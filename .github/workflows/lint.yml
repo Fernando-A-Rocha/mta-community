@@ -1,14 +1,10 @@
-name: linter
+name: Linter
 
 on:
   push:
-    branches:
-      - develop
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -17,6 +13,11 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     environment: Testing
+
+    defaults:
+      run:
+        working-directory: ./comm2
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,12 +36,3 @@ jobs:
 
       - name: Run Pint
         run: vendor/bin/pint
-
-      # - name: Commit Changes
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: fix code style
-      #     commit_options: '--no-verify'
-      #     file_pattern: |
-      #       **/*
-      #       !.github/workflows/*
