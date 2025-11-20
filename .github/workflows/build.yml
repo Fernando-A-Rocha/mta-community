@@ -1,4 +1,4 @@
-name: Tests
+name: Build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     services:
@@ -54,6 +54,9 @@ jobs:
 
       - name: Directory Permissions
         run: chmod -R 775 storage bootstrap/cache
+
+      - name: Run Pint (Linting)
+        run: vendor/bin/pint
 
       - name: Run Migrations
         run: php artisan migrate --force
