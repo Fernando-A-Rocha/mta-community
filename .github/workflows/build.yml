@@ -43,11 +43,22 @@ jobs:
           extensions: mbstring, xml, bcmath, pdo, pdo_mysql, fileinfo, gd, zip
           coverage: none
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
       - name: Install Dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Build Assets
+        run: npm run build
 
       - name: Generate key
         run: php artisan key:generate
