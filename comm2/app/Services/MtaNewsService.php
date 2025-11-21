@@ -33,8 +33,8 @@ class MtaNewsService
 
         // Check if we need to refresh the cache
         $lastFetch = Cache::get($timestampKey);
-        // $needsRefresh = $lastFetch === null || (time() - $lastFetch) > $cacheDuration;
-        $needsRefresh = true; // Bypass cache for testing
+        $needsRefresh = $lastFetch === null || (time() - $lastFetch) > $cacheDuration;
+        // $needsRefresh = true; // Bypass cache for testing
 
         if ($needsRefresh) {
             $news = $this->fetchAndParseNews();

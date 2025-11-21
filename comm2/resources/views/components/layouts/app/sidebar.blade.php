@@ -63,10 +63,13 @@
             </flux:dropdown>
             @endauth
             @guest
-            <!-- Login Button -->
-            <flux:button variant="outline" :href="route('login')" wire:navigate>
-                {{ __('Log in') }}
-            </flux:button>
+            <!-- Login Link -->
+            <div class="px-3 py-2 text-sm">
+                {{ __('Existing user?') }}
+                <flux:link :href="route('login')" wire:navigate>
+                    {{ __('Log in') }}
+                </flux:link>
+            </div>
             @endguest
         </flux:sidebar>
 

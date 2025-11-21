@@ -1,28 +1,32 @@
-<x-layouts.auth title="{{ __('Confirm password') }}">
-    <div class="flex flex-col gap-6">
-        <x-auth-header
-            :title="__('Confirm password')"
-            :description="__('This is a secure area of the application. Please confirm your password before continuing.')"
-        />
-
-        <x-auth-session-status class="text-center" :status="session('status')" />
-
-        <form method="POST" action="{{ route('password.confirm.store') }}" class="flex flex-col gap-6">
-            @csrf
-
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="current-password"
-                :placeholder="__('Password')"
-                viewable
+<x-layouts.app.sidebar title="{{ __('Confirm password') }}">
+    <flux:main>
+    <div class="flex min-h-[calc(100vh-88px)] lg:min-h-[calc(100vh-104px)] flex-col items-center justify-center gap-6 p-6 md:p-10">
+        <div class="flex w-full max-w-sm flex-col gap-6">
+            <x-auth-header
+                :title="__('Confirm password')"
+                :description="__('This is a secure area of the application. Please confirm your password before continuing.')"
             />
 
-            <flux:button variant="primary" type="submit" class="w-full" data-test="confirm-password-button">
-                {{ __('Confirm') }}
-            </flux:button>
-        </form>
+            <x-auth-session-status class="text-center" :status="session('status')" />
+
+            <form method="POST" action="{{ route('password.confirm.store') }}" class="flex flex-col gap-6">
+                @csrf
+
+                <flux:input
+                    name="password"
+                    :label="__('Password')"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                    :placeholder="__('Password')"
+                    viewable
+                />
+
+                <flux:button variant="primary" type="submit" class="w-full" data-test="confirm-password-button">
+                    {{ __('Confirm') }}
+                </flux:button>
+            </form>
+        </div>
     </div>
-</x-layouts.auth>
+    </flux:main>
+</x-layouts.app.sidebar>
