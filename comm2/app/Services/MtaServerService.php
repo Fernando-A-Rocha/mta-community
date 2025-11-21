@@ -28,12 +28,15 @@ class MtaServerService
 
         // Check if we need to refresh the cache
         $lastFetch = Cache::get($timestampKey);
-        $needsRefresh = $lastFetch === null || (time() - $lastFetch) > $cacheDuration;
-        // $needsRefresh = true; // Bypass cache for testing
+        // $needsRefresh = $lastFetch === null || (time() - $lastFetch) > $cacheDuration;
+        $needsRefresh = true; // Bypass cache for testing
         if ($needsRefresh) {
             $servers = $this->fetchAndFilterServers($targetVersion);
-            Cache::put($cacheKey, $servers, now()->addHours(24)); // Store for 24 hours as backup
-            Cache::put($timestampKey, time(), now()->addHours(24));
+            // Only cache if we have servers, so we can retry immediately if we get 0 servers
+            if (count($servers) > 0) {
+                Cache::put($cacheKey, $servers, now()->addHours(24)); // Store for 24 hours as backup
+                Cache::put($timestampKey, time(), now()->addHours(24));
+            }
         } else {
             $servers = Cache::get($cacheKey, []);
         }
@@ -103,11 +106,8 @@ class MtaServerService
 
             // Ensure proper types and preserve UTF-8 encoding
             return array_map(function ($server) {
-                $name = $server['name'] ?? '';
-                $name = utf8_decode($name); // Makes special characters work
-
                 return [
-                    'name' => (string) $name,
+                    'name' => (string) $server['name'] ?? '',
                     'ip' => (string) ($server['ip'] ?? ''),
                     'port' => (int) ($server['port'] ?? 0),
                     'players' => (int) ($server['players'] ?? 0),

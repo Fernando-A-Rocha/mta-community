@@ -63,7 +63,7 @@
                         <!-- Name Column -->
                         <div class="flex items-center gap-2 min-w-0">
                             <span class="server-name truncate font-medium text-neutral-900 dark:text-neutral-100">
-                                {{ $server['name'] }}
+                                {{ utf8_decode($server['name']) }}
                             </span>
                             @if ($server['password'] === 1)
                                 <span class="inline-flex items-center rounded-md bg-yellow-50 px-1.5 py-0.5 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 dark:bg-yellow-400/10 dark:text-yellow-400 dark:ring-yellow-400/20 shrink-0" title="{{ __('Password Protected') }}">
