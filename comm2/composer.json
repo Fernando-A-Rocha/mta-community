@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "MTA Community Platform",
+    "name": "mta-community/comm2",
     "type": "project",
     "description": "New community platform for Multi Theft Auto made with Laravel",
     "keywords": [
