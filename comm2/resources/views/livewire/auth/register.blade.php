@@ -1,5 +1,7 @@
 <x-layouts.auth title="{{ __('Sign up') }}">
     <div class="flex flex-col gap-6">
+        <x-logo/>
+
         <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
         <!-- Session Status -->
@@ -11,12 +13,12 @@
             <!-- Name -->
             <flux:input
                 name="name"
-                :label="__('Name')"
+                :label="__('Account name')"
                 type="text"
                 required
                 autofocus
                 autocomplete="name"
-                :placeholder="__('Full name')"
+                :placeholder="__('Username/nickname')"
             />
 
             <!-- Email Address -->
