@@ -16,32 +16,40 @@
             </div>
         </section>
 
-        <!-- Latest Resources Section -->
+        <!-- Latest News Section -->
         <section>
-            <flux:heading size="lg" class="mb-4">{{ __('Latest Resources') }}</flux:heading>
-            <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                @for ($i = 0; $i < 5; $i++)
-                    <div class="py-4 first:pt-0">
-                        <div class="flex items-start gap-4">
-                            <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-700">
-                                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                                    {{ __('Resource Title Placeholder') }} {{ $i + 1 }}
+            <flux:heading size="lg" class="mb-4">{{ __('Latest News') }}</flux:heading>
+            @if($news->count() > 0)
+                <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                    @foreach($news as $entry)
+                        @php
+                            $isFirstOnFirstPage = $loop->first && $news->currentPage() === 1;
+                        @endphp
+                        <div class="py-4 first:pt-0 {{ $isFirstOnFirstPage ? 'pb-6' : '' }}">
+                            <div>
+                                <h3 class="{{ $isFirstOnFirstPage ? 'text-2xl font-bold' : 'text-base font-medium' }} {{ $isFirstOnFirstPage ? 'text-neutral-900 dark:text-neutral-100' : 'text-neutral-600 dark:text-neutral-400' }} mb-2">
+                                    <a href="{{ $entry['url'] }}" target="_blank" rel="noopener noreferrer" class="hover:underline">
+                                        {{ $entry['title'] }}
+                                    </a>
                                 </h3>
-                                <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                                    {{ __('This is a placeholder description for a resource that would be displayed here. In the future, this will show actual resources posted by community members.') }}
-                                </p>
-                                <div class="mt-2 flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-500">
-                                    <span>{{ __('Posted') }}: {{ now()->subDays($i)->diffForHumans() }}</span>
-                                    <span>{{ __('By') }}: {{ __('Community Member') }}</span>
+                                <div class="flex items-center gap-4 {{ $isFirstOnFirstPage ? 'text-sm' : 'text-xs' }} text-neutral-500 dark:text-neutral-500">
+                                    <span>{{ __('By') }}: {{ $entry['author'] }}</span>
+                                    <span>{{ __('Posted') }}: {{ $entry['date']->format('F j, Y') }}</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @endfor
-            </div>
+                    @endforeach
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-6">
+                    {{ $news->links() }}
+                </div>
+            @else
+                <div class="py-8 text-center text-neutral-600 dark:text-neutral-400">
+                    <p>{{ __('No news entries available at the moment.') }}</p>
+                </div>
+            @endif
         </section>
     </div>
 </x-layouts.app>

@@ -17,4 +17,15 @@ return [
     'cache_duration' => env('MTA_CACHE_DURATION', 10 * 60), // seconds
 
     'verify_ssl' => env('MTA_VERIFY_SSL', false), // Set to true in production if SSL certificates are properly configured
+
+    /*
+    |--------------------------------------------------------------------------
+    | MTA News Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for fetching and caching MTA forum news entries.
+    |
+    */
+
+    'news_cache_duration' => env('MTA_NEWS_CACHE_DURATION', 3600), // seconds (default: 1 hour)
 ];
