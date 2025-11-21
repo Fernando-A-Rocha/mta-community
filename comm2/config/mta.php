@@ -18,4 +18,3 @@ return [
 
     'verify_ssl' => env('MTA_VERIFY_SSL', false), // Set to true in production if SSL certificates are properly configured
 ];
-

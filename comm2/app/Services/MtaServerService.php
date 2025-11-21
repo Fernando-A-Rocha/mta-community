@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 class MtaServerService
 {
     private const CACHE_KEY = 'mta_servers_list';
+
     private const CACHE_TIMESTAMP_KEY = 'mta_servers_list_timestamp';
 
     /**
@@ -43,7 +44,6 @@ class MtaServerService
     /**
      * Fetch servers from API and filter them.
      *
-     * @param  string  $targetVersion
      * @return array<int, array{name: string, ip: string, port: int, players: int, maxplayers: int, password: int, version: string}>
      */
     private function fetchAndFilterServers(string $targetVersion): array
@@ -105,6 +105,7 @@ class MtaServerService
             return array_map(function ($server) {
                 $name = $server['name'] ?? '';
                 $name = utf8_decode($name); // Makes special characters work
+
                 return [
                     'name' => (string) $name,
                     'ip' => (string) ($server['ip'] ?? ''),
@@ -145,4 +146,3 @@ class MtaServerService
         ];
     }
 }
-

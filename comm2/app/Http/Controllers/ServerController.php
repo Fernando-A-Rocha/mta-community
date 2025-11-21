@@ -13,8 +13,7 @@ class ServerController extends Controller
 {
     public function __construct(
         private readonly MtaServerService $mtaServerService
-    ) {
-    }
+    ) {}
 
     /**
      * Display the list of MTA servers.
@@ -27,7 +26,7 @@ class ServerController extends Controller
         // Create a map of server positions in the original list (using IP:Port as unique identifier)
         $serverPositions = [];
         foreach ($allServers as $index => $server) {
-            $key = $server['ip'] . ':' . $server['port'];
+            $key = $server['ip'].':'.$server['port'];
             $serverPositions[$key] = $index + 1; // Position starts at 1
         }
 
@@ -36,13 +35,13 @@ class ServerController extends Controller
 
         // Filter servers by search query if provided
         $servers = $allServers;
-        if (!empty($searchQuery)) {
+        if (! empty($searchQuery)) {
             $searchQuery = strtolower(trim($searchQuery));
             $servers = array_filter($servers, function ($server) use ($searchQuery) {
                 $name = strtolower($server['name'] ?? '');
                 $ip = $server['ip'] ?? '';
                 $port = (string) ($server['port'] ?? '');
-                $ipPort = ($ip . ':' . $port);
+                $ipPort = ($ip.':'.$port);
 
                 return str_contains($name, $searchQuery) || str_contains($ipPort, $searchQuery);
             });
@@ -51,8 +50,9 @@ class ServerController extends Controller
 
         // Add original position to each server
         $servers = array_map(function ($server) use ($serverPositions) {
-            $key = $server['ip'] . ':' . $server['port'];
+            $key = $server['ip'].':'.$server['port'];
             $server['original_position'] = $serverPositions[$key] ?? null;
+
             return $server;
         }, $servers);
 
@@ -73,7 +73,7 @@ class ServerController extends Controller
         );
 
         // Append search query to pagination links
-        if (!empty($searchQuery)) {
+        if (! empty($searchQuery)) {
             $paginator->appends(['search' => $searchQuery]);
         }
 
@@ -84,4 +84,3 @@ class ServerController extends Controller
         ]);
     }
 }
-

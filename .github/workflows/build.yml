@@ -66,8 +66,8 @@ jobs:
       - name: Directory Permissions
         run: chmod -R 775 storage bootstrap/cache
 
-      - name: Run Pint (Linting)
-        run: vendor/bin/pint
+      - name: Run Linter
+        run: composer run lint
 
       - name: Run Migrations
         run: php artisan migrate --force

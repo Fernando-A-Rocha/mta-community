@@ -45,10 +45,6 @@ class AuthenticateUser
 
     /**
      * Validate password against old password format.
-     *
-     * @param  string  $password
-     * @param  string  $oldPasswordHash
-     * @return bool
      */
     private function validateOldPassword(string $password, string $oldPasswordHash): bool
     {
@@ -58,4 +54,3 @@ class AuthenticateUser
         return hash_equals($oldPasswordHash, $hashedPassword);
     }
 }
-
