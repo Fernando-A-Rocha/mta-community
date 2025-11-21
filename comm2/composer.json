@@ -1,11 +1,12 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "MTA Community Platform",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "New community platform for Multi Theft Auto made with Laravel",
     "keywords": [
-        "laravel",
-        "framework"
+        "mta",
+        "community",
+        "platform"
     ],
     "license": "MIT",
     "require": {
