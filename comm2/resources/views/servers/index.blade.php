@@ -1,8 +1,8 @@
 <x-layouts.app :title="__('Servers')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
-        <section class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-zinc-900">
-            <div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-700">
-                <flux:heading size="lg">{{ __('Active MTA Servers') }}</flux:heading>
+    <div class="flex h-full w-full flex-1 flex-col gap-6">
+        <section>
+            <div class="mb-4">
+                <flux:heading size="lg" class="mb-2">{{ __('Active MTA Servers') }}</flux:heading>
                 <flux:text class="text-neutral-600 dark:text-neutral-400">
                     {{ __('There are :players players playing on :servers public MTA :version servers.', [
                         'players' => number_format($statistics['total_players']),
@@ -12,7 +12,7 @@
                 </flux:text>
             </div>
             <!-- Search Bar -->
-            <div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-700">
+            <div class="mb-4">
                 <form method="GET" action="{{ route('servers.index') }}" class="flex items-center gap-3">
                     <div class="flex-1">
                         <flux:input
@@ -39,7 +39,7 @@
             </div>
             <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
                 <!-- Table Header -->
-                <div class="grid grid-cols-[60px_1fr_120px_180px] gap-4 px-6 py-3 bg-neutral-50 dark:bg-zinc-800/50">
+                <div class="grid grid-cols-[60px_1fr_120px_180px] gap-4 py-3 bg-neutral-50 dark:bg-zinc-800/50">
                     <div class="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
                         #
                     </div>
@@ -55,7 +55,7 @@
                 </div>
                 <!-- Table Rows -->
                 @forelse ($servers as $index => $server)
-                    <div class="grid grid-cols-[60px_1fr_120px_180px] gap-4 px-6 py-3 hover:bg-neutral-50 dark:hover:bg-zinc-800">
+                    <div class="grid grid-cols-[60px_1fr_120px_180px] gap-4 py-3 hover:bg-neutral-50 dark:hover:bg-zinc-800">
                         <!-- Position Index Column -->
                         <div class="flex items-center text-sm text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
                             {{ $server['original_position'] ?? (($servers->currentPage() - 1) * $servers->perPage() + $index + 1) }}
@@ -83,7 +83,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="px-6 py-8 text-center">
+                    <div class="py-8 text-center">
                         <flux:text class="text-neutral-600 dark:text-neutral-400">
                             {{ __('No servers found.') }}
                         </flux:text>
@@ -93,7 +93,7 @@
 
             <!-- Pagination -->
             @if ($servers->hasPages())
-                <div class="border-t border-neutral-200 px-6 py-4 dark:border-neutral-700">
+                <div class="mt-4 pt-4">
                     <div class="flex items-center justify-center">
                         {{ $servers->links() }}
                     </div>
