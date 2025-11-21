@@ -27,6 +27,17 @@
                 @endif
             </div>
 
+            <div>
+                <flux:field>
+                    <flux:label>{{ __('Profile Visibility') }}</flux:label>
+                    <flux:radio.group wire:model="profile_visibility" variant="segmented">
+                        <flux:radio value="public">{{ __('Public') }}</flux:radio>
+                        <flux:radio value="private">{{ __('Private') }}</flux:radio>
+                    </flux:radio.group>
+                    <flux:description>{{ __('Control who can view') }} <a href="{{ route('profile.show', auth()->user()) }}" class="underline" wire:navigate>{{ __('your profile') }}</a>. {{__('Public profiles can be viewed by anyone, while private profiles are only visible to you.') }}</flux:description>
+                </flux:field>
+            </div>
+
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
                     <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>

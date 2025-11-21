@@ -14,6 +14,8 @@ class Profile extends Component
 
     public string $email = '';
 
+    public string $profile_visibility = 'public';
+
     /**
      * Mount the component.
      */
@@ -21,6 +23,7 @@ class Profile extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->profile_visibility = Auth::user()->profile_visibility ?? 'public';
     }
 
     /**
@@ -41,6 +44,8 @@ class Profile extends Component
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
+
+            'profile_visibility' => ['required', 'string', Rule::in(['public', 'private'])],
         ]);
 
         $user->fill($validated);

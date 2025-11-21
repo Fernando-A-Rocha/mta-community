@@ -4,16 +4,14 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        <x-mta-header />
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <x-app-logo />
-            </a>
-
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Navigation')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('home')" :current="request()->routeIs('home')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
+                    <flux:navlist.item icon="newspaper" :href="route('home')" :current="request()->routeIs('home')" wire:navigate>{{ __('News') }}</flux:navlist.item>
+                    <flux:navlist.item icon="server" :href="route('servers.index')" :current="request()->routeIs('servers.*')" wire:navigate>{{ __('Servers') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -41,8 +39,7 @@
                                 </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <a href="{{ route('profile.show', auth()->user()) }}" class="truncate font-semibold hover:underline" wire:navigate>{{ auth()->user()->name }}</a>
                                 </div>
                             </div>
                         </div>
@@ -99,8 +96,7 @@
                                 </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <a href="{{ route('profile.show', auth()->user()) }}" class="truncate font-semibold hover:underline" wire:navigate>{{ auth()->user()->name }}</a>
                                 </div>
                             </div>
                         </div>

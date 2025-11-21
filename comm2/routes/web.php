@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServerController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -10,6 +12,8 @@ use Laravel\Fortify\Features;
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -29,3 +33,5 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 });
+
+Route::get('profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
