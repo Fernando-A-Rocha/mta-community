@@ -28,8 +28,8 @@ class MtaServerService
 
         // Check if we need to refresh the cache
         $lastFetch = Cache::get($timestampKey);
-        // $needsRefresh = $lastFetch === null || (time() - $lastFetch) > $cacheDuration;
-        $needsRefresh = true; // Bypass cache for testing
+        $needsRefresh = $lastFetch === null || (time() - $lastFetch) > $cacheDuration;
+        // $needsRefresh = true; // Bypass cache for testing
         if ($needsRefresh) {
             $servers = $this->fetchAndFilterServers($targetVersion);
             // Only cache if we have servers, so we can retry immediately if we get 0 servers
