@@ -95,4 +95,24 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->isModerator();
     }
+
+    /**
+     * Get the role's display name and badge color classes
+     *
+     * @return array{name: string, color: string}|null
+     */
+    public function roleBadge(): ?array
+    {
+        return match ($this->role) {
+            'admin' => [
+                'name' => __('Admin'),
+                'color' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+            ],
+            'moderator' => [
+                'name' => __('Moderator'),
+                'color' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+            ],
+            default => null,
+        };
+    }
 }

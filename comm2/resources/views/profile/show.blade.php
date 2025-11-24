@@ -5,7 +5,14 @@
                 {{ $user->initials() }}
             </div>
             <div class="flex-1">
-                <h1 class="text-2xl font-bold">{{ $user->name }}</h1>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-bold">{{ $user->name }}</h1>
+                    @if ($roleBadge = $user->roleBadge())
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $roleBadge['color'] }}">
+                            {{ $roleBadge['name'] }}
+                        </span>
+                    @endif
+                </div>
                 @if ($isOwner)
                     <p class="text-sm text-neutral-600 dark:text-neutral-400">{{ $user->email }}</p>
                     <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-500">
