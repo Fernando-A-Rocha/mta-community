@@ -123,4 +123,29 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Registration Enabled
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether new user registration is enabled.
+    | Set this to false in your ".env" file to disable registration.
+    |
+    */
+
+    'registration_enabled' => env('REGISTRATION_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resource Modification Enabled
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether resource modification (create, update, delete)
+    | is enabled. Set this to false in your ".env" file to disable resource
+    | modifications.
+    |
+    */
+
+    'resource_modification_enabled' => env('RESOURCE_MODIFICATION_ENABLED', true),
+
 ];

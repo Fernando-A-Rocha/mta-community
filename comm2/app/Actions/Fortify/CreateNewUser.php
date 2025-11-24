@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
@@ -18,6 +19,12 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        if (! config('app.registration_enabled', true)) {
+            throw ValidationException::withMessages([
+                'registration' => ['Registration is currently disabled.'],
+            ]);
+        }
+
         Validator::make($input, [
             'name' => [
                 'required',

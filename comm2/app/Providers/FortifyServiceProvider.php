@@ -41,7 +41,11 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::authenticateUsing(fn ($request) => app(AuthenticateUser::class)($request));
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-        Fortify::createUsersUsing(CreateNewUser::class);
+        
+        // Only register user creation if registration is enabled
+        if (config('app.registration_enabled', true)) {
+            Fortify::createUsersUsing(CreateNewUser::class);
+        }
 
         // Register custom login response
         $this->app->singleton(
@@ -59,7 +63,12 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::verifyEmailView(fn () => view('livewire.auth.verify-email'));
         Fortify::twoFactorChallengeView(fn () => view('livewire.auth.two-factor-challenge'));
         Fortify::confirmPasswordView(fn () => view('livewire.auth.confirm-password'));
-        Fortify::registerView(fn () => view('livewire.auth.register'));
+        
+        // Only register the registration view if registration is enabled
+        if (config('app.registration_enabled', true)) {
+            Fortify::registerView(fn () => view('livewire.auth.register'));
+        }
+        
         Fortify::resetPasswordView(fn () => view('livewire.auth.reset-password'));
         Fortify::requestPasswordResetLinkView(fn () => view('livewire.auth.forgot-password'));
     }

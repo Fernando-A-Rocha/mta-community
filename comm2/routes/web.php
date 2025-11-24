@@ -41,14 +41,18 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 
     // Resource Upload (must be before resources/{resource} to avoid route conflict)
-    Route::get('resources/upload', [ResourceUploadController::class, 'create'])->name('resources.upload.create');
+    Route::get('resources/upload', [ResourceUploadController::class, 'create'])
+        ->middleware('ensure.resource.modification.enabled')
+        ->name('resources.upload.create');
     Route::post('resources/upload', [ResourceUploadController::class, 'store'])
-        ->middleware('throttle:resource-upload')
+        ->middleware(['throttle:resource-upload', 'ensure.resource.modification.enabled'])
         ->name('resources.upload.store');
 
     // Resource edit (author or admin+)
     Route::get('resources/{resource}/edit', [ResourceController::class, 'edit'])->name('resources.edit');
-    Route::put('resources/{resource}', [ResourceController::class, 'update'])->name('resources.update');
+    Route::put('resources/{resource}', [ResourceController::class, 'update'])
+        ->middleware('ensure.resource.modification.enabled')
+        ->name('resources.update');
 
     // Resource rating
     Route::post('resources/{resource}/rating', [ResourceController::class, 'storeRating'])->name('resources.rating.store');
@@ -58,10 +62,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('resources/{resource}/enable', [ResourceController::class, 'enable'])->name('resources.enable');
 
     // Resource version deletion (author or admin+)
-    Route::delete('resources/{resource}/versions/{version}', [ResourceController::class, 'destroyVersion'])->name('resources.versions.destroy');
+    Route::delete('resources/{resource}/versions/{version}', [ResourceController::class, 'destroyVersion'])
+        ->middleware('ensure.resource.modification.enabled')
+        ->name('resources.versions.destroy');
 
     // Resource deletion (author or admin+)
-    Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])->name('resources.destroy');
+    Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])
+        ->middleware('ensure.resource.modification.enabled')
+        ->name('resources.destroy');
 });
 
 // Resource downloads (public, must be before show route to avoid conflict)
