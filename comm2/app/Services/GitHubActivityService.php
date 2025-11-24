@@ -70,7 +70,7 @@ class GitHubActivityService
     private function fetchActivity(string $repoKey): array
     {
         $repo = self::REPOSITORIES[$repoKey];
-        $token = env('GITHUB_TOKEN');
+        $token = config('mta.github_token');
 
         if (empty($token)) {
             Log::warning('GITHUB_TOKEN not configured');

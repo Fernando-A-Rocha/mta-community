@@ -45,5 +45,7 @@ return [
     |
     */
 
+    'github_token' => env('GITHUB_TOKEN'),
+
     'github_activity_cache_duration' => env('MTA_GITHUB_ACTIVITY_CACHE_DURATION', 900), // seconds (default: 15 minutes)
 ];
