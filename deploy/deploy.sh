@@ -119,7 +119,7 @@ sudo rsync -av --delete \
     --exclude='phpunit.xml' \
     --exclude='.editorconfig' \
     --exclude='.styleci.yml' \
-    "$PROJECT_LARAVEL_DIR" "$LARAVEL_DIR/"
+    "$PROJECT_LARAVEL_DIR/" "$LARAVEL_DIR/"
 
 if [ $? -ne 0 ]; then
     log "${RED}❌ Rsync failed${NC}"
