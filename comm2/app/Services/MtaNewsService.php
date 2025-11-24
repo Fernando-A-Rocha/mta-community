@@ -16,6 +16,7 @@ class MtaNewsService
     private const CACHE_KEY = 'mta_news_list';
 
     private const CACHE_TIMESTAMP_KEY = 'mta_news_list_timestamp';
+
     /**
      * Get cached and sorted MTA news entries.
      *

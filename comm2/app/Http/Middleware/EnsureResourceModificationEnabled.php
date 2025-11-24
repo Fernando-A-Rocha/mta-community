@@ -28,4 +28,3 @@ class EnsureResourceModificationEnabled
         return $next($request);
     }
 }
-
