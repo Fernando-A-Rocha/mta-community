@@ -24,7 +24,7 @@ class MtaServerService
         $cacheKey = self::CACHE_KEY;
         $timestampKey = self::CACHE_TIMESTAMP_KEY;
         $cacheDuration = (int) config('mta.cache_duration', 300);
-        $targetVersion = config('mta.server_version', '1.6');
+        $targetVersion = config('mta.current_stable_version', '1.6');
 
         // Check if we need to refresh the cache
         $lastFetch = Cache::get($timestampKey);
@@ -51,7 +51,7 @@ class MtaServerService
      */
     private function fetchAndFilterServers(string $targetVersion): array
     {
-        $apiUrl = config('mta.api_url', 'https://multitheftauto.com/api/');
+        $apiUrl = config('mta.servers_api_url', 'https://multitheftauto.com/api/');
         $verifySsl = (bool) config('mta.verify_ssl', false);
 
         try {

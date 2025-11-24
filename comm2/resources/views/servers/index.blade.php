@@ -7,7 +7,7 @@
                     {{ __('There are :players players playing on :servers public MTA :version servers.', [
                         'players' => number_format($statistics['total_players']),
                         'servers' => number_format($statistics['total_servers']),
-                        'version' => config('mta.server_version', '1.6'),
+                        'version' => config('mta.current_stable_version', '1.6'),
                     ]) }}
                 </flux:text>
             </div>

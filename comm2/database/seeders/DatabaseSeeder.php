@@ -14,5 +14,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::factory(5)->withoutTwoFactor()->create();
+
+        $this->call([
+            TagSeeder::class,
+        ]);
     }
 }

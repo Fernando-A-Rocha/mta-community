@@ -80,6 +80,7 @@ class MtaNewsService
                 ]);
 
                 $cached = Cache::get(self::CACHE_KEY, []);
+
                 return $this->deserializeNewsFromCache($cached);
             }
 
@@ -100,6 +101,7 @@ class MtaNewsService
             ]);
 
             $cached = Cache::get(self::CACHE_KEY, []);
+
             return $this->deserializeNewsFromCache($cached);
         }
     }
@@ -117,7 +119,7 @@ class MtaNewsService
         // Suppress warnings for malformed HTML
         libxml_use_internal_errors(true);
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         @$dom->loadHTML('<?xml encoding="UTF-8">'.$html);
 
         $xpath = new DOMXPath($dom);
@@ -250,7 +252,7 @@ class MtaNewsService
     private function extractDateFromContainer(DOMXPath $xpath, \DOMElement $container): ?Carbon
     {
         // First, look for time elements (most reliable)
-        $timeElements = $xpath->query(".//time", $container);
+        $timeElements = $xpath->query('.//time', $container);
         if ($timeElements->length > 0) {
             foreach ($timeElements as $timeElement) {
                 // Try datetime attribute first
@@ -307,11 +309,10 @@ class MtaNewsService
         return null;
     }
 
-
     /**
      * Serialize news entries for caching (convert Carbon to ISO string).
      *
-     * @param array<int, array{url: string, title: string, author: string, date: Carbon}> $news
+     * @param  array<int, array{url: string, title: string, author: string, date: Carbon}>  $news
      * @return array<int, array{url: string, title: string, author: string, date: string}>
      */
     private function serializeNewsForCache(array $news): array
@@ -329,7 +330,7 @@ class MtaNewsService
     /**
      * Deserialize news entries from cache (convert ISO string to Carbon).
      *
-     * @param array<int, array{url: string, title: string, author: string, date: string}> $serializedNews
+     * @param  array<int, array{url: string, title: string, author: string, date: string}>  $serializedNews
      * @return array<int, array{url: string, title: string, author: string, date: Carbon}>
      */
     private function deserializeNewsFromCache(array $serializedNews): array
@@ -344,4 +345,3 @@ class MtaNewsService
         }, $serializedNews);
     }
 }
-

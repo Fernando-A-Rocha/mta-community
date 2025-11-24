@@ -25,9 +25,17 @@ class ProfileController extends Controller
             abort(403, 'This profile is private.');
         }
 
+        // Load user's resources
+        $resources = $user->resources()
+            ->where('is_disabled', false)
+            ->with('currentVersion')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('profile.show', [
             'user' => $user,
             'isOwner' => $isOwner,
+            'resources' => $resources,
         ]);
     }
 }
