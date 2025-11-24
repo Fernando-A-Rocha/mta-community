@@ -101,7 +101,7 @@ class ResourceUploadController extends Controller
                     // Ensure it's an array (Laravel returns array for multiple file inputs)
                     $images = is_array($uploadedImages) ? $uploadedImages : [$uploadedImages];
                     // Filter out any null/invalid entries
-                    $images = array_filter($images, fn($img) => $img && $img->isValid());
+                    $images = array_filter($images, fn ($img) => $img && $img->isValid());
                 }
             }
 

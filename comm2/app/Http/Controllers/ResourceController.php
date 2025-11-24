@@ -362,6 +362,7 @@ class ResourceController extends Controller
         if ($firstVersion && $firstVersion->id === $version->id) {
             // Merge resource name into request to bypass validation when called from version delete
             $request->merge(['resource_name' => $resource->name]);
+
             return $this->destroy($request, $resource);
         }
 

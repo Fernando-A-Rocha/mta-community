@@ -80,4 +80,3 @@ class UpdateResourceRequest extends FormRequest
         ];
     }
 }
-

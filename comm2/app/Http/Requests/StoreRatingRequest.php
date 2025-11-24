@@ -6,7 +6,6 @@ namespace App\Http\Requests;
 
 use App\Rules\NoHtml;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreRatingRequest extends FormRequest
 {
@@ -41,4 +40,3 @@ class StoreRatingRequest extends FormRequest
         ];
     }
 }
-
