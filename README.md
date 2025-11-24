@@ -4,14 +4,14 @@ New community platform for Multi Theft Auto
 
 ## `comm2` Project
 
-Dependencies:
+### Dependencies
 
 - PHP 8.4
 - Composer
 - NodeJS & NPM
 - MySQL server 8+ (one database)
 
-Setup:
+### Setup
 
 - Ensure PHP, Composer and NPM are available
 - Create a MySQL database (e.g. "comm2")
@@ -23,8 +23,9 @@ Setup:
 - If desired, seed the DB: `php artisan db:seed`
 - Run `npm install` to prepare NodeJS environment
 
-Development:
+### Development
 
 - `cd comm2`
 - Start local dev server: `composer run dev`
-- Run tests: `composer run test`
+- Run the linter: `composer run lint:fix`
+- Run tests and ensure they are passing: `composer run test`
