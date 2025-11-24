@@ -7,4 +7,6 @@
 
 ## Deploying with Nginx (Web server)
 
-todo
+- Use nginx.conf with your domain (generate a certif for it)
+
+- Run deploy.sh
