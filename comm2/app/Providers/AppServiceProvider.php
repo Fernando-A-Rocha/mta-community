@@ -37,8 +37,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         // Use Tailwind pagination view by default
-        Paginator::defaultView('vendor.pagination.tailwind');
-        Paginator::defaultSimpleView('vendor.pagination.simple-tailwind');
+        Paginator::defaultView('pagination.tailwind');
+        Paginator::defaultSimpleView('pagination.simple-tailwind');
     }
 
     /**
