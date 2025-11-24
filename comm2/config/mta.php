@@ -34,6 +34,8 @@ return [
     |
     */
 
+    'news_forum_url' => 'https://multitheftauto.com/news',
+
     'news_cache_duration' => env('MTA_NEWS_CACHE_DURATION', 3600), // seconds (default: 1 hour)
 
     /*

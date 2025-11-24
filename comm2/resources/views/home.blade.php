@@ -18,7 +18,12 @@
 
         <!-- Latest News Section -->
         <section>
-            <flux:heading size="lg" class="mb-4">{{ __('Latest News') }}</flux:heading>
+            <div class="flex items-center justify-between mb-4">
+                <flux:heading size="lg">{{ __('Latest News') }}</flux:heading>
+                <flux:link :href="config('mta.news_forum_url')" variant="outline" target="_blank" rel="noopener noreferrer" class="text-sm">
+                    {{ __('View on Forum') }}
+                </flux:link>
+            </div>
             @if($news->count() > 0)
                 <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
                     @foreach($news as $entry)

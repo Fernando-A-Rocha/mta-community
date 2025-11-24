@@ -16,10 +16,6 @@ class MtaNewsService
     private const CACHE_KEY = 'mta_news_list';
 
     private const CACHE_TIMESTAMP_KEY = 'mta_news_list_timestamp';
-
-    // private const FORUM_URL = 'https://forum.multitheftauto.com/forum/21-news/?sortby=start_date&sortdirection=desc';
-    private const FORUM_URL = 'https://multitheftauto.com/news';
-
     /**
      * Get cached and sorted MTA news entries.
      *
@@ -70,6 +66,7 @@ class MtaNewsService
             if (! $verifySsl) {
                 $httpClient = $httpClient->withoutVerifying();
             }
+            $FORUM_URL = config('mta.news_forum_url');
 
             $response = $httpClient->get(self::FORUM_URL);
 
