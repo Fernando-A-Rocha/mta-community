@@ -17,6 +17,7 @@ NC='\033[0m' # No Color
 ENVIRONMENT=${1:-production}
 HOME_DIR="/home/$(whoami)"
 PROJECT_DIR="$HOME_DIR/mta/mtacomm2"
+PROJECT_LARAVEL_DIR="$PROJECT_DIR/comm2"
 WEB_ROOT="/var/www/mtacomm2.frocha.net"
 LARAVEL_DIR="$WEB_ROOT/platform"
 PERSISTENT_STORAGE="$WEB_ROOT/storage"
@@ -118,7 +119,7 @@ sudo rsync -av --delete \
     --exclude='phpunit.xml' \
     --exclude='.editorconfig' \
     --exclude='.styleci.yml' \
-    "$PROJECT_DIR/" "$LARAVEL_DIR/"
+    "$PROJECT_LARAVEL_DIR" "$LARAVEL_DIR/"
 
 if [ $? -ne 0 ]; then
     log "${RED}❌ Rsync failed${NC}"
@@ -138,12 +139,12 @@ log "${GREEN}✅ Files synced successfully${NC}"
 
 # Copy environment file from home directory
 log "${GREEN}📋 Copying .env file...${NC}"
-if [ -f "$PROJECT_DIR/comm2/.env" ]; then
-    sudo cp "$PROJECT_DIR/comm2/.env" "$LARAVEL_DIR/.env"
+if [ -f "$PROJECT_LARAVEL_DIR/.env" ]; then
+    sudo cp "$PROJECT_LARAVEL_DIR/.env" "$LARAVEL_DIR/.env"
     sudo chown www-data:www-data "$LARAVEL_DIR/.env"
     log "${GREEN}✅ .env file copied successfully${NC}"
 else
-    log "${YELLOW}⚠️  No .env file found in $PROJECT_DIR/comm2/.env${NC}"
+    log "${YELLOW}⚠️  No .env file found in $PROJECT_LARAVEL_DIR/.env${NC}"
 fi
 
 # Set proper permissions
@@ -225,10 +226,9 @@ fi
 log "${GREEN}🎉 Deployment completed successfully!${NC}"
 log "${GREEN}🌐 The mtacomm2 is available at: https://mtacomm2.frocha.net${NC}"
 log "${BLUE}📊 Deployment Summary:${NC}"
-log "   - Files synced from: $PROJECT_DIR/comm2/"
-log "   - Files deployed to: $LARAVEL_DIR"
+log "   - Files synced from: $PROJECT_LARAVEL_DIR/"
+log "   - Laravel directory deployed to: $LARAVEL_DIR"
 log "   - Persistent storage: $PERSISTENT_STORAGE"
-log "   - Storage symlinked: $LARAVEL_DIR/storage -> $PERSISTENT_STORAGE"
 log "   - HTTP Status: $HTTP_STATUS"
 
-log "${GREEN}✅ mtacomm2 Deployment completed!${NC}"
+log "${GREEN}✅ mtacomm2 deployment completed!${NC}"
