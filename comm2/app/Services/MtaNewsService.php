@@ -67,14 +67,14 @@ class MtaNewsService
             if (! $verifySsl) {
                 $httpClient = $httpClient->withoutVerifying();
             }
-            $FORUM_URL = config('mta.news_forum_url');
+            $forumUrl = (string) config('mta.news_forum_url');
 
-            $response = $httpClient->get(self::FORUM_URL);
+            $response = $httpClient->get($forumUrl);
 
             if (! $response->successful()) {
                 Log::warning('Failed to fetch MTA news', [
                     'status' => $response->status(),
-                    'url' => self::FORUM_URL,
+                    'url' => $forumUrl,
                 ]);
 
                 $cached = Cache::get(self::CACHE_KEY, []);
@@ -94,7 +94,7 @@ class MtaNewsService
 
         } catch (\Exception $e) {
             Log::error('Exception while fetching MTA news', [
-                'url' => self::FORUM_URL,
+                'url' => $forumUrl,
                 'message' => $e->getMessage(),
             ]);
 
