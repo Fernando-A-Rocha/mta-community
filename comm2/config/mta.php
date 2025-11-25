@@ -24,7 +24,7 @@ return [
 
     'current_stable_version' => '1.6',
 
-    'servers_cache_duration' => env('MTA_SERVERS_CACHE_DURATION', 10 * 60), // seconds
+    'servers_cache_duration' => 60 * 10, // seconds (10 minutes)
     /*
     |--------------------------------------------------------------------------
     | MTA News Configuration
@@ -36,7 +36,7 @@ return [
 
     'news_forum_url' => 'https://multitheftauto.com/news',
 
-    'news_cache_duration' => env('MTA_NEWS_CACHE_DURATION', 3600), // seconds (default: 1 hour)
+    'news_cache_duration' => 60 * 60 * 12, // seconds (12 hours)
 
     /*
     |--------------------------------------------------------------------------
@@ -49,5 +49,5 @@ return [
 
     'github_token' => env('GITHUB_TOKEN'),
 
-    'github_activity_cache_duration' => env('MTA_GITHUB_ACTIVITY_CACHE_DURATION', 900), // seconds (default: 15 minutes)
+    'github_activity_cache_duration' => 60 * 15, // seconds (15 minutes)
 ];

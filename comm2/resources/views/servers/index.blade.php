@@ -10,6 +10,11 @@
                         'version' => config('mta.current_stable_version', '1.6'),
                     ]) }}
                 </flux:text>
+                @if($fetchTimestamp)
+                    <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
+                        {{ __('Fetched') }}: {{ \Carbon\Carbon::createFromTimestamp($fetchTimestamp)->format('M j, Y g:i A') }}
+                    </p>
+                @endif
             </div>
             <!-- Search Bar -->
             <div class="mb-4">

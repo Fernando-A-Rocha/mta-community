@@ -56,9 +56,14 @@ class DevelopmentController extends Controller
             ]
         );
 
+        $mtasaBlueFetchTimestamp = $this->githubActivityService->getFetchTimestamp('mtasa-blue');
+        $mtasaResourcesFetchTimestamp = $this->githubActivityService->getFetchTimestamp('mtasa-resources');
+
         return view('development.index', [
             'mtasaBlueActivity' => $mtasaBluePaginator,
             'mtasaResourcesActivity' => $mtasaResourcesPaginator,
+            'mtasaBlueFetchTimestamp' => $mtasaBlueFetchTimestamp,
+            'mtasaResourcesFetchTimestamp' => $mtasaResourcesFetchTimestamp,
         ]);
     }
 }

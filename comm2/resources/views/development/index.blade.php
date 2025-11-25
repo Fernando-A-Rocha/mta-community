@@ -49,6 +49,11 @@
                                 mtasa-blue
                             </a>
                         </div>
+                        @if($mtasaBlueFetchTimestamp)
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
+                                {{ __('Fetched') }}: {{ \Carbon\Carbon::createFromTimestamp($mtasaBlueFetchTimestamp)->format('M j, Y g:i A') }}
+                            </p>
+                        @endif
                     </div>
 
                     @if($mtasaBlueActivity->count() > 0)
@@ -119,6 +124,11 @@
                                 mtasa-resources
                             </a>
                         </div>
+                        @if($mtasaResourcesFetchTimestamp)
+                            <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
+                                {{ __('Fetched') }}: {{ \Carbon\Carbon::createFromTimestamp($mtasaResourcesFetchTimestamp)->format('M j, Y g:i A') }}
+                            </p>
+                        @endif
                     </div>
 
                     @if($mtasaResourcesActivity->count() > 0)

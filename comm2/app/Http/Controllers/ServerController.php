@@ -77,10 +77,13 @@ class ServerController extends Controller
             $paginator->appends(['search' => $searchQuery]);
         }
 
+        $fetchTimestamp = $this->mtaServerService->getFetchTimestamp();
+
         return view('servers.index', [
             'servers' => $paginator,
             'statistics' => $statistics,
             'searchQuery' => $searchQuery,
+            'fetchTimestamp' => $fetchTimestamp,
         ]);
     }
 }

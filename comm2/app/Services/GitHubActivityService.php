@@ -323,4 +323,21 @@ class GitHubActivityService
             ];
         }, $serializedActivity);
     }
+
+    /**
+     * Get the timestamp when the activity data was last fetched for a repository.
+     *
+     * @param  string  $repoKey  Repository key ('mtasa-blue' or 'mtasa-resources')
+     * @return int|null Unix timestamp or null if never fetched
+     */
+    public function getFetchTimestamp(string $repoKey): ?int
+    {
+        if (! isset(self::REPOSITORIES[$repoKey])) {
+            return null;
+        }
+
+        $timestampKey = self::CACHE_TIMESTAMP_KEY_PREFIX.$repoKey;
+
+        return Cache::get($timestampKey);
+    }
 }

@@ -38,8 +38,11 @@ class HomeController extends Controller
             ]
         );
 
+        $fetchTimestamp = $this->mtaNewsService->getFetchTimestamp();
+
         return view('home', [
             'news' => $paginator,
+            'fetchTimestamp' => $fetchTimestamp,
         ]);
     }
 }

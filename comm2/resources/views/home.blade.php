@@ -19,7 +19,14 @@
         <!-- Latest News Section -->
         <section>
             <div class="flex items-center justify-between mb-4">
-                <flux:heading size="lg">{{ __('Latest News') }}</flux:heading>
+                <div>
+                    <flux:heading size="lg">{{ __('Latest News') }}</flux:heading>
+                    @if($fetchTimestamp)
+                        <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
+                            {{ __('Fetched') }}: {{ \Carbon\Carbon::createFromTimestamp($fetchTimestamp)->format('M j, Y g:i A') }}
+                        </p>
+                    @endif
+                </div>
                 <flux:link :href="config('mta.news_forum_url')" variant="outline" target="_blank" rel="noopener noreferrer" class="text-sm">
                     {{ __('View on Forum') }}
                 </flux:link>

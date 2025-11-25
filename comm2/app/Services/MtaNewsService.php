@@ -52,6 +52,16 @@ class MtaNewsService
     }
 
     /**
+     * Get the timestamp when the news data was last fetched.
+     *
+     * @return int|null Unix timestamp or null if never fetched
+     */
+    public function getFetchTimestamp(): ?int
+    {
+        return Cache::get(self::CACHE_TIMESTAMP_KEY);
+    }
+
+    /**
      * Fetch and parse news from the forum.
      *
      * @return array<int, array{url: string, title: string, author: string, date: Carbon}>

@@ -145,4 +145,14 @@ class MtaServerService
             'total_servers' => $totalServers,
         ];
     }
+
+    /**
+     * Get the timestamp when the server data was last fetched.
+     *
+     * @return int|null Unix timestamp or null if never fetched
+     */
+    public function getFetchTimestamp(): ?int
+    {
+        return Cache::get(self::CACHE_TIMESTAMP_KEY);
+    }
 }
