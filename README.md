@@ -1,8 +1,42 @@
 # mta-community
 
-New community platform for Multi Theft Auto
+**MTA Community** (comm2) is a community platform for Multi Theft Auto (MTA) that enables developers to upload, manage, and distribute MTA resources (scripts, gamemodes, maps, etc.). The platform includes user authentication, resource management with versioning, ratings, downloads tracking, and integrations with MTA servers, forum news, and GitHub.
 
-## `comm2` Project
+## Key Features
+
+- User authentication with 2FA
+- News articles listing
+- MTA server listings integration
+- MTA GitHub activity display
+- MTA Resource upload and version management
+- MTA Resource ratings and download tracking
+- Admin/moderation tools
+
+## Technology Stack
+
+### Backend
+
+Laravel (PHP Framework) with single MySQL database.
+
+### Frontend
+
+- **Livewire Flux** - UI component library
+- **Livewire Volt** - Single-file components
+- **Tailwind CSS** - CSS framework
+- **Vite** - Build tool
+
+### Authentication
+
+- **Laravel Fortify** - Authentication backend
+- Two-factor authentication (TOTP)
+- Email verification
+
+### Development Tools
+
+- **Pest PHP** - Testing framework
+- **Laravel Pint** - Code style fixer
+
+## Getting Started
 
 ### Dependencies
 
@@ -29,3 +63,7 @@ New community platform for Multi Theft Auto
 - Start local dev server: `composer run dev`
 - Run the linter: `composer run lint:fix`
 - Run tests and ensure they are passing: `composer run test`
+
+## License
+
+Unless otherwise specified, all source code hosted on this repository is licensed under the GPLv3 license. See the [LICENSE](./LICENSE) file for more details.
