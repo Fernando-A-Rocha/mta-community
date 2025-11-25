@@ -47,6 +47,7 @@ fi
 
 log "${GREEN}✅ Enabling maintenance mode...${NC}"
 sudo touch "$MAINTENANCE_FLAG"
+sudo chown www-data:www-data "$MAINTENANCE_FLAG"
 sudo systemctl reload nginx
 
 # Navigate to project directory

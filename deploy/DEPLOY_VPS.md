@@ -7,6 +7,4 @@
 
 ## Deploying with Nginx (Web server)
 
-- Use nginx.conf with your domain (generate a certif for it)
-
-- Run deploy.sh
+Use `nginx.conf` with your domain (generate a certificate for it) and `deploy.sh`.
