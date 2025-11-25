@@ -9,25 +9,38 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Header with title and category -->
-                    <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-3">
-                                <h1 class="text-3xl font-bold">{{ $resource->display_name }}</h1>
-                                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                    {{ ucfirst($resource->category) }}
-                                </span>
-                            </div>
-                            @auth
-                                @can('update', $resource)
-                                    <flux:link :href="route('resources.edit', $resource)" variant="outline" size="sm">
-                                        Edit Resource
-                                    </flux:link>
-                                @endcan
-                            @endauth
+                    @if ($resource->is_disabled && (!auth()->check() || !auth()->user()->isModerator()))
+                        <div class="p-8">
+                            <h2 class="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Resource Disabled</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                The resource you are looking for is not available for viewing or downloading at this time.
+                            </p>
                         </div>
-                        <p class="text-lg text-gray-600 dark:text-gray-400">{{ $resource->short_description }}</p>
-                        @if ($resource->average_rating)
+                    @else
+                        <!-- Header with title and category -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <h1 class="text-3xl font-bold">{{ $resource->display_name }}</h1>
+                                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
+                                        {{ ucfirst($resource->category) }}
+                                    </span>
+                                    @if ($resource->is_disabled)
+                                        <span class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full text-sm font-medium">
+                                            Disabled
+                                        </span>
+                                    @endif
+                                </div>
+                                @auth
+                                    @can('update', $resource)
+                                        <flux:link :href="route('resources.edit', $resource)" variant="outline" size="sm">
+                                            Edit Resource
+                                        </flux:link>
+                                    @endcan
+                                @endauth
+                            </div>
+                            <p class="text-lg text-gray-600 dark:text-gray-400">{{ $resource->short_description }}</p>
+                            @if ($resource->average_rating)
                             <div class="flex items-center gap-2 mt-2">
                                 <div class="flex items-center">
                                     @for ($i = 1; $i <= 5; $i++)
@@ -217,31 +230,33 @@
                             </div>
                         </div>
                     @endif
+                    @endif
                 </div>
 
                 <!-- Sidebar -->
                 <div class="space-y-6">
-                    <!-- Download Button -->
-                    @if ($resource->currentVersion)
-                        <div class="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                            <a href="{{ route('resources.download', $resource) }}" class="block">
-                                <flux:button variant="primary" class="w-full text-lg py-3">
-                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Download v{{ $resource->currentVersion->version }}
-                                </flux:button>
-                            </a>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center">
-                                {{ number_format($resource->unique_downloads_count) }} {{ Str::plural('download', $resource->unique_downloads_count) }}
-                            </p>
-                        </div>
-                    @endif
+                    @if (!$resource->is_disabled || (auth()->check() && auth()->user()->isModerator()))
+                        <!-- Download Button -->
+                        @if ($resource->currentVersion)
+                            <div class="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                                <a href="{{ route('resources.download', $resource) }}" class="block">
+                                    <flux:button variant="primary" class="w-full text-lg py-3">
+                                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        Download v{{ $resource->currentVersion->version }}
+                                    </flux:button>
+                                </a>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center">
+                                    {{ number_format($resource->unique_downloads_count) }} {{ Str::plural('download', $resource->unique_downloads_count) }}
+                                </p>
+                            </div>
+                        @endif
 
-                    <!-- Resource Info -->
-                    <div class="border rounded-lg p-4 bg-white dark:bg-gray-800">
-                        <h3 class="font-bold mb-4 text-lg">Resource Information</h3>
-                        <div class="space-y-3 text-sm">
+                        <!-- Resource Info -->
+                        <div class="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                            <h3 class="font-bold mb-4 text-lg">Resource Information</h3>
+                            <div class="space-y-3 text-sm">
                             <div class="flex items-start justify-between">
                                 <span class="font-semibold text-gray-600 dark:text-gray-400">Author:</span>
                                 <a href="{{ route('profile.show', $resource->user) }}" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
@@ -276,12 +291,12 @@
                                     </span>
                                 </div>
                             @endif
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Tags -->
-                    @if ($resource->tags->isNotEmpty())
-                        <div class="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                        <!-- Tags -->
+                        @if ($resource->tags->isNotEmpty())
+                            <div class="border rounded-lg p-4 bg-white dark:bg-gray-800">
                             <h3 class="font-bold mb-4 text-lg">Tags</h3>
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($resource->tags as $tag)
@@ -290,13 +305,13 @@
                                     </span>
                                 @endforeach
                             </div>
-                        </div>
-                    @endif
+                            </div>
+                        @endif
 
 
-                    <!-- Links -->
-                    @if ($resource->github_url || $resource->forum_thread_url)
-                        <div class="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                        <!-- Links -->
+                        @if ($resource->github_url || $resource->forum_thread_url)
+                            <div class="border rounded-lg p-4 bg-white dark:bg-gray-800">
                             <h3 class="font-bold mb-4 text-lg">Links</h3>
                             <div class="space-y-3">
                                 @if ($resource->github_url)
@@ -318,7 +333,8 @@
                                     </a>
                                 @endif
                             </div>
-                        </div>
+                            </div>
+                        @endif
                     @endif
 
                     <!-- Author Actions -->
