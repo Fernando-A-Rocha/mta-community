@@ -2,9 +2,12 @@
 
 ## Initial Setup
 
-- Run the commands in the main README.md (same as a first development setup)
+- Clone the repo in a secure folder of your linux user (like home)
+- Run the commands from the main README.md (same as a first development setup)
 - Make sure to configure .env according to production environment
 
-## Deploying with Nginx (Web server)
+## Deploy with Nginx (Web server)
 
 Use `nginx.conf` with your domain (generate a certificate for it) and `deploy.sh`.
+
+It requires specific configuration of your VPS, proceed with caution.
