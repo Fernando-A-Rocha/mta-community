@@ -19,6 +19,7 @@ HOME_DIR="/home/$(whoami)"
 PROJECT_DIR="$HOME_DIR/mta/mtacomm2"
 PROJECT_LARAVEL_DIR="$PROJECT_DIR/comm2"
 WEB_ROOT="/var/www/mtacomm2.frocha.net"
+MAINTENANCE_FLAG="/var/www/utility/maintenance.flag"
 LARAVEL_DIR="$WEB_ROOT/platform"
 PERSISTENT_STORAGE="$WEB_ROOT/storage"
 
@@ -43,6 +44,10 @@ if [ ! -d "$PROJECT_DIR" ]; then
     log "${RED}❌ Project directory $PROJECT_DIR not found${NC}"
     exit 1
 fi
+
+log "${GREEN}✅ Enabling maintenance mode...${NC}"
+sudo touch "$MAINTENANCE_FLAG"
+sudo systemctl reload nginx
 
 # Navigate to project directory
 cd "$PROJECT_DIR"
@@ -192,6 +197,10 @@ if [ ! -L "$LARAVEL_DIR/public/storage" ]; then
     log "${GREEN}🔗 Creating storage link...${NC}"
     sudo -u www-data php artisan storage:link
 fi
+
+# Clear under maintenance flag
+log "${GREEN}✅ Disabling maintenance mode...${NC}"
+sudo rm -f "$MAINTENANCE_FLAG"
 
 # Restart services
 log "${GREEN}🔄 Restarting services...${NC}"
