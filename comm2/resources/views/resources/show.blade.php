@@ -1,6 +1,5 @@
-<x-layouts.app.sidebar :title="$resource->display_name">
-    <flux:main>
-        <div class="flex h-full w-full flex-1 flex-col gap-6">
+<x-layouts.app :title="$resource->display_name">
+        <div class="flex w-full flex-1 flex-col gap-6">
             <div class="mb-6">
                 <a href="{{ route('resources.index') }}" class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:underline">
                     ← Back to Resources
@@ -348,6 +347,5 @@
                 </div>
             </div>
         </div>
-    </flux:main>
-</x-layouts.app.sidebar>
+</x-layouts.app>
 

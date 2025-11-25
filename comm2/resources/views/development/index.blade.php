@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('Development')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6">
+    <div class="flex w-full flex-1 flex-col gap-6">
         <section>
             <flux:heading size="lg" class="mb-4">{{ __('Development Activity') }}</flux:heading>
             <flux:text class="text-neutral-600 dark:text-neutral-400 mb-6">

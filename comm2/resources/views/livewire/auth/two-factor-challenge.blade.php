@@ -1,6 +1,5 @@
-<x-layouts.app.sidebar title="{{ __('Two-Factor Authentication') }}">
-    <flux:main>
-    <div class="flex min-h-[calc(100vh-88px)] lg:min-h-[calc(100vh-104px)] flex-col items-center justify-center gap-6 p-6 md:p-10">
+<x-layouts.app title="{{ __('Two-Factor Authentication') }}">
+    <div class="flex flex-col items-center justify-center gap-6 p-6 md:p-10">
         <div class="flex w-full max-w-sm flex-col gap-6">
             <div
                 class="relative w-full h-auto"
@@ -99,5 +98,4 @@
             </div>
         </div>
     </div>
-    </flux:main>
-</x-layouts.app.sidebar>
+</x-layouts.app>

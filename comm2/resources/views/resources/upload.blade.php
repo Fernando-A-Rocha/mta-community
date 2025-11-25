@@ -1,6 +1,5 @@
-<x-layouts.app.sidebar title="Upload Resource">
-    <flux:main>
-        <div class="flex h-full w-full flex-1 flex-col gap-6">
+<x-layouts.app title="Upload Resource">
+        <div class="flex w-full flex-1 flex-col gap-6">
             <div class="mb-2">
                 <h2 class="text-2xl font-bold">Upload Resource</h2>
             </div>
@@ -467,6 +466,5 @@
                 }
             </script>
         </div>
-    </flux:main>
-</x-layouts.app.sidebar>
+</x-layouts.app>
 

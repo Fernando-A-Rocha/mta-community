@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('Servers')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6">
+    <div class="flex w-full flex-1 flex-col gap-6">
         <section>
             <div class="mb-4">
                 <flux:heading size="lg" class="mb-2">{{ __('Active MTA Servers') }}</flux:heading>

@@ -1,6 +1,5 @@
-<x-layouts.app.sidebar title="{{ __('Sign up') }}">
-    <flux:main>
-    <div class="flex min-h-[calc(100vh-88px)] lg:min-h-[calc(100vh-104px)] flex-col items-center justify-center gap-6 p-6 md:p-10">
+<x-layouts.app title="{{ __('Sign up') }}">
+    <div class="flex flex-col items-center justify-center gap-6 p-6 md:p-10">
         <div class="flex w-full max-w-sm flex-col gap-6">
             <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
@@ -66,5 +65,4 @@
             </div>
         </div>
     </div>
-    </flux:main>
-</x-layouts.app.sidebar>
+</x-layouts.app>

@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('Profile') . ' - ' . $user->name">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+    <div class="flex w-full flex-1 flex-col gap-6 rounded-xl">
         <div class="flex items-center gap-4">
             <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-2xl font-semibold text-black dark:bg-neutral-700 dark:text-white">
                 {{ $user->initials() }}
