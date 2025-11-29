@@ -25,6 +25,23 @@
                     </div>
                 @endif
 
+                <!-- Short Description -->
+                <div>
+                    <flux:field>
+                        <flux:label>Short Description</flux:label>
+                        <flux:textarea
+                            name="short_description"
+                            rows="3"
+                            id="short_description"
+                            maxlength="500"
+                        >{{ old('short_description', $resource->short_description) }}</flux:textarea>
+                        <flux:description>Brief description of your resource (max 500 characters). This appears in the resource header.</flux:description>
+                        @error('short_description')
+                            <flux:error>{{ $message }}</flux:error>
+                        @enderror
+                    </flux:field>
+                </div>
+
                 <!-- Long Description -->
                 <div>
                     <flux:field>

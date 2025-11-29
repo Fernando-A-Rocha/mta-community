@@ -38,6 +38,77 @@
                 </flux:field>
             </div>
 
+            <flux:separator />
+
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold">{{ __('Favorites') }}</h3>
+                    <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400 italic">
+                        {{ __('Share your preferences with the community and let others discover what makes your experience unique. Your favorites help build connections and showcase your personality!') }}
+                    </p>
+                </div>
+
+                <flux:field>
+                    <flux:label>{{ __('City') }}</flux:label>
+                    <flux:select wire:model="favorite_city">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach (\App\Data\ProfileFavorites::cities() as $city)
+                            <option value="{{ $city }}" {{ $favorite_city === $city ? 'selected' : '' }}>{{ $city }}</option>
+                        @endforeach
+                    </flux:select>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Vehicle') }}</flux:label>
+                    <flux:select wire:model="favorite_vehicle">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach (\App\Data\ProfileFavorites::vehicles() as $vehicle)
+                            <option value="{{ $vehicle }}" {{ $favorite_vehicle === $vehicle ? 'selected' : '' }}>{{ $vehicle }}</option>
+                        @endforeach
+                    </flux:select>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Character') }}</flux:label>
+                    <flux:select wire:model="favorite_character">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach (\App\Data\ProfileFavorites::characters() as $character)
+                            <option value="{{ $character }}" {{ $favorite_character === $character ? 'selected' : '' }}>{{ $character }}</option>
+                        @endforeach
+                    </flux:select>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Gang') }}</flux:label>
+                    <flux:select wire:model="favorite_gang">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach (\App\Data\ProfileFavorites::gangs() as $gang)
+                            <option value="{{ $gang }}" {{ $favorite_gang === $gang ? 'selected' : '' }}>{{ $gang }}</option>
+                        @endforeach
+                    </flux:select>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Weapon') }}</flux:label>
+                    <flux:select wire:model="favorite_weapon">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach (\App\Data\ProfileFavorites::weapons() as $weapon)
+                            <option value="{{ $weapon }}" {{ $favorite_weapon === $weapon ? 'selected' : '' }}>{{ $weapon }}</option>
+                        @endforeach
+                    </flux:select>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Radio Station') }}</flux:label>
+                    <flux:select wire:model="favorite_radio_station">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach (\App\Data\ProfileFavorites::radioStations() as $radioStation)
+                            <option value="{{ $radioStation }}" {{ $favorite_radio_station === $radioStation ? 'selected' : '' }}>{{ $radioStation }}</option>
+                        @endforeach
+                    </flux:select>
+                </flux:field>
+            </div>
+
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
                     <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
