@@ -22,3 +22,4 @@ class LoginResponse implements LoginResponseContract
         return $intended ? Redirect::to($intended) : Redirect::to(config('fortify.home', '/'));
     }
 }
+
