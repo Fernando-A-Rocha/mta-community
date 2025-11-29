@@ -6,9 +6,6 @@
             'sort' => $sortBy !== 'date' ? ucfirst($sortBy) : null,
             'order' => $sortOrder !== 'desc' ? ucfirst($sortOrder) : null,
         ])->filter();
-        $visibleRange = $resources->count() > 0
-            ? sprintf('%s–%s', number_format($resources->firstItem() ?? 0), number_format($resources->lastItem() ?? 0))
-            : '0';
     @endphp
 
     <div class="flex w-full flex-1 flex-col gap-8">
@@ -18,7 +15,7 @@
                     <div>
                         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Resources</h1>
                         <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                            Browse curated scripts, gamemodes, and assets built by the community. Refine the catalog with search, filters, and smarter sorting.
+                            Browse maps, scripts, gamemodes, and assets built by the community. Refine the catalog with search, filters, and sorting.
                         </p>
                     </div>
                 </div>
@@ -28,27 +25,6 @@
                     </flux:link>
                 @endauth
             </div>
-
-            <dl class="mt-6 grid gap-4 sm:grid-cols-3">
-                <div class="rounded-2xl bg-white p-4 text-sm shadow-sm dark:bg-slate-900/70">
-                    <dt class="text-slate-500 dark:text-slate-400">Available resources</dt>
-                    <dd class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">
-                        {{ number_format($resources->total()) }}
-                    </dd>
-                </div>
-                <div class="rounded-2xl bg-white p-4 text-sm shadow-sm dark:bg-slate-900/70">
-                    <dt class="text-slate-500 dark:text-slate-400">Visible this page</dt>
-                    <dd class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">
-                        {{ $visibleRange }}
-                    </dd>
-                </div>
-                <div class="rounded-2xl bg-white p-4 text-sm shadow-sm dark:bg-slate-900/70">
-                    <dt class="text-slate-500 dark:text-slate-400">Refreshed</dt>
-                    <dd class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">
-                        {{ now()->format('M j, Y') }}
-                    </dd>
-                </div>
-            </dl>
         </section>
 
         @if (session('success'))

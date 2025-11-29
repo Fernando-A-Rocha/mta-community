@@ -3,7 +3,7 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
+    <body class="min-h-screen bg-white dark:bg-zinc-800 flex flex-col">
         <x-mta-header />
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -127,9 +127,11 @@
             @endauth
         </flux:header>
 
-        <flux:main>
-            {{ $slot }}
-        <x-footer />
+        <flux:main class="flex-1 flex flex-col">
+            <div class="flex-1">
+                {{ $slot }}
+            </div>
+            <x-footer />
         </flux:main>
 
 
