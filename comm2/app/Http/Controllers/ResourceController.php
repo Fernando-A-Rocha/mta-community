@@ -41,7 +41,10 @@ class ResourceController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('long_name', 'like', "%{$search}%")
-                    ->orWhere('short_description', 'like', "%{$search}%");
+                    ->orWhere('short_description', 'like', "%{$search}%")
+                    ->orWhereHas('tags', function ($tagQuery) use ($search) {
+                        $tagQuery->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -131,6 +134,7 @@ class ResourceController extends Controller
         DB::transaction(function () use ($request, $resource) {
             // Update basic fields
             $resource->update([
+                'short_description' => $request->input('short_description'),
                 'long_description' => $request->input('long_description'),
                 'github_url' => $request->input('github_url'),
                 'forum_thread_url' => $request->input('forum_thread_url'),
@@ -299,18 +303,37 @@ class ResourceController extends Controller
     }
 
     /**
-     * Log a resource download. All downloads are logged for tracking purposes.
-     * The counting logic (unique per user/IP per 24h) is handled by the model accessor.
+     * Log a resource download. Only logs if the user/IP hasn't downloaded within the last 24 hours.
      */
     private function logDownload(Resource $resource, string $version, Request $request): void
     {
-        ResourceDownload::create([
-            'resource_id' => $resource->id,
-            'user_id' => $request->user()?->id,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'version' => $version,
-        ]);
+        $user = $request->user();
+        $ipAddress = $request->ip();
+        $twentyFourHoursAgo = now()->subDay();
+
+        // Check if this user/IP has already downloaded in the last 24 hours
+        $recentDownload = $resource->downloads()
+            ->where('created_at', '>=', $twentyFourHoursAgo)
+            ->where(function ($query) use ($user, $ipAddress) {
+                if ($user) {
+                    $query->where('user_id', $user->id);
+                } else {
+                    $query->whereNull('user_id')
+                        ->where('ip_address', $ipAddress);
+                }
+            })
+            ->exists();
+
+        // Only create a download record if they haven't downloaded in the last 24 hours
+        if (! $recentDownload) {
+            ResourceDownload::create([
+                'resource_id' => $resource->id,
+                'user_id' => $user?->id,
+                'ip_address' => $ipAddress,
+                'user_agent' => $request->userAgent(),
+                'version' => $version,
+            ]);
+        }
     }
 
     /**

@@ -68,7 +68,7 @@
                                 <flux:input
                                     name="search"
                                     type="text"
-                                    placeholder="Search by name or description"
+                                    placeholder="Search by name, description, or tag"
                                     value="{{ request('search') }}"
                                     class="flex-1"
                                 />

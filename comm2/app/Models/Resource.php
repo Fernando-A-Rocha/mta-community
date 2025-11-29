@@ -79,29 +79,22 @@ class Resource extends Model
     }
 
     /**
-     * Get the unique download count (one per user/IP per 24 hours).
-     * This counts distinct user/IP combinations that have downloaded in the last 24 hours.
+     * Get the unique download count (all time, one per user/IP).
      * For authenticated users, we count by user_id. For guests, we count by IP.
      */
     public function getUniqueDownloadsCountAttribute(): int
     {
-        $twentyFourHoursAgo = now()->subDay();
+        $userDownloads = $this->downloads()
+            ->whereNotNull('user_id')
+            ->distinct('user_id')
+            ->count('user_id');
 
-        // Get all downloads in the past 24 hours
-        $recentDownloads = $this->downloads()
-            ->where('created_at', '>=', $twentyFourHoursAgo)
-            ->get();
+        $ipDownloads = $this->downloads()
+            ->whereNull('user_id')
+            ->distinct('ip_address')
+            ->count('ip_address');
 
-        // Count unique by user_id (for authenticated) or ip_address (for guests)
-        $uniqueIdentifiers = $recentDownloads
-            ->map(function ($download) {
-                // Use user_id if available, otherwise use IP address
-                return $download->user_id ?? $download->ip_address;
-            })
-            ->unique()
-            ->count();
-
-        return $uniqueIdentifiers;
+        return $userDownloads + $ipDownloads;
     }
 
     /**
@@ -120,26 +113,6 @@ class Resource extends Model
             ->count('ip_address');
 
         return $userDownloads + $ipDownloads;
-    }
-
-    /**
-     * Check if a user/IP has downloaded this resource in the past 24 hours.
-     */
-    public function hasDownloadedRecently(?int $userId, string $ipAddress): bool
-    {
-        $twentyFourHoursAgo = now()->subDay();
-
-        $query = $this->downloads()
-            ->where('created_at', '>=', $twentyFourHoursAgo);
-
-        // Check by user_id if authenticated, otherwise by IP
-        if ($userId) {
-            return $query->where('user_id', $userId)->exists();
-        }
-
-        return $query->where('ip_address', $ipAddress)
-            ->whereNull('user_id')
-            ->exists();
     }
 
     /**
@@ -162,7 +135,7 @@ class Resource extends Model
     {
         $avg = $this->ratings()->avg('rating');
 
-        return $avg !== null ? (float) round($avg, 2) : null;
+        return $avg !== null ? round((float) $avg, 2) : null;
     }
 
     /**

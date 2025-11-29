@@ -23,15 +23,23 @@
         <section class="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div class="space-y-4">
-                    <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wide">
-                        <span class="rounded-full bg-white/10 px-3 py-1 text-white/80">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-lg">
                             {{ ucfirst($resource->category) }}
                         </span>
                         @if ($resource->is_disabled)
-                            <span class="rounded-full bg-red-500/80 px-3 py-1 text-white">Disabled</span>
+                            <span class="rounded-full bg-red-500/80 px-3 py-1 text-white text-xs font-semibold">Disabled</span>
                         @endif
                         @if ($resource->oop_enabled)
-                            <span class="rounded-full bg-emerald-500/90 px-3 py-1 text-white">OOP Ready</span>
+                            <span class="rounded-full bg-emerald-500/90 px-3 py-1 text-white text-xs font-semibold">OOP Ready</span>
+                        @endif
+                        @if ($resource->tags->isNotEmpty())
+                            @foreach ($resource->tags->take(6) as $tag)
+                                <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">{{ $tag->name }}</span>
+                            @endforeach
+                            @if ($resource->tags->count() > 6)
+                                <span class="text-xs font-medium text-white/70">+{{ $resource->tags->count() - 6 }} more</span>
+                            @endif
                         @endif
                     </div>
                     <div>
@@ -39,17 +47,11 @@
                         <p class="mt-3 max-w-3xl text-base text-slate-200">
                             {{ $resource->short_description }}
                         </p>
+                        <a href="{{ route('profile.show', $resource->user) }}" class="mt-3 flex items-center gap-2 text-sm font-semibold text-white hover:underline">
+                            <x-user-avatar :user="$resource->user" size="sm" />
+                            {{ $resource->user->name }}
+                        </a>
                     </div>
-                    @if ($resource->tags->isNotEmpty())
-                        <div class="flex flex-wrap gap-2">
-                            @foreach ($resource->tags->take(6) as $tag)
-                                <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">{{ $tag->name }}</span>
-                            @endforeach
-                            @if ($resource->tags->count() > 6)
-                                <span class="text-xs font-medium text-white/70">+{{ $resource->tags->count() - 6 }} more</span>
-                            @endif
-                        </div>
-                    @endif
                 </div>
                 <div class="w-full max-w-sm space-y-4 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
                     <dl class="grid grid-cols-2 gap-4 text-sm">
@@ -65,20 +67,20 @@
                             <dd class="text-xs text-slate-300">{{ $ratingCount }} {{ \Illuminate\Support\Str::plural('review', $ratingCount) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-slate-200">Downloads (24h)</dt>
+                            <dt class="text-slate-200">Downloads</dt>
                             <dd class="mt-1 text-3xl font-semibold">{{ number_format($resource->unique_downloads_count) }}</dd>
                             <dd class="text-xs text-slate-300">unique</dd>
                         </div>
                         <div>
                             <dt class="text-slate-200">Latest version</dt>
-                            <dd class="mt-1 text-3xl font-semibold">
+                            <dd class="mt-1 text-lg font-semibold">
                                 {{ $latestVersion?->version ?? '—' }}
                             </dd>
                             <dd class="text-xs text-slate-300">Released {{ $latestVersion?->created_at?->format('M d, Y') ?? '—' }}</dd>
                         </div>
                         <div>
                             <dt class="text-slate-200">Updated</dt>
-                            <dd class="mt-1 text-3xl font-semibold">
+                            <dd class="mt-1 text-lg font-semibold">
                                 {{ $lastUpdated?->diffForHumans() ?? '—' }}
                             </dd>
                             <dd class="text-xs text-slate-300">relative</dd>
@@ -144,7 +146,7 @@
                                         </div>
                                     @empty
                                         <div class="flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-200 text-sm text-slate-400 dark:border-slate-700">
-                                            More images coming soon
+                                            More images to be added
                                         </div>
                                     @endforelse
                                 </div>
@@ -161,89 +163,13 @@
                         </div>
                     @endif
 
-                    @auth
-                        @if (auth()->id() !== $resource->user_id)
-                            <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                                <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Rate this resource</h2>
-                                <form action="{{ route('resources.rating.store', $resource) }}" method="POST" class="mt-4 space-y-4">
-                                    @csrf
-                                    <div>
-                                        <flux:field>
-                                            <flux:label>Rating</flux:label>
-                                            <div class="flex gap-2">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <label class="cursor-pointer">
-                                                        <input
-                                                            type="radio"
-                                                            name="rating"
-                                                            value="{{ $i }}"
-                                                            class="hidden peer"
-                                                            {{ old('rating', $userRating?->rating) == $i ? 'checked' : '' }}
-                                                            required
-                                                        />
-                                                        <svg class="h-8 w-8 text-slate-300 transition-colors peer-checked:text-amber-400 dark:text-slate-600" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                        </svg>
-                                                    </label>
-                                                @endfor
-                                            </div>
-                                            @error('rating')
-                                                <flux:error>{{ $message }}</flux:error>
-                                            @enderror
-                                        </flux:field>
-                                    </div>
-                                    <div>
-                                        <flux:field>
-                                            <flux:label>Comment (optional)</flux:label>
-                                            <flux:textarea
-                                                name="comment"
-                                                rows="3"
-                                                placeholder="Share your experience, tips, or bugs others should know..."
-                                            >{{ old('comment', $userRating?->comment) }}</flux:textarea>
-                                            @error('comment')
-                                                <flux:error>{{ $message }}</flux:error>
-                                            @enderror
-                                        </flux:field>
-                                    </div>
-                                    <flux:button type="submit" variant="primary">
-                                        {{ $userRating ? 'Update rating' : 'Submit rating' }}
-                                    </flux:button>
-                                </form>
-                            </div>
-                        @endif
-                    @endauth
-
-                    @if ($resource->ratings->isNotEmpty())
-                        <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Ratings & reviews</h2>
-                            <div class="mt-4 space-y-4">
-                                @foreach ($resource->ratings->take(10) as $rating)
-                                    <div class="rounded-2xl border border-slate-100/80 p-4 dark:border-slate-800">
-                                        <div class="flex items-center justify-between gap-3">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-semibold text-slate-900 dark:text-white">{{ $rating->user->name }}</span>
-                                                <div class="flex">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <svg class="h-4 w-4 {{ $i <= $rating->rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600' }}" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                        </svg>
-                                                    @endfor
-                                                </div>
-                                            </div>
-                                            <span class="text-xs text-slate-500 dark:text-slate-400">{{ $rating->created_at->diffForHumans() }}</span>
-                                        </div>
-                                        @if ($rating->comment)
-                                            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ $rating->comment }}</p>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
 
                     @if ($resource->versions->isNotEmpty())
                         <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Releases</h2>
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Releases</h2>
+                                <span class="text-sm text-slate-500 dark:text-slate-400">{{ $resource->versions->count() }} {{ \Illuminate\Support\Str::plural('release', $resource->versions->count()) }}</span>
+                            </div>
                             <div class="mt-6 space-y-4">
                                 @foreach ($resource->versions as $version)
                                     <div class="rounded-2xl border border-slate-100/80 p-4 transition hover:border-blue-400 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:border-blue-400/70 dark:hover:bg-blue-900/20 {{ $version->is_current ? 'border-blue-400 bg-blue-50/60 dark:border-blue-400/80 dark:bg-blue-900/30' : '' }}">
@@ -276,76 +202,159 @@
                             </div>
                         </div>
                     @endif
+
+                    @if ($resource->ratings->isNotEmpty())
+                        <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+                            <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Ratings & reviews</h2>
+                            <div class="mt-4 space-y-4">
+                                @foreach ($resource->ratings->take(10) as $rating)
+                                    <div class="rounded-2xl border border-slate-100/80 p-4 dark:border-slate-800">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="flex items-center gap-2">
+                                                <a href="{{ route('profile.show', $rating->user) }}" class="flex items-center gap-2 font-semibold text-slate-900 hover:underline dark:text-white">
+                                                    <x-user-avatar :user="$rating->user" size="sm" />
+                                                    {{ $rating->user->name }}
+                                                </a>
+                                                <div class="flex">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <svg class="h-4 w-4 {{ $i <= $rating->rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            <span class="text-xs text-slate-500 dark:text-slate-400">{{ $rating->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        @if ($rating->comment)
+                                            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ $rating->comment }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 @endif
             </div>
 
             <div class="space-y-6">
-                @if (!$resource->is_disabled || (auth()->check() && auth()->user()->isModerator()))
-                    @if ($resource->currentVersion)
-                        <div class="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-5 shadow-sm dark:border-blue-500/40 dark:from-blue-900/20 dark:to-indigo-900/20">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-blue-900 dark:text-blue-200">Latest build</p>
-                            <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">v{{ $resource->currentVersion->version }}</p>
-                            <p class="text-xs text-slate-600 dark:text-slate-300">Released {{ $resource->currentVersion->created_at->diffForHumans() }}</p>
-                            <a href="{{ route('resources.download', $resource) }}" class="mt-4 block">
-                                <flux:button variant="primary" class="w-full">
-                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
-                                    </svg>
-                                    Download package
+                @auth
+                    @if (auth()->id() !== $resource->user_id)
+                        <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+                            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Rate this resource</h3>
+                            <form action="{{ route('resources.rating.store', $resource) }}" method="POST" class="mt-4 space-y-4">
+                                @csrf
+                                <div>
+                                    <flux:field>
+                                        <flux:label>Rating</flux:label>
+                                        <div class="rating-stars flex gap-2" data-selected="{{ old('rating', $userRating?->rating ?? 0) }}">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <label class="cursor-pointer star-label" data-rating="{{ $i }}">
+                                                    <input
+                                                        type="radio"
+                                                        name="rating"
+                                                        value="{{ $i }}"
+                                                        class="hidden star-input"
+                                                        {{ old('rating', $userRating?->rating) == $i ? 'checked' : '' }}
+                                                        required
+                                                    />
+                                                    <svg class="h-8 w-8 text-slate-300 transition-colors star-svg dark:text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                </label>
+                                            @endfor
+                                        </div>
+                                        @error('rating')
+                                            <flux:error>{{ $message }}</flux:error>
+                                        @enderror
+                                    </flux:field>
+                                </div>
+                                <script>
+                                    (function() {
+                                        const script = document.currentScript;
+                                        const container = script.parentElement.querySelector('.rating-stars');
+                                        if (!container) return;
+
+                                        const stars = container.querySelectorAll('.star-label');
+                                        const inputs = container.querySelectorAll('.star-input');
+
+                                        function updateStars(selectedRating) {
+                                            stars.forEach((star, index) => {
+                                                const rating = index + 1;
+                                                const svg = star.querySelector('.star-svg');
+                                                if (rating <= selectedRating) {
+                                                    svg.classList.remove('text-slate-300', 'dark:text-slate-600');
+                                                    svg.classList.add('text-amber-400');
+                                                } else {
+                                                    svg.classList.remove('text-amber-400');
+                                                    svg.classList.add('text-slate-300', 'dark:text-slate-600');
+                                                }
+                                            });
+                                        }
+
+                                        // Initialize with selected rating
+                                        const selectedInput = container.querySelector('.star-input:checked');
+                                        if (selectedInput) {
+                                            updateStars(parseInt(selectedInput.value));
+                                        }
+
+                                        // Handle input changes
+                                        inputs.forEach(input => {
+                                            input.addEventListener('change', function() {
+                                                updateStars(parseInt(this.value));
+                                            });
+                                        });
+
+                                        // Handle hover
+                                        stars.forEach((star, index) => {
+                                            star.addEventListener('mouseenter', function() {
+                                                const rating = index + 1;
+                                                updateStars(rating);
+                                            });
+                                        });
+
+                                        container.addEventListener('mouseleave', function() {
+                                            const selectedInput = container.querySelector('.star-input:checked');
+                                            if (selectedInput) {
+                                                updateStars(parseInt(selectedInput.value));
+                                            } else {
+                                                updateStars(0);
+                                            }
+                                        });
+                                    })();
+                                </script>
+                                <div>
+                                    <flux:field>
+                                        <flux:label>Comment (optional)</flux:label>
+                                        <flux:textarea
+                                            name="comment"
+                                            rows="3"
+                                            placeholder="Share your experience, tips, or bugs others should know..."
+                                        >{{ old('comment', $userRating?->comment) }}</flux:textarea>
+                                        @error('comment')
+                                            <flux:error>{{ $message }}</flux:error>
+                                        @enderror
+                                    </flux:field>
+                                </div>
+                                <flux:button type="submit" variant="primary">
+                                    {{ $userRating ? 'Update rating' : 'Submit rating' }}
                                 </flux:button>
-                            </a>
-                            <p class="mt-3 text-xs text-slate-600 dark:text-slate-300 text-center">
-                                {{ number_format($resource->unique_downloads_count) }} {{ \Illuminate\Support\Str::plural('download', $resource->unique_downloads_count) }} in the last 24h
-                            </p>
+                            </form>
                         </div>
                     @endif
+                @endauth
 
+                @if (!$resource->is_disabled || (auth()->check() && auth()->user()->isModerator()))
                     <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Resource information</h3>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Additional information</h3>
                         <dl class="mt-4 space-y-3 text-sm">
-                            <div class="flex items-center justify-between gap-4">
-                                <dt class="text-slate-500 dark:text-slate-400">Author</dt>
-                                <dd>
-                                    <a href="{{ route('profile.show', $resource->user) }}" class="font-semibold text-blue-600 hover:underline dark:text-blue-300">
-                                        {{ $resource->user->name }}
-                                    </a>
-                                </dd>
-                            </div>
-                            <div class="flex items-center justify-between gap-4">
-                                <dt class="text-slate-500 dark:text-slate-400">Category</dt>
-                                <dd class="font-semibold text-slate-900 dark:text-white">{{ ucfirst($resource->category) }}</dd>
-                            </div>
-                            @if ($resource->currentVersion)
-                                <div class="flex items-center justify-between gap-4">
-                                    <dt class="text-slate-500 dark:text-slate-400">Releases</dt>
-                                    <dd class="font-semibold text-slate-900 dark:text-white">{{ $resource->versions->count() }}</dd>
-                                </div>
-                            @endif
                             @if ($resource->min_mta_version)
                                 <div class="flex items-center justify-between gap-4">
                                     <dt class="text-slate-500 dark:text-slate-400">Min MTA</dt>
                                     <dd class="font-mono text-xs text-slate-700 dark:text-slate-200">{{ $resource->min_mta_version }}</dd>
                                 </div>
                             @endif
-                            @if ($resource->oop_enabled)
-                                <div class="flex items-center justify-between gap-4">
-                                    <dt class="text-slate-500 dark:text-slate-400">OOP</dt>
-                                    <dd class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">Enabled</dd>
-                                </div>
-                            @endif
                         </dl>
                     </div>
-
-                    @if ($resource->tags->isNotEmpty())
-                        <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Tags</h3>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                @foreach ($resource->tags as $tag)
-                                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ $tag->name }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
 
                     @if ($resource->github_url || $resource->forum_thread_url)
                         <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">

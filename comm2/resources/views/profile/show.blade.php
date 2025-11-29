@@ -30,6 +30,59 @@
 
         <flux:separator />
 
+        @php
+            $hasFavorites = $user->favorite_city || $user->favorite_vehicle || $user->favorite_character 
+                || $user->favorite_gang || $user->favorite_weapon || $user->favorite_radio_station;
+        @endphp
+
+        @if ($hasFavorites)
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold">{{ __('Favorites') }}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @if ($user->favorite_city)
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">{{ __('City') }}:</span>
+                            <span class="font-semibold">{{ $user->favorite_city }}</span>
+                        </div>
+                    @endif
+                    @if ($user->favorite_vehicle)
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">{{ __('Vehicle') }}:</span>
+                            <span class="font-semibold">{{ $user->favorite_vehicle }}</span>
+                        </div>
+                    @endif
+                    @if ($user->favorite_character)
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">{{ __('Character') }}:</span>
+                            <span class="font-semibold">{{ $user->favorite_character }}</span>
+                        </div>
+                    @endif
+                    @if ($user->favorite_gang)
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">{{ __('Gang') }}:</span>
+                            <span class="font-semibold">{{ $user->favorite_gang }}</span>
+                        </div>
+                    @endif
+                    @if ($user->favorite_weapon)
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">{{ __('Weapon') }}:</span>
+                            <span class="font-semibold">{{ $user->favorite_weapon }}</span>
+                        </div>
+                    @endif
+                    @if ($user->favorite_radio_station)
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">{{ __('Radio Station') }}:</span>
+                            <span class="font-semibold">{{ $user->favorite_radio_station }}</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            @if ($resources->isNotEmpty())
+                <flux:separator />
+            @endif
+        @endif
+
         <div class="space-y-4">
             @if ($resources->isNotEmpty())
                 <div>

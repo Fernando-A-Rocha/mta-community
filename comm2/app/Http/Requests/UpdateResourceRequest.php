@@ -28,6 +28,12 @@ class UpdateResourceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'short_description' => [
+                'required',
+                'string',
+                'max:500',
+                new NoHtml,
+            ],
             'long_description' => [
                 'nullable',
                 'string',
