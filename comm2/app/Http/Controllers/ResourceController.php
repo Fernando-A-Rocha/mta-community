@@ -32,8 +32,12 @@ class ResourceController extends Controller
     {
         $query = Resource::with(['user', 'tags', 'displayImage', 'currentVersion'])
             ->withAvg('ratings', 'rating')
-            ->withCount('ratings')
-            ->where('is_disabled', false);
+            ->withCount('ratings');
+
+        // Only show disabled resources to moderators+
+        if (! Auth::check() || ! Auth::user()->isModerator()) {
+            $query->where('is_disabled', false);
+        }
 
         // Search
         if ($request->filled('search')) {

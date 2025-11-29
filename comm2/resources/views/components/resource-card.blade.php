@@ -27,8 +27,15 @@
             <x-placeholder-pattern class="h-full w-full text-slate-200 dark:text-slate-700" />
         @endif
         <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent"></div>
-        <div class="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-900/90 dark:text-slate-100">
-            {{ ucfirst($resource->category) }}
+        <div class="absolute left-3 top-3 flex flex-wrap gap-2">
+            <div class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-900/90 dark:text-slate-100">
+                {{ ucfirst($resource->category) }}
+            </div>
+            @if ($resource->is_disabled)
+                <div class="rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
+                    Disabled
+                </div>
+            @endif
         </div>
         @if ($resource->currentVersion)
             <div class="absolute bottom-3 left-3 rounded-full bg-blue-500/90 px-3 py-1 text-xs font-semibold text-white shadow">

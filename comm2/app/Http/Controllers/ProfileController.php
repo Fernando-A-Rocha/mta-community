@@ -26,11 +26,17 @@ class ProfileController extends Controller
         }
 
         // Load user's resources with ratings and downloads
-        $resources = $user->resources()
-            ->where('is_disabled', false)
+        $resourcesQuery = $user->resources()
             ->with(['currentVersion', 'displayImage'])
             ->withAvg('ratings', 'rating')
-            ->withCount(['ratings', 'downloads'])
+            ->withCount(['ratings', 'downloads']);
+
+        // Only show disabled resources to moderators+
+        if (! auth()->check() || ! auth()->user()->isModerator()) {
+            $resourcesQuery->where('is_disabled', false);
+        }
+
+        $resources = $resourcesQuery
             ->orderBy('created_at', 'desc')
             ->get();
 
