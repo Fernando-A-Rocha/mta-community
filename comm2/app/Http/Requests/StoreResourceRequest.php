@@ -34,7 +34,7 @@ class StoreResourceRequest extends FormRequest
                 'required',
                 'file',
                 'mimes:zip',
-                'max:20480', // 20MB in KB
+                'max:20480', // 20MB in KB - See docs/UPLOAD_LIMITS.md for nginx/PHP alignment
             ],
             'upload_mode' => [
                 'required',
@@ -76,7 +76,7 @@ class StoreResourceRequest extends FormRequest
                 'required',
                 'image',
                 'mimes:jpg,jpeg,png',
-                'max:2048', // 2MB per image
+                'max:2048', // 2MB per image - See docs/UPLOAD_LIMITS.md for nginx/PHP alignment
             ];
             $rules['github_url'] = [
                 'nullable',

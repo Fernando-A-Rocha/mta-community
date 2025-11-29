@@ -72,7 +72,7 @@ class UpdateResourceRequest extends FormRequest
                 'required',
                 'image',
                 'mimes:jpg,jpeg,png',
-                'max:2048', // 2MB per image
+                'max:2048', // 2MB per image - See docs/UPLOAD_LIMITS.md for nginx/PHP alignment
             ],
             'remove_images' => [
                 'nullable',
