@@ -32,15 +32,16 @@ The nginx limit must be slightly larger than the Laravel validation limit to acc
 - Multipart form data overhead
 - Request body encoding overhead
 
-### PHP Configuration
+### PHP-FPM Configuration
 
-PHP-FPM must be configured with the following settings (typically in `php.ini` or PHP-FPM pool configuration):
+PHP-FPM must be configured with the following settings (usually `/etc/php/8.4/fpm/php.ini`, not the CLI php.ini):
 
 ```ini
 upload_max_filesize = 25M
 post_max_size = 25M
 memory_limit = 256M
 ```
+
 ## Alignment Requirements
 
 For uploads to work correctly, the limits must follow this hierarchy:
@@ -56,8 +57,9 @@ Laravel validation max (20MB)
 ```
 
 **Critical:** If any layer has a limit lower than the Laravel validation, uploads will fail with:
+
 - **Nginx**: `413 Request Entity Too Large`
-- **PHP**: Silent failure or `POST Content-Length` errors
+- **PHP-FPM**: Silent failure or `POST Content-Length` errors
 - **Laravel**: Validation error (expected behavior)
 
 ## Verification
@@ -69,18 +71,12 @@ nginx -t  # Test configuration syntax
 nginx -T | grep client_max_body_size  # Verify setting
 ```
 
-### Check PHP Configuration
-
-```bash
-php -i | grep -E "upload_max_filesize|post_max_size|memory_limit"
-```
-
 ## Changing Upload Limits
 
 If you need to change the upload limits:
 
 1. **Update Laravel validation**
 2. **Update nginx** `client_max_body_size` (add ~5MB overhead)
-3. **Update PHP** `upload_max_filesize` and `post_max_size` to match nginx
+3. **Update PHP-FPM** `upload_max_filesize` and `post_max_size` to match nginx
 4. **Update this documentation**
 5. **Test thoroughly** before deploying to production

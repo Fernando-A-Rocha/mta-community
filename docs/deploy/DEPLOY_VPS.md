@@ -8,7 +8,7 @@
 
 ## Deploying
 
-### Prepare Web Server
+### Preparing Web Server
 
 Install Nginx and PHP-FPM for the correct PHP version.
 
