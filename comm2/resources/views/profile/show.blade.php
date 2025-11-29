@@ -31,7 +31,7 @@
         <flux:separator />
 
         @php
-            $hasFavorites = $user->favorite_city || $user->favorite_vehicle || $user->favorite_character 
+            $hasFavorites = $user->favorite_city || $user->favorite_vehicle || $user->favorite_character
                 || $user->favorite_gang || $user->favorite_weapon || $user->favorite_radio_station;
         @endphp
 
@@ -86,19 +86,10 @@
         <div class="space-y-4">
             @if ($resources->isNotEmpty())
                 <div>
-                    <h2 class="text-lg font-semibold mb-3">{{ __('Resources Uploaded') }}</h2>
-                    <div class="space-y-2">
+                    <h2 class="text-lg font-semibold mb-4">{{ __('Resources Uploaded') }}</h2>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         @foreach ($resources as $resource)
-                            <div class="flex items-center justify-between py-2 border-b border-neutral-200 dark:border-neutral-700 last:border-0">
-                                <a href="{{ route('resources.show', $resource) }}" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                                    {{ $resource->display_name }}
-                                </a>
-                                @if ($resource->currentVersion)
-                                    <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                                        v{{ $resource->currentVersion->version }}
-                                    </span>
-                                @endif
-                            </div>
+                            <x-resource-card :resource="$resource" :showUser="false" />
                         @endforeach
                     </div>
                 </div>

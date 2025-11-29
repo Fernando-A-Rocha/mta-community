@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DevelopmentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ResourceUploadController;
@@ -21,6 +22,9 @@ Route::get('development', [DevelopmentController::class, 'index'])->name('develo
 
 // Resources
 Route::get('resources', [ResourceController::class, 'index'])->name('resources.index');
+
+// Members
+Route::get('members', [MemberController::class, 'index'])->name('members.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

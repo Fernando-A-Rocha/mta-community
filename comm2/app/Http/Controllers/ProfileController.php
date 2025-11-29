@@ -25,10 +25,12 @@ class ProfileController extends Controller
             abort(403, 'This profile is private.');
         }
 
-        // Load user's resources
+        // Load user's resources with ratings and downloads
         $resources = $user->resources()
             ->where('is_disabled', false)
-            ->with('currentVersion')
+            ->with(['currentVersion', 'displayImage'])
+            ->withAvg('ratings', 'rating')
+            ->withCount(['ratings', 'downloads'])
             ->orderBy('created_at', 'desc')
             ->get();
 

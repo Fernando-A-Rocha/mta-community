@@ -129,8 +129,8 @@
                                         <img
                                             src="{{ Storage::disk('public')->url($primaryImage->path) }}"
                                             alt="{{ $resource->display_name }}"
-                                            class="h-72 w-full cursor-pointer object-cover transition duration-300 hover:scale-105"
-                                            onclick="window.open(this.src, '_blank')"
+                                            class="gallery-image h-72 w-full cursor-pointer object-cover transition duration-300 hover:scale-105"
+                                            data-image-src="{{ Storage::disk('public')->url($primaryImage->path) }}"
                                         />
                                     </div>
                                 </div>
@@ -140,8 +140,8 @@
                                             <img
                                                 src="{{ Storage::disk('public')->url($image->path) }}"
                                                 alt="{{ $resource->display_name }}"
-                                                class="h-32 w-full cursor-pointer object-cover transition duration-300 hover:scale-105"
-                                                onclick="window.open(this.src, '_blank')"
+                                                class="gallery-image h-32 w-full cursor-pointer object-cover transition duration-300 hover:scale-105"
+                                                data-image-src="{{ Storage::disk('public')->url($image->path) }}"
                                             />
                                         </div>
                                     @empty
@@ -152,6 +152,72 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Image Lightbox Modal -->
+                        <div id="image-lightbox" class="fixed inset-0 z-[9999] hidden h-screen w-screen items-center justify-center bg-black/90 backdrop-blur-sm">
+                            <button
+                                id="lightbox-close"
+                                class="absolute right-4 top-4 z-[10000] flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-lg transition hover:bg-white dark:bg-slate-800/90 dark:text-white dark:hover:bg-slate-700"
+                                aria-label="Close"
+                            >
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <img
+                                id="lightbox-image"
+                                src=""
+                                alt=""
+                                class="max-h-[90vh] max-w-[90vw] object-contain"
+                            />
+                        </div>
+
+                        <script>
+                            (function() {
+                                const lightbox = document.getElementById('image-lightbox');
+                                const lightboxImage = document.getElementById('lightbox-image');
+                                const closeButton = document.getElementById('lightbox-close');
+                                const galleryImages = document.querySelectorAll('.gallery-image');
+
+                                function openLightbox(imageSrc) {
+                                    lightboxImage.src = imageSrc;
+                                    lightbox.classList.remove('hidden');
+                                    lightbox.classList.add('flex');
+                                    document.body.style.overflow = 'hidden';
+                                }
+
+                                function closeLightbox() {
+                                    lightbox.classList.add('hidden');
+                                    lightbox.classList.remove('flex');
+                                    document.body.style.overflow = '';
+                                }
+
+                                // Open lightbox on image click
+                                galleryImages.forEach(img => {
+                                    img.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        openLightbox(this.dataset.imageSrc || this.src);
+                                    });
+                                });
+
+                                // Close on X button click
+                                closeButton.addEventListener('click', closeLightbox);
+
+                                // Close on ESC key
+                                document.addEventListener('keydown', function(e) {
+                                    if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
+                                        closeLightbox();
+                                    }
+                                });
+
+                                // Close on overlay click (but not on image click)
+                                lightbox.addEventListener('click', function(e) {
+                                    if (e.target === lightbox) {
+                                        closeLightbox();
+                                    }
+                                });
+                            })();
+                        </script>
                     @endif
 
                     @if ($resource->long_description)
