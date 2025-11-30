@@ -87,7 +87,7 @@ class Profile extends Component
         // Handle avatar upload
         if ($this->avatar) {
             $this->validateImageType($this->avatar);
-            
+
             // Delete old avatar if exists
             if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
                 Storage::disk('public')->delete($user->avatar_path);
@@ -198,16 +198,16 @@ class Profile extends Component
 
         // Preserve transparency for PNG/WebP
         $preserveTransparency = in_array($sourceType, [IMAGETYPE_PNG, IMAGETYPE_WEBP]);
-        
+
         if ($preserveTransparency) {
             // Enable alpha blending and save alpha channel for destination
             imagealphablending($newImage, false);
             imagesavealpha($newImage, true);
-            
+
             // Fill with transparent color
             $transparent = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
             imagefill($newImage, 0, 0, $transparent);
-            
+
             // Enable alpha blending on source image for proper transparency handling
             imagealphablending($sourceImage, true);
             imagesavealpha($sourceImage, true);
@@ -226,7 +226,7 @@ class Profile extends Component
             $originalWidth,
             $originalHeight
         );
-        
+
         // Disable alpha blending before saving PNG to ensure proper transparency
         if ($preserveTransparency) {
             imagealphablending($newImage, false);

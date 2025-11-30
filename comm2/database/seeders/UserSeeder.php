@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = "!Super25u8StrongPW$";
+        $password = '!Super25u8StrongPW$';
         $this->createUser('test1', 'test1@example.com', $password);
         $this->createUser('test2', 'test2@example.com', $password);
         $this->createUser('admin', 'admin@example.com', $password, 'admin');
