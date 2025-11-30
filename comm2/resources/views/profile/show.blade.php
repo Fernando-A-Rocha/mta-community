@@ -1,9 +1,7 @@
 <x-layouts.app :title="__('Profile') . ' - ' . $user->name">
     <div class="flex w-full flex-1 flex-col gap-6 rounded-xl">
         <div class="flex items-center gap-4">
-            <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-2xl font-semibold text-black dark:bg-neutral-700 dark:text-white">
-                {{ $user->initials() }}
-            </div>
+            <x-user-avatar :user="$user" size="lg" class="!h-20 !w-20 !rounded-full" />
             <div class="flex-1">
                 <div class="flex items-center gap-2">
                     <h1 class="text-2xl font-bold">{{ $user->name }}</h1>

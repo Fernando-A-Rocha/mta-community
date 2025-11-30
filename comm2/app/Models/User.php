@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -24,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'profile_visibility',
         'role',
+        'avatar_path',
         'favorite_city',
         'favorite_vehicle',
         'favorite_character',
@@ -59,7 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the user's initials
+     * Get the user's initials (fallback when no avatar)
      */
     public function initials(): string
     {
@@ -68,6 +70,26 @@ class User extends Authenticatable implements MustVerifyEmail
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    /**
+     * Get the user's avatar URL
+     */
+    public function avatarUrl(): ?string
+    {
+        if (! $this->avatar_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->avatar_path);
+    }
+
+    /**
+     * Check if user has an avatar
+     */
+    public function hasAvatar(): bool
+    {
+        return ! empty($this->avatar_path) && Storage::disk('public')->exists($this->avatar_path);
     }
 
     /**

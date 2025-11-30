@@ -4,7 +4,11 @@ This document outlines the maximum upload file sizes configured across the appli
 
 ## Overview
 
-The application allows users to upload resource ZIP files and associated images. The upload limits are enforced at multiple layers:
+The application allows users to upload:
+- Resource ZIP files and associated images (up to 20MB)
+- Profile avatars (up to 500KB)
+
+The upload limits are enforced at multiple layers:
 
 1. **Laravel Validation** - Application-level validation rules
 2. **Nginx** - Web server request body size limit
@@ -16,7 +20,11 @@ All three layers must be configured consistently to prevent upload failures.
 
 ### Laravel Validation Rules
 
-Defined in comm2/app/Http/Requests for Images, ZIP Files.
+- **Resource ZIP files**: 20MB (defined in `comm2/app/Http/Requests/StoreResourceRequest.php`)
+- **Resource images**: 20MB (defined in `comm2/app/Http/Requests/StoreResourceRequest.php`)
+- **Profile avatars**: 500KB (512KB in validation, defined in `comm2/app/Livewire/Settings/Profile.php`)
+  - Automatically resized to maximum 500x500 pixels
+  - Stored as JPEG with 85% quality for optimal file size
 
 ### Nginx Configuration
 
@@ -53,8 +61,10 @@ PHP post_max_size (25M)
     ≥
 PHP upload_max_filesize (25M)
     ≥
-Laravel validation max (20MB)
+Laravel validation max (20MB for resources, 500KB for avatars)
 ```
+
+**Note:** Profile avatars have a separate 500KB limit enforced at the Laravel validation level. The nginx and PHP limits (25M) are sufficient for avatar uploads as they are well below the configured limits.
 
 **Critical:** If any layer has a limit lower than the Laravel validation, uploads will fail with:
 

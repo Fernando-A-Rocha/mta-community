@@ -1,32 +1,52 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Manage your profile settings and preferences')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
-
+            {{-- Profile Picture --}}
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
-
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
-
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
-
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
+                <flux:field>
+                    <flux:label>{{ __('Profile Picture') }}</flux:label>
+                    <div class="flex items-center gap-4">
+                        @if ($avatarPreview)
+                            <img src="{{ $avatarPreview }}" alt="{{ __('Avatar') }}" class="h-20 w-20 rounded-full object-cover border-2 border-neutral-200 dark:border-neutral-700" />
+                        @else
+                            <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400">
+                                <svg
+                                    class="h-10 w-10"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </div>
                         @endif
+                        <div class="flex-1 space-y-2">
+                            <flux:input wire:model="avatar" type="file" accept="image/*" :label="__('Upload new picture')" />
+                            <flux:description>{{ __('Maximum file size: 500KB. Image will be automatically resized to 500x500 pixels.') }}</flux:description>
+                            @if ($avatarPreview)
+                                <flux:button type="button" variant="ghost" wire:click="deleteAvatar" class="text-sm">
+                                    {{ __('Delete picture') }}
+                                </flux:button>
+                            @endif
+                        </div>
                     </div>
-                @endif
+                    @error('avatar')
+                        <flux:error>{{ $message }}</flux:error>
+                    @enderror
+                </flux:field>
             </div>
 
+            <flux:separator />
+
+            {{-- Profile Visibility --}}
             <div>
                 <flux:field>
                     <flux:label>{{ __('Profile Visibility') }}</flux:label>

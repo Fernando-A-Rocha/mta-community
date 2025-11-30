@@ -10,6 +10,8 @@
 
 ### Preparing Web Server
 
+Ensure you have PHP 8.4 installed with GD extension. Install PHP 8.4 FPM.
+
 Install Nginx and PHP-FPM for the correct PHP version.
 
 Configure the site with nginx.conf and the domain (generate a certificate for it).

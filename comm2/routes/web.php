@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ResourceUploadController;
 use App\Http\Controllers\ServerController;
+use App\Livewire\Settings\Account;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -27,8 +28,9 @@ Route::get('resources', [ResourceController::class, 'index'])->name('resources.i
 Route::get('members', [MemberController::class, 'index'])->name('members.index');
 
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
+    Route::redirect('settings', 'settings/account');
 
+    Route::get('settings/account', Account::class)->name('account.edit');
     Route::get('settings/profile', Profile::class)->name('profile.edit');
     Route::get('settings/password', Password::class)->name('user-password.edit');
     Route::get('settings/appearance', Appearance::class)->name('appearance.edit');

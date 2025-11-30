@@ -27,9 +27,7 @@
                             wire:navigate
                             class="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60"
                         >
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-lg font-semibold text-black dark:bg-neutral-700 dark:text-white">
-                                {{ $creator['user']->initials() }}
-                            </div>
+                            <x-user-avatar :user="$creator['user']" size="md" class="!h-12 !w-12 !rounded-full" />
 
                             <div class="flex flex-1 items-center justify-between gap-4">
                                 <div class="flex-1">

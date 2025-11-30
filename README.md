@@ -20,8 +20,7 @@ Laravel (PHP Framework) with single MySQL database.
 
 ### Frontend
 
-- **Livewire Flux** - UI component library
-- **Livewire Volt** - Single-file components
+- **Livewire** - UI library
 - **Tailwind CSS** - CSS framework
 - **Vite** - Build tool
 
@@ -40,10 +39,19 @@ Laravel (PHP Framework) with single MySQL database.
 
 ### Dependencies
 
-- PHP 8.4
+- PHP 8.4 with GD extension
 - Composer
 - NodeJS & NPM
 - MySQL server 8+ (one database)
+
+#### Notes [Windows]
+
+- PHP, Composer and Node.JS can be easily installed using [Laravel Herd](https://herd.laravel.com/windows).
+- MySQL Server can be set up using the [official installer](https://dev.mysql.com/downloads/installer/).
+
+#### Notes [Linux]
+
+All of this should be easy to set up with your package manager.
 
 ### Setup
 
