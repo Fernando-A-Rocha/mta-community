@@ -39,51 +39,114 @@
         </section>
 
         <!-- Latest News Section -->
-        <section>
+        <section x-data="{
+            news: [],
+            loading: false,
+            currentPage: 1,
+            lastPage: 1,
+            total: 0,
+            fetchTimestamp: null,
+            async loadNews(page = 1) {
+                this.loading = true;
+                this.currentPage = page;
+                try {
+                    const params = new URLSearchParams({
+                        page: page,
+                    });
+                    const response = await fetch(`{{ route('home.news') }}?${params}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        },
+                        credentials: 'same-origin',
+                    });
+                    const data = await response.json();
+                    this.news = data.news;
+                    this.lastPage = data.pagination.last_page;
+                    this.total = data.pagination.total;
+                    this.fetchTimestamp = data.fetch_timestamp;
+                } catch (error) {
+                    console.error('Failed to load news:', error);
+                    this.news = [];
+                } finally {
+                    this.loading = false;
+                }
+            },
+            formatFetchTimestamp(timestamp) {
+                if (!timestamp) return '';
+                const date = new Date(timestamp * 1000);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+            },
+            init() {
+                this.loadNews();
+            }
+        }">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <flux:heading size="lg">{{ __('Latest News') }}</flux:heading>
-                    @if($fetchTimestamp)
-                        <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
-                            {{ __('Fetched') }}: {{ \Carbon\Carbon::createFromTimestamp($fetchTimestamp)->format('M j, Y g:i A') }}
-                        </p>
-                    @endif
+                    <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-1" x-show="fetchTimestamp">
+                        {{ __('Fetched') }}: <span x-text="formatFetchTimestamp(fetchTimestamp)"></span>
+                    </p>
                 </div>
                 <flux:link :href="config('mta.news_forum_url')" variant="outline" target="_blank" rel="noopener noreferrer" class="text-sm">
                     {{ __('View on Forum') }}
                 </flux:link>
             </div>
-            @if($news->count() > 0)
-                <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                    @foreach($news as $entry)
-                        @php
-                            $isFirstOnFirstPage = $loop->first && $news->currentPage() === 1;
-                        @endphp
-                        <div class="py-4 first:pt-0 {{ $isFirstOnFirstPage ? 'pb-6' : '' }}">
+
+            <!-- Loading State -->
+            <div x-show="loading" class="py-8 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 dark:border-white"></div>
+                <p class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">{{ __('Loading news...') }}</p>
+            </div>
+
+            <!-- News List -->
+            <div x-show="!loading">
+                <template x-if="news.length === 0">
+                    <div class="py-8 text-center text-neutral-600 dark:text-neutral-400">
+                        <p>{{ __('No news entries available at the moment.') }}</p>
+                    </div>
+                </template>
+                <div x-show="news.length > 0" class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                    <template x-for="(entry, index) in news" :key="entry.url">
+                        <div class="py-4 first:pt-0" :class="entry.is_first ? 'p-6 border-2 border-orange-500 rounded' : ''">
                             <div>
-                                <h3 class="{{ $isFirstOnFirstPage ? 'text-2xl font-bold' : 'text-base font-medium' }} {{ $isFirstOnFirstPage ? 'text-neutral-900 dark:text-neutral-100' : 'text-neutral-600 dark:text-neutral-400' }} mb-2">
-                                    <a href="{{ $entry['url'] }}" target="_blank" rel="noopener noreferrer" class="hover:underline">
-                                        {{ $entry['title'] }}
-                                    </a>
+                                <h3 :class="entry.is_first ? 'text-xl font-bold text-neutral-900 dark:text-neutral-100' : 'text-base font-medium text-neutral-600 dark:text-neutral-400'" class="mb-2">
+                                    <a :href="entry.url" target="_blank" rel="noopener noreferrer" class="hover:underline" x-text="entry.title"></a>
                                 </h3>
-                                <div class="flex items-center gap-4 {{ $isFirstOnFirstPage ? 'text-sm' : 'text-xs' }} text-neutral-500 dark:text-neutral-500">
-                                    <span>{{ __('By') }}: {{ $entry['author'] }}</span>
-                                    <span>{{ __('Posted') }}: {{ $entry['date']->format('F j, Y') }}</span>
+                                <div :class="entry.is_first ? 'text-sm' : 'text-xs'" class="flex items-center gap-4 text-neutral-500 dark:text-neutral-500">
+                                    <span>{{ __('By') }}: <span x-text="entry.author"></span></span>
+                                    <span>{{ __('Posted') }}: <span x-text="entry.date_formatted"></span></span>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    </template>
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-6">
-                    {{ $news->links() }}
+                <div x-show="news.length > 0 && lastPage > 1" class="mt-6 flex items-center justify-between">
+                    <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                        {{ __('Showing') }} <span x-text="(currentPage - 1) * 5 + 1"></span> - <span x-text="Math.min(currentPage * 5, total)"></span> {{ __('of') }} <span x-text="total"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <flux:button
+                            variant="ghost"
+                            size="sm"
+                            x-on:click="loadNews(currentPage - 1)"
+                            x-bind:disabled="currentPage === 1 || loading"
+                        >
+                            {{ __('Previous') }}
+                        </flux:button>
+                        <flux:button
+                            variant="ghost"
+                            size="sm"
+                            x-on:click="loadNews(currentPage + 1)"
+                            x-bind:disabled="currentPage >= lastPage || loading"
+                        >
+                            {{ __('Next') }}
+                        </flux:button>
+                    </div>
                 </div>
-            @else
-                <div class="py-8 text-center text-neutral-600 dark:text-neutral-400">
-                    <p>{{ __('No news entries available at the moment.') }}</p>
-                </div>
-            @endif
+            </div>
         </section>
 
     </div>

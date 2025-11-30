@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\MtaServerService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\View\View;
@@ -20,6 +22,14 @@ class ServerController extends Controller
      */
     public function index(): View
     {
+        return view('servers.index');
+    }
+
+    /**
+     * Get MTA servers list.
+     */
+    public function servers(Request $request): JsonResponse
+    {
         $allServers = $this->mtaServerService->getServers();
         $statistics = $this->mtaServerService->getStatistics();
 
@@ -31,7 +41,7 @@ class ServerController extends Controller
         }
 
         // Get search query from request
-        $searchQuery = request()->query('search', '');
+        $searchQuery = $request->string('search')->toString();
 
         // Filter servers by search query if provided
         $servers = $allServers;
@@ -57,33 +67,39 @@ class ServerController extends Controller
         }, $servers);
 
         $perPage = 30;
-        $currentPage = Paginator::resolveCurrentPage('page');
-        $offset = ($currentPage - 1) * $perPage;
+        $page = $request->integer('page', 1);
+        $offset = ($page - 1) * $perPage;
         $paginatedServers = array_slice($servers, $offset, $perPage);
+        $total = count($servers);
 
-        $paginator = new LengthAwarePaginator(
-            $paginatedServers,
-            count($servers),
-            $perPage,
-            $currentPage,
-            [
-                'path' => request()->url(),
-                'pageName' => 'page',
-            ]
-        );
+        // Format servers for JSON response
+        $formattedServers = array_map(function ($server, $index) use ($page, $perPage) {
+            $position = $server['original_position'] ?? (($page - 1) * $perPage + $index + 1);
 
-        // Append search query to pagination links
-        if (! empty($searchQuery)) {
-            $paginator->appends(['search' => $searchQuery]);
-        }
+            return [
+                'name' => $server['name'],
+                'ip' => $server['ip'],
+                'port' => $server['port'],
+                'players' => $server['players'],
+                'maxplayers' => $server['maxplayers'],
+                'password' => $server['password'],
+                'version' => $server['version'] ?? 'N/A',
+                'original_position' => $position,
+            ];
+        }, $paginatedServers, array_keys($paginatedServers));
 
         $fetchTimestamp = $this->mtaServerService->getFetchTimestamp();
 
-        return view('servers.index', [
-            'servers' => $paginator,
+        return response()->json([
+            'servers' => $formattedServers,
             'statistics' => $statistics,
-            'searchQuery' => $searchQuery,
-            'fetchTimestamp' => $fetchTimestamp,
+            'pagination' => [
+                'current_page' => $page,
+                'last_page' => (int) ceil($total / $perPage),
+                'per_page' => $perPage,
+                'total' => $total,
+            ],
+            'fetch_timestamp' => $fetchTimestamp,
         ]);
     }
 }

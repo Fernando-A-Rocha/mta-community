@@ -19,8 +19,10 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('home/news', [HomeController::class, 'news'])->name('home.news');
 
 Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
+Route::get('servers/list', [ServerController::class, 'servers'])->name('servers.list');
 
 Route::get('development', [DevelopmentController::class, 'index'])->name('development.index');
 Route::get('development/activity', [DevelopmentController::class, 'activity'])->name('development.activity');
