@@ -2,15 +2,9 @@
 
 **MTA Community** (comm2) is a community platform for Multi Theft Auto (MTA) that enables developers to upload, manage, and distribute MTA resources (scripts, gamemodes, maps, etc.). The platform includes user authentication, resource management with versioning, ratings, downloads tracking, and integrations with MTA servers, forum news, and GitHub.
 
-## Key Features
+## Contributing
 
-- User authentication with 2FA
-- News articles listing
-- MTA server listings integration
-- MTA GitHub activity display
-- MTA Resource upload and version management
-- MTA Resource ratings and download tracking
-- Admin/moderation tools
+Please read the [CONTRIBUTING.md file](./CONTRIBUTING.md).
 
 ## Technology Stack
 
