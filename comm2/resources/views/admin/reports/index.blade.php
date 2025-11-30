@@ -100,7 +100,24 @@
                         <div>
                             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $report->reasonLabel() }}</p>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
-                                {{ $isResource ? __('Resource') : __('User') }} • {{ $report->created_at->diffForHumans() }}
+                                @if ($target && $targetUrl)
+                                <a href="{{ $targetUrl }}" class="hover:underline">{{ $isResource ? $target->display_name ?? $target->name : $target->name }}</a>
+                                @elseif ($target)
+                                    {{ $isResource ? $target->display_name ?? $target->name : $target->name }}
+                                @else
+                                    <span>{{ __('Unavailable') }}</span>
+                                @endif
+                                ({{ $isResource ? __('Resource') : __('User') }})
+                                • <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Reporter') }}:</span>
+                                @if ($report->reporter)
+                                    <a href="{{ route('profile.show', $report->reporter) }}" class="hover:underline">{{ $report->reporter->name }}</a>
+                                @else
+                                    <span>{{ __('Deleted user') }}</span>
+                                @endif
+                                • <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Submitted') }}:</span>
+                                {{ $report->created_at->diffForHumans() }}
+                                • <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Updated') }}:</span>
+                                {{ $report->updated_at->diffForHumans() }}
                             </p>
                         </div>
                         <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $report->status->badgeClasses() }}">{{ $report->status->label() }}</span>
@@ -108,26 +125,6 @@
                     <p class="mt-4 text-sm text-slate-800 dark:text-slate-200">{{ Str::limit($report->comment, 400) }}</p>
                     <div class="mt-4 grid gap-2 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-2">
                         <div>
-                            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Reporter') }}:</span>
-                            @if ($report->reporter)
-                                <a href="{{ route('profile.show', $report->reporter) }}" class="hover:underline">{{ $report->reporter->name }}</a>
-                            @else
-                                <span>{{ __('Deleted user') }}</span>
-                            @endif
-                        </div>
-                        <div>
-                            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Target') }}:</span>
-                            @if ($target && $targetUrl)
-                                <a href="{{ $targetUrl }}" class="hover:underline">
-                                    {{ $isResource ? $target->display_name ?? $target->name : $target->name }}
-                                </a>
-                            @else
-                                <span>{{ __('Unavailable') }}</span>
-                            @endif
-                        </div>
-                        <div>
-                            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Updated') }}:</span>
-                            {{ $report->updated_at->diffForHumans() }}
                         </div>
                     </div>
                     <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
