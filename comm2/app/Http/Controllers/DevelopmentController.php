@@ -7,8 +7,6 @@ namespace App\Http\Controllers;
 use App\Services\GitHubActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
 use Illuminate\View\View;
 
 class DevelopmentController extends Controller
