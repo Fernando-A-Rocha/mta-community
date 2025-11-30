@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Language;
 use App\Models\Resource;
 use App\Models\ResourceVersion;
 use App\Models\Tag;
@@ -30,6 +31,7 @@ class ResourceUploadService
      * @param  string|null  $version  Semantic version string (if null, will be extracted from meta.xml)
      * @param  string  $changelog  Changelog text
      * @param  array  $tagIds  Array of tag IDs (max 5)
+     * @param  array  $languageIds  Array of language IDs (required for first upload)
      * @param  array  $images  Array of uploaded images (UploadedFile instances, file paths, or arrays with 'path' and 'originalName')
      * @param  string|null  $longDescription  Long description (for first upload)
      * @param  string|null  $githubUrl  GitHub repository URL
@@ -42,6 +44,7 @@ class ResourceUploadService
         ?string $version = null,
         string $changelog = 'First public release',
         array $tagIds = [],
+        array $languageIds = [],
         array $images = [],
         ?string $longDescription = null,
         ?string $githubUrl = null,
@@ -104,6 +107,7 @@ class ResourceUploadService
             $version,
             $changelog,
             $tagIds,
+            $languageIds,
             $images,
             $longDescription,
             $githubUrl,
@@ -175,6 +179,11 @@ class ResourceUploadService
                 'is_current' => true,
             ]);
 
+            // Handle languages (required for first upload)
+            if (! empty($languageIds)) {
+                $this->syncLanguages($resource, $languageIds);
+            }
+
             // Handle tags
             if (! empty($tagIds)) {
                 $this->syncTags($resource, $tagIds);
@@ -232,6 +241,21 @@ class ResourceUploadService
         }
 
         return $path;
+    }
+
+    /**
+     * Sync languages to resource
+     */
+    private function syncLanguages(Resource $resource, array $languageIds): void
+    {
+        // Validate languages exist
+        $languages = Language::whereIn('id', $languageIds)->get();
+
+        if ($languages->count() !== count($languageIds)) {
+            throw new InvalidArgumentException('One or more languages do not exist');
+        }
+
+        $resource->languages()->sync($languageIds);
     }
 
     /**

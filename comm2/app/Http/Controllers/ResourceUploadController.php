@@ -27,6 +27,7 @@ class ResourceUploadController extends Controller
         $canUpload = ($user->profile_visibility ?? 'public') === 'public';
 
         $tags = Tag::orderBy('name')->get();
+        $languages = \App\Models\Language::orderBy('order')->get();
         $userOwnedResources = Auth::user()
             ? Resource::where('user_id', Auth::id())
                 ->orderBy('name')
@@ -35,6 +36,7 @@ class ResourceUploadController extends Controller
 
         return view('resources.upload', [
             'tags' => $tags,
+            'languages' => $languages,
             'userOwnedResources' => $userOwnedResources,
             'canUpload' => $canUpload,
         ]);
@@ -118,6 +120,7 @@ class ResourceUploadController extends Controller
 
             $longDescription = $isFirstVersion ? $request->input('long_description') : null;
             $tagIds = $isFirstVersion ? ($request->input('tags', [])) : [];
+            $languageIds = $isFirstVersion ? ($request->input('languages', [])) : [];
             $githubUrl = $isFirstVersion ? $request->input('github_url') : null;
             $forumThreadUrl = $isFirstVersion ? $request->input('forum_thread_url') : null;
 
@@ -129,6 +132,7 @@ class ResourceUploadController extends Controller
                 version: null,
                 changelog: $changelog,
                 tagIds: $tagIds,
+                languageIds: $languageIds,
                 images: $images,
                 longDescription: $longDescription,
                 githubUrl: $githubUrl,

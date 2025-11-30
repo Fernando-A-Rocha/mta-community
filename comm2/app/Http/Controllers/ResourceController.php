@@ -31,7 +31,7 @@ class ResourceController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Resource::with(['user', 'tags', 'displayImage', 'currentVersion'])
+        $query = Resource::with(['user', 'tags', 'languages', 'displayImage', 'currentVersion'])
             ->withAvg('ratings', 'rating')
             ->withCount('ratings');
 
@@ -93,6 +93,7 @@ class ResourceController extends Controller
         $resource->load([
             'user',
             'tags',
+            'languages',
             'images',
             'currentVersion',
             'ratings.user',
@@ -125,15 +126,17 @@ class ResourceController extends Controller
         $this->authorize('update', $resource);
 
         $tags = Tag::orderBy('name')->get();
+        $languages = \App\Models\Language::orderBy('order')->get();
         $resource->load([
             'tags',
+            'languages',
             'images',
             'versions' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             },
         ]);
 
-        return view('resources.edit', compact('resource', 'tags'));
+        return view('resources.edit', compact('resource', 'tags', 'languages'));
     }
 
     /**
@@ -155,6 +158,11 @@ class ResourceController extends Controller
             // Update tags
             if ($request->has('tags')) {
                 $resource->tags()->sync($request->input('tags', []));
+            }
+
+            // Update languages
+            if ($request->has('languages')) {
+                $resource->languages()->sync($request->input('languages', []));
             }
 
             // Remove images
@@ -452,14 +460,14 @@ class ResourceController extends Controller
     }
 
     /**
-     * Delete a resource permanently (author or admin+)
+     * Delete a resource permanently (author or admin only)
      */
     public function destroy(Request $request, Resource $resource): RedirectResponse
     {
         $this->authorize('delete', $resource);
 
-        // For authors, require confirmation by typing resource name
-        if ($resource->user_id === Auth::id() && ! Auth::user()->isModerator()) {
+        // For authors (non-admins), require confirmation by typing resource name
+        if ($resource->user_id === Auth::id() && ! Auth::user()->isAdmin()) {
             $confirmedName = $request->input('resource_name');
             if ($confirmedName !== $resource->name) {
                 return redirect()

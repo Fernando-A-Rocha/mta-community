@@ -43,6 +43,13 @@
                         @if ($resource->oop_enabled)
                             <span class="rounded-full bg-emerald-500/90 px-3 py-1 text-white text-xs font-semibold">OOP Ready</span>
                         @endif
+                        @if ($resource->languages->isNotEmpty())
+                            @if ($resource->languages->count() === 1)
+                                <span class="rounded-full bg-white/10 px-3 py-1 text-white text-xs font-semibold">{{ $resource->languages->first()->name }}</span>
+                            @else
+                                <span class="rounded-full bg-white/10 px-3 py-1 text-white text-xs font-semibold">Multi-lang</span>
+                            @endif
+                        @endif
                         @if ($resource->tags->isNotEmpty())
                             @foreach ($resource->tags->take(6) as $tag)
                                 <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">{{ $tag->name }}</span>
@@ -341,6 +348,18 @@
                                 <div class="flex items-center justify-between gap-4">
                                     <dt class="text-slate-500 dark:text-slate-400">Min MTA</dt>
                                     <dd class="font-mono text-xs text-slate-700 dark:text-slate-200">{{ $resource->min_mta_version }}</dd>
+                                </div>
+                            @endif
+                            @if ($resource->languages->isNotEmpty())
+                                <div class="flex items-start justify-between gap-4">
+                                    <dt class="text-slate-500 dark:text-slate-400">Languages</dt>
+                                    <dd class="flex flex-wrap gap-1.5 justify-end">
+                                        @foreach ($resource->languages as $language)
+                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                {{ $language->name }}
+                                            </span>
+                                        @endforeach
+                                    </dd>
                                 </div>
                             @endif
                         </dl>

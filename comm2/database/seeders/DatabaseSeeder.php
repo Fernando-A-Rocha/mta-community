@@ -11,9 +11,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Mandatory:
+        // For now call the user seeder (useful for development)
         $this->call([
-            TagSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

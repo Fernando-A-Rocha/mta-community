@@ -41,6 +41,13 @@
                     </div>
                 @endif
 
+                <!-- English Only Notice -->
+                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p class="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>Note:</strong> All text fields including title, descriptions, and changelog must be written in English only (ASCII characters).
+                    </p>
+                </div>
+
                 <!-- ZIP File Upload -->
                 <div>
                     <flux:field>
@@ -121,7 +128,7 @@
                                 <span id="long_description_min_status" class="ml-2"></span>
                             </div>
                         </div>
-                        <flux:description>Detailed description of your resource (required for first-time uploads, minimum 50 characters)</flux:description>
+                        <flux:description>Detailed description of your resource (required for first-time uploads, minimum 50 characters). Must be in English only.</flux:description>
                         @error('long_description')
                             <flux:error>{{ $message }}</flux:error>
                         @enderror
@@ -146,8 +153,32 @@
                                 <span id="changelog_min_status" class="ml-2"></span>
                             </div>
                         </div>
-                        <flux:description>Describe what changed in this version (required for updates, minimum 10 characters)</flux:description>
+                        <flux:description>Describe what changed in this version (required for updates, minimum 10 characters). Must be in English only.</flux:description>
                         @error('changelog')
+                            <flux:error>{{ $message }}</flux:error>
+                        @enderror
+                    </flux:field>
+                </div>
+
+                <!-- Languages (only for first version) -->
+                <div id="languages_field" class="{{ old('upload_mode', 'first_version') === 'new_release' ? 'hidden' : '' }}">
+                    <flux:field>
+                        <flux:label>Languages *</flux:label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
+                            @foreach ($languages as $language)
+                                <flux:checkbox
+                                    name="languages[]"
+                                    value="{{ $language->id }}"
+                                    :label="$language->name"
+                                    :checked="in_array($language->id, old('languages', []))"
+                                />
+                            @endforeach
+                        </div>
+                        <flux:description>Select the language(s) your resource supports. You can select multiple languages if your resource is multi-lingual.</flux:description>
+                        @error('languages')
+                            <flux:error>{{ $message }}</flux:error>
+                        @enderror
+                        @error('languages.*')
                             <flux:error>{{ $message }}</flux:error>
                         @enderror
                     </flux:field>
@@ -251,6 +282,7 @@
                 const uploadModeRelease = document.getElementById('upload_mode_release');
                 const firstVersionFields = document.getElementById('first_version_fields');
                 const newReleaseFields = document.getElementById('new_release_fields');
+                const languagesField = document.getElementById('languages_field');
                 const tagsField = document.getElementById('tags_field');
                 const imagesField = document.getElementById('images_field');
                 const githubUrlField = document.getElementById('github_url_field');
@@ -275,6 +307,9 @@
                         if (wasHidden && !isFirstVersion && typeof window.updateChangelogCounter === 'function') {
                             setTimeout(window.updateChangelogCounter, 50);
                         }
+                    }
+                    if (languagesField) {
+                        languagesField.classList.toggle('hidden', !isFirstVersion);
                     }
                     if (tagsField) {
                         tagsField.classList.toggle('hidden', !isFirstVersion);

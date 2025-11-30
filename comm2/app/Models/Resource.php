@@ -74,6 +74,11 @@ class Resource extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    public function languages(): BelongsToMany
+    {
+        return $this->belongsToMany(Language::class, 'resource_language');
+    }
+
     public function downloads(): HasMany
     {
         return $this->hasMany(ResourceDownload::class);

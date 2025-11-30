@@ -51,6 +51,16 @@ class UpdateResourceRequest extends FormRequest
                 'integer',
                 Rule::exists('tags', 'id'),
             ],
+            'languages' => [
+                'nullable',
+                'array',
+                'min:1',
+            ],
+            'languages.*' => [
+                'required',
+                'integer',
+                Rule::exists('languages', 'id'),
+            ],
             'github_url' => [
                 'nullable',
                 'url',

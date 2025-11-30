@@ -90,6 +90,30 @@
                     </flux:field>
                 </div>
 
+                <!-- Languages -->
+                <div>
+                    <flux:field>
+                        <flux:label>Languages</flux:label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
+                            @foreach ($languages as $language)
+                                <flux:checkbox
+                                    name="languages[]"
+                                    value="{{ $language->id }}"
+                                    :label="$language->name"
+                                    :checked="in_array($language->id, old('languages', $resource->languages->pluck('id')->toArray()))"
+                                />
+                            @endforeach
+                        </div>
+                        <flux:description>Select the language(s) your resource supports. You can select multiple languages if your resource is multi-lingual.</flux:description>
+                        @error('languages')
+                            <flux:error>{{ $message }}</flux:error>
+                        @enderror
+                        @error('languages.*')
+                            <flux:error>{{ $message }}</flux:error>
+                        @enderror
+                    </flux:field>
+                </div>
+
                 <!-- Existing Images -->
                 @if ($resource->images->isNotEmpty())
                     <div>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Rules\EnglishOnly;
 use App\Rules\GitHubUrl;
 use App\Rules\MtaForumUrl;
 use App\Rules\NoHtml;
@@ -50,12 +51,24 @@ class StoreResourceRequest extends FormRequest
                 'min:50',
                 'max:10000',
                 new NoHtml,
+                new EnglishOnly,
             ];
             $rules['changelog'] = [
                 'nullable',
                 'string',
                 'max:5000',
                 new NoHtml,
+                new EnglishOnly,
+            ];
+            $rules['languages'] = [
+                'required',
+                'array',
+                'min:1',
+            ];
+            $rules['languages.*'] = [
+                'required',
+                'integer',
+                Rule::exists('languages', 'id'),
             ];
             $rules['tags'] = [
                 'nullable',
@@ -98,12 +111,14 @@ class StoreResourceRequest extends FormRequest
                 'min:10',
                 'max:5000',
                 new NoHtml,
+                new EnglishOnly,
             ];
             $rules['long_description'] = [
                 'nullable',
                 'string',
                 'max:10000',
                 new NoHtml,
+                new EnglishOnly,
             ];
         }
 

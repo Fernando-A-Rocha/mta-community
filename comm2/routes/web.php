@@ -71,12 +71,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('resources/{resource}/enable', [ResourceController::class, 'enable'])->name('resources.enable');
     Route::post('resources/{resource}/verify', [ResourceController::class, 'updateVerification'])->name('resources.verify');
 
-    // Resource version deletion (author or admin+)
+    // Resource version deletion (author or admin only)
     Route::delete('resources/{resource}/versions/{version}', [ResourceController::class, 'destroyVersion'])
         ->middleware('ensure.resource.modification.enabled')
         ->name('resources.versions.destroy');
 
-    // Resource deletion (author or admin+)
+    // Resource deletion (author or admin only)
     Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])
         ->middleware('ensure.resource.modification.enabled')
         ->name('resources.destroy');

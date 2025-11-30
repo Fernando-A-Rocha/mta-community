@@ -41,6 +41,17 @@
                     Disabled
                 </div>
             @endif
+            @if ($resource->languages->isNotEmpty())
+                @if ($resource->languages->count() === 1)
+                    <div class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-900/90 dark:text-slate-100">
+                        {{ $resource->languages->first()->name }}
+                    </div>
+                @else
+                    <div class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-900/90 dark:text-slate-100">
+                        Multi-lang
+                    </div>
+                @endif
+            @endif
         </div>
         @if ($resource->currentVersion)
             <div class="absolute bottom-3 left-3 flex items-center gap-2">
