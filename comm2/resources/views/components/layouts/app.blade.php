@@ -1,3 +1,11 @@
+@php
+    use App\Enums\ReportStatus;
+    use App\Models\Report;
+    
+    $pendingReportsCount = auth()->check() && auth()->user()->isModerator()
+        ? Report::where('status', ReportStatus::Pending)->count()
+        : 0;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
@@ -16,6 +24,25 @@
                     <flux:navlist.item icon="folder" :href="route('resources.index')" :current="request()->routeIs('resources.*')" wire:navigate>{{ __('Resources') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')" wire:navigate>{{ __('Members') }}</flux:navlist.item>
                 </flux:navlist.group>
+                @auth
+                    @if (auth()->user()->isModerator())
+                        <flux:navlist.group :heading="__('Admin Panel')" class="mt-4 grid">
+                            <flux:navlist.item icon="flag" :href="route('admin.reports.index')" :current="request()->routeIs('admin.reports.*')" wire:navigate>
+                                <span class="flex items-center gap-2">
+                                    {{ __('Reports') }}
+                                    @if ($pendingReportsCount > 0)
+                                        <span class="inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-semibold h-5 w-5 min-w-[1.25rem]">
+                                            {{ $pendingReportsCount > 99 ? '99+' : $pendingReportsCount }}
+                                        </span>
+                                    @endif
+                                </span>
+                            </flux:navlist.item>
+                            <flux:navlist.item icon="book-open-text" :href="route('admin.logs.index')" :current="request()->routeIs('admin.logs.*')" wire:navigate>
+                                {{ __('Logs') }}
+                            </flux:navlist.item>
+                        </flux:navlist.group>
+                    @endif
+                @endauth
             </flux:navlist>
 
             <flux:spacer />

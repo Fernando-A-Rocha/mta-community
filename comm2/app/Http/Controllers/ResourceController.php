@@ -106,7 +106,14 @@ class ResourceController extends Controller
             $userRating = $resource->ratings()->where('user_id', Auth::id())->first();
         }
 
-        return view('resources.show', compact('resource', 'userRating'));
+        $existingReport = Auth::check()
+            ? $resource->reports()
+                ->where('reporter_id', Auth::id())
+                ->latest('id')
+                ->first()
+            : null;
+
+        return view('resources.show', compact('resource', 'userRating', 'existingReport'));
     }
 
     /**

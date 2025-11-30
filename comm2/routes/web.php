@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\LogController as AdminLogController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\DevelopmentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ResourceUploadController;
 use App\Http\Controllers\ServerController;
@@ -76,6 +79,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])
         ->middleware('ensure.resource.modification.enabled')
         ->name('resources.destroy');
+
+    // Reports (public submission + management)
+    Route::post('resources/{resource}/report', [ReportController::class, 'storeResource'])->name('reports.resources.store');
+    Route::post('profile/{user}/report', [ReportController::class, 'storeUser'])->name('reports.users.store');
+    Route::delete('reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::patch('reports/{report}', [AdminReportController::class, 'update'])->name('reports.update');
+        Route::delete('reports/{report}', [AdminReportController::class, 'destroy'])->name('reports.destroy');
+        Route::post('reports/cleanup', [AdminReportController::class, 'cleanup'])->name('reports.cleanup');
+
+        Route::get('logs', [AdminLogController::class, 'index'])->name('logs.index');
+    });
 });
 
 // Resource downloads (public, must be before show route to avoid conflict)
