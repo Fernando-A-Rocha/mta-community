@@ -9,12 +9,13 @@
     $ratingCount = $resource->ratings_count ?? $resource->rating_count;
     $downloadsCount = $resource->unique_downloads_count ?? 0;
     $lastUpdated = $resource->currentVersion?->created_at ?? $resource->updated_at;
+    $isVerified = $resource->isLatestVersionVerified();
 @endphp
 
 <a
     href="{{ route('resources.show', $resource) }}"
     wire:navigate
-    class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/60"
+    class="group relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-slate-900/60 {{ $isVerified ? 'border-emerald-400/80 shadow-emerald-200/50 dark:border-emerald-500/60 dark:shadow-emerald-900/30' : 'border-slate-200/80 hover:border-blue-400 dark:border-slate-800' }}"
 >
     <div class="relative aspect-[3/2] max-h-[150px] overflow-hidden">
         @if ($resource->displayImage)
@@ -42,8 +43,18 @@
             @endif
         </div>
         @if ($resource->currentVersion)
-            <div class="absolute bottom-3 left-3 rounded-full bg-blue-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
-                v{{ $resource->currentVersion->version }}
+            <div class="absolute bottom-3 left-3 flex items-center gap-2">
+                <div class="rounded-full bg-blue-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
+                    v{{ $resource->currentVersion->version }}
+                </div>
+                @if ($isVerified)
+                    <div class="rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white shadow flex items-center gap-1">
+                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Verified
+                    </div>
+                @endif
             </div>
         @endif
     </div>

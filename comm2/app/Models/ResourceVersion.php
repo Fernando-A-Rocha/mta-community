@@ -18,10 +18,12 @@ class ResourceVersion extends Model
         'changelog',
         'zip_path',
         'is_current',
+        'is_verified',
     ];
 
     protected $casts = [
         'is_current' => 'boolean',
+        'is_verified' => 'boolean',
     ];
 
     public function resource(): BelongsTo

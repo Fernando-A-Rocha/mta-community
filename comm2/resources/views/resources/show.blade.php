@@ -99,11 +99,21 @@
                     <div class="flex flex-wrap gap-3">
                         @if (!$resource->is_disabled || (auth()->check() && auth()->user()->isModerator()))
                             @if ($resource->currentVersion)
-                                <a href="{{ route('resources.download', $resource) }}">
-                                    <flux:button variant="primary">
-                                        Download v{{ $resource->currentVersion->version }}
-                                    </flux:button>
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('resources.download', $resource) }}">
+                                        <flux:button variant="primary">
+                                            Download v{{ $resource->currentVersion->version }}
+                                        </flux:button>
+                                    </a>
+                                    @if ($resource->currentVersion->is_verified)
+                                        <span class="rounded-full bg-emerald-500/90 px-3 py-1.5 text-xs font-semibold text-white shadow flex items-center gap-1.5">
+                                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                            Verified
+                                        </span>
+                                    @endif
+                                </div>
                             @endif
                         @endif
                         @can('update', $resource)
@@ -255,6 +265,16 @@
                                                     <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Version {{ $version->version }}</h3>
                                                     @if ($version->is_current)
                                                         <span class="rounded-full bg-blue-500/20 px-2 py-1 text-xs font-semibold text-blue-700 dark:text-blue-200">Latest</span>
+                                                    @endif
+                                                    @if ($version->is_verified)
+                                                        <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200 flex items-center gap-1">
+                                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            Verified
+                                                        </span>
+                                                    @else
+                                                        <span class="rounded-full bg-slate-300/20 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">Not Verified</span>
                                                     @endif
                                                 </div>
                                                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Released {{ $version->created_at->format('M d, Y') }}</p>
@@ -529,6 +549,67 @@
                                         Disable resource
                                     </flux:button>
                                 </form>
+                            @endif
+                        </div>
+
+                        <div class="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-900/20">
+                            <h3 class="text-lg font-semibold text-emerald-800 dark:text-emerald-200">Version Verification</h3>
+                            <p class="mt-1 text-sm text-emerald-700/80 dark:text-emerald-200/80">Mark resource releases as verified.</p>
+                            @if ($resource->versions->isNotEmpty())
+                                <form method="POST" action="{{ route('resources.verify', $resource) }}" class="mt-4 space-y-3">
+                                    @csrf
+                                    <flux:field>
+                                        <flux:label>Select Version</flux:label>
+                                        <flux:select name="version_id" required>
+                                            <option value="">Choose a version...</option>
+                                            @foreach ($resource->versions as $version)
+                                                <option value="{{ $version->id }}" {{ old('version_id') == $version->id ? 'selected' : '' }}>
+                                                    v{{ $version->version }} {{ $version->is_current ? '(Latest)' : '' }} {{ $version->is_verified ? '(Currently Verified)' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </flux:select>
+                                        @error('version_id')
+                                            <flux:error>{{ $message }}</flux:error>
+                                        @enderror
+                                    </flux:field>
+                                    <flux:field>
+                                        <flux:label>Verification Status</flux:label>
+                                        <div class="flex gap-4">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="is_verified"
+                                                    value="1"
+                                                    id="is_verified_1"
+                                                    class="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500 dark:border-gray-600 dark:focus:ring-emerald-500"
+                                                    {{ old('is_verified', '1') === '1' ? 'checked' : '' }}
+                                                    required
+                                                />
+                                                <span class="text-sm font-medium text-slate-900 dark:text-white">Verified</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="is_verified"
+                                                    value="0"
+                                                    id="is_verified_0"
+                                                    class="w-4 h-4 text-slate-600 border-gray-300 focus:ring-slate-500 dark:border-gray-600 dark:focus:ring-slate-500"
+                                                    {{ old('is_verified', '1') === '0' ? 'checked' : '' }}
+                                                    required
+                                                />
+                                                <span class="text-sm font-medium text-slate-900 dark:text-white">Not Verified</span>
+                                            </label>
+                                        </div>
+                                        @error('is_verified')
+                                            <flux:error>{{ $message }}</flux:error>
+                                        @enderror
+                                    </flux:field>
+                                    <flux:button type="submit" variant="primary" class="w-full">
+                                        Update Verification
+                                    </flux:button>
+                                </form>
+                            @else
+                                <p class="mt-4 text-sm text-emerald-700/60 dark:text-emerald-200/60">No versions available to verify.</p>
                             @endif
                         </div>
                     @endif

@@ -151,4 +151,12 @@ class Resource extends Model
     {
         return $this->ratings()->count();
     }
+
+    /**
+     * Check if the latest release is verified.
+     */
+    public function isLatestVersionVerified(): bool
+    {
+        return $this->currentVersion?->is_verified ?? false;
+    }
 }

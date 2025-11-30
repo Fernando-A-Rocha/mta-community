@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
     // Resource moderation (moderator+)
     Route::post('resources/{resource}/disable', [ResourceController::class, 'disable'])->name('resources.disable');
     Route::post('resources/{resource}/enable', [ResourceController::class, 'enable'])->name('resources.enable');
+    Route::post('resources/{resource}/verify', [ResourceController::class, 'updateVerification'])->name('resources.verify');
 
     // Resource version deletion (author or admin+)
     Route::delete('resources/{resource}/versions/{version}', [ResourceController::class, 'destroyVersion'])

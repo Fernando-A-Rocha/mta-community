@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRatingRequest;
 use App\Http\Requests\UpdateResourceRequest;
+use App\Http\Requests\UpdateVersionVerificationRequest;
 use App\Models\Resource;
 use App\Models\ResourceDownload;
 use App\Models\ResourceImage;
@@ -373,6 +374,26 @@ class ResourceController extends Controller
         return redirect()
             ->route('resources.show', $resource)
             ->with('success', 'Resource has been enabled.');
+    }
+
+    /**
+     * Update version verification status (moderator+)
+     */
+    public function updateVerification(UpdateVersionVerificationRequest $request, Resource $resource): RedirectResponse
+    {
+        $version = ResourceVersion::where('id', $request->input('version_id'))
+            ->where('resource_id', $resource->id)
+            ->firstOrFail();
+
+        $version->update([
+            'is_verified' => $request->boolean('is_verified'),
+        ]);
+
+        $status = $request->boolean('is_verified') ? 'verified' : 'unverified';
+
+        return redirect()
+            ->route('resources.show', $resource)
+            ->with('success', "Version {$version->version} has been {$status}.");
     }
 
     /**
