@@ -1,9 +1,26 @@
+@php
+    $canUpload = $canUpload ?? true;
+@endphp
+
 <x-layouts.app title="Upload Resource">
         <div class="flex w-full flex-1 flex-col gap-6">
             <div class="mb-2">
                 <h2 class="text-2xl font-bold">Upload Resource</h2>
             </div>
 
+            @if (! $canUpload)
+                <div class="rounded-3xl border border-amber-200 bg-amber-50/80 p-6 text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-50">
+                    <h3 class="text-xl font-semibold">{{ __('Make your profile public first') }}</h3>
+                    <p class="mt-2 text-sm">
+                        {{ __('Community uploads require a public profile so other players can discover and contact you. Switch your profile visibility to public and then return here.') }}
+                    </p>
+                    <div class="mt-4">
+                        <flux:link :href="route('profile.edit')" variant="primary">
+                            {{ __('Open profile settings') }}
+                        </flux:link>
+                    </div>
+                </div>
+            @else
             <form action="{{ route('resources.upload.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="resource-upload-form">
                 @csrf
 
@@ -405,6 +422,7 @@
                     setTimeout(initializeCharacterCounters, 100);
                 }
             </script>
+        @endif
         </div>
 </x-layouts.app>
 

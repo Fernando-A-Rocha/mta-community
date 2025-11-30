@@ -23,6 +23,9 @@ class ResourceUploadController extends Controller
      */
     public function create(): View
     {
+        $user = Auth::user();
+        $canUpload = ($user->profile_visibility ?? 'public') === 'public';
+
         $tags = Tag::orderBy('name')->get();
         $userOwnedResources = Auth::user()
             ? Resource::where('user_id', Auth::id())
@@ -33,6 +36,7 @@ class ResourceUploadController extends Controller
         return view('resources.upload', [
             'tags' => $tags,
             'userOwnedResources' => $userOwnedResources,
+            'canUpload' => $canUpload,
         ]);
     }
 
@@ -41,6 +45,14 @@ class ResourceUploadController extends Controller
      */
     public function store(StoreResourceRequest $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        if (($user->profile_visibility ?? 'public') !== 'public') {
+            return redirect()
+                ->route('resources.upload.create')
+                ->withErrors(['profile_visibility' => __('Set your profile visibility to public before publishing resources.')]);
+        }
+
         $zipFile = $request->file('zip_file');
 
         if (! $zipFile || ! $zipFile->isValid()) {
@@ -89,7 +101,6 @@ class ResourceUploadController extends Controller
         }
 
         try {
-            $user = Auth::user();
             $changelog = $isFirstVersion ? 'First public release' : $request->input('changelog');
 
             // Get images - handle both single and multiple file inputs

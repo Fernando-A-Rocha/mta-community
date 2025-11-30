@@ -55,6 +55,9 @@
                         <flux:radio value="private">{{ __('Private') }}</flux:radio>
                     </flux:radio.group>
                     <flux:description>{{ __('Control who can view') }} <a href="{{ route('profile.show', auth()->user()) }}" class="underline" wire:navigate>{{ __('your profile') }}</a>. {{__('Public profiles can be viewed by anyone, while private profiles are only visible to you.') }}</flux:description>
+                    @error('profile_visibility')
+                        <flux:error>{{ $message }}</flux:error>
+                    @enderror
                 </flux:field>
             </div>
 

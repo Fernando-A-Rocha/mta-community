@@ -84,6 +84,12 @@ class Profile extends Component
         // Convert empty strings to null
         $validated = array_map(fn ($value) => $value === '' ? null : $value, $validated);
 
+        if (($validated['profile_visibility'] ?? 'public') === 'private' && $user->resources()->exists()) {
+            throw ValidationException::withMessages([
+                'profile_visibility' => [__('You must keep your profile public while you host published resources.')],
+            ]);
+        }
+
         // Handle avatar upload
         if ($this->avatar) {
             $this->validateImageType($this->avatar);

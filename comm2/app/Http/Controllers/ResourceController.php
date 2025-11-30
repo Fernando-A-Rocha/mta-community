@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRatingRequest;
 use App\Http\Requests\UpdateResourceRequest;
+use App\Models\Report;
 use App\Models\Resource;
 use App\Models\ResourceDownload;
 use App\Models\ResourceImage;
@@ -106,7 +107,14 @@ class ResourceController extends Controller
             $userRating = $resource->ratings()->where('user_id', Auth::id())->first();
         }
 
-        return view('resources.show', compact('resource', 'userRating'));
+        $existingReport = Auth::check()
+            ? $resource->reports()
+                ->where('reporter_id', Auth::id())
+                ->latest('id')
+                ->first()
+            : null;
+
+        return view('resources.show', compact('resource', 'userRating', 'existingReport'));
     }
 
     /**

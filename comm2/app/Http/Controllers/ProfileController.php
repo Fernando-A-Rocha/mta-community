@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -40,10 +41,22 @@ class ProfileController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $viewerReport = null;
+        if (auth()->check() && auth()->id() !== $user->id) {
+            $viewerReport = Report::query()
+                ->where('reporter_id', auth()->id())
+                ->where('reportable_type', Report::TYPE_USER)
+                ->where('reportable_id', $user->id)
+                ->latest('id')
+                ->first();
+        }
+
         return view('profile.show', [
             'user' => $user,
             'isOwner' => $isOwner,
             'resources' => $resources,
+            'profileIsPublic' => $isPublic,
+            'viewerReport' => $viewerReport,
         ]);
     }
 }

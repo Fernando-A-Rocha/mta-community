@@ -16,6 +16,18 @@
                     <flux:navlist.item icon="folder" :href="route('resources.index')" :current="request()->routeIs('resources.*')" wire:navigate>{{ __('Resources') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')" wire:navigate>{{ __('Members') }}</flux:navlist.item>
                 </flux:navlist.group>
+                @auth
+                    @if (auth()->user()->isModerator())
+                        <flux:navlist.group :heading="__('Admin Panel')" class="mt-4 grid">
+                            <flux:navlist.item icon="flag" :href="route('admin.reports.index')" :current="request()->routeIs('admin.reports.*')" wire:navigate>
+                                {{ __('Reports') }}
+                            </flux:navlist.item>
+                            <flux:navlist.item icon="book-open-text" :href="route('admin.logs.index')" :current="request()->routeIs('admin.logs.*')" wire:navigate>
+                                {{ __('Logs') }}
+                            </flux:navlist.item>
+                        </flux:navlist.group>
+                    @endif
+                @endauth
             </flux:navlist>
 
             <flux:spacer />
