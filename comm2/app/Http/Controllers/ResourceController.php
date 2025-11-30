@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRatingRequest;
 use App\Http\Requests\UpdateResourceRequest;
-use App\Models\Report;
 use App\Models\Resource;
 use App\Models\ResourceDownload;
 use App\Models\ResourceImage;

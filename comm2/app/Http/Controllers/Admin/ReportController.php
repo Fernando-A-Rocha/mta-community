@@ -27,7 +27,7 @@ class ReportController extends Controller
 
         // Default to pending if no status filter is provided
         $statusFilter = $request->has('status') ? $request->string('status')->toString() : ReportStatus::Pending->value;
-        
+
         $filters = [
             'status' => $statusFilter,
             'type' => $request->string('type')->toString(),

@@ -16,6 +16,7 @@ class Report extends Model
     use HasFactory;
 
     public const TYPE_RESOURCE = Resource::class;
+
     public const TYPE_USER = User::class;
 
     public const COMMENT_MIN_LENGTH = 60;

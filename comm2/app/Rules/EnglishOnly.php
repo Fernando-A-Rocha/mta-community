@@ -18,6 +18,7 @@ class EnglishOnly implements ValidationRule
         // Reject characters outside standard ASCII printable set
         if (preg_match('/[^\x09\x0A\x0D\x20-\x7E]/u', $value)) {
             $fail(__('The :attribute must be written in English (ASCII characters only).'));
+
             return;
         }
     }

@@ -6,7 +6,7 @@ use App\Rules\EnglishOnly;
 use Illuminate\Support\Facades\Validator;
 
 test('english text passes validation', function () {
-    $rule = new EnglishOnly();
+    $rule = new EnglishOnly;
 
     $validator = Validator::make([
         'comment' => 'This is a perfectly valid English sentence with clarity.',
@@ -18,7 +18,7 @@ test('english text passes validation', function () {
 });
 
 test('non ascii content fails validation', function () {
-    $rule = new EnglishOnly();
+    $rule = new EnglishOnly;
 
     $validator = Validator::make([
         'comment' => 'Este reporte incluye caracteres ñ and á',
@@ -30,7 +30,7 @@ test('non ascii content fails validation', function () {
 });
 
 test('text without letters fails english rule', function () {
-    $rule = new EnglishOnly();
+    $rule = new EnglishOnly;
 
     $validator = Validator::make([
         'comment' => '1234567890!@#$%',
