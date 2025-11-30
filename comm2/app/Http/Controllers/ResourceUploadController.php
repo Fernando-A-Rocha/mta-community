@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreResourceRequest;
 use App\Models\Resource;
 use App\Models\Tag;
+use App\Services\ActivityLogger;
 use App\Services\ResourceUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -124,6 +125,12 @@ class ResourceUploadController extends Controller
             $githubUrl = $isFirstVersion ? $request->input('github_url') : null;
             $forumThreadUrl = $isFirstVersion ? $request->input('forum_thread_url') : null;
 
+            // Check if resource exists before upload to determine if it's a new resource or update
+            $zipFileName = pathinfo($zipFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $resourceExistedBefore = Resource::where('name', $zipFileName)
+                ->where('user_id', $user->id)
+                ->exists();
+
             // The service will handle all validation, parsing, and business logic
             // Version will be extracted from meta.xml by the service
             $resource = $this->uploadService->upload(
@@ -138,6 +145,49 @@ class ResourceUploadController extends Controller
                 githubUrl: $githubUrl,
                 forumThreadUrl: $forumThreadUrl
             );
+
+            // Reload to get the latest version info
+            $resource->refresh();
+            $currentVersion = $resource->currentVersion;
+
+            // Log the action
+            if ($resourceExistedBefore) {
+                // New version uploaded
+                ActivityLogger::log(
+                    'resource.version.uploaded',
+                    $user,
+                    $request->ip(),
+                    [
+                        'resource_id' => $resource->id,
+                        'resource_name' => $resource->name,
+                        'version' => $currentVersion?->version,
+                        'version_id' => $currentVersion?->id,
+                        'changelog' => $changelog,
+                    ],
+                    $request->userAgent()
+                );
+            } else {
+                // New resource created
+                ActivityLogger::log(
+                    'resource.created',
+                    $user,
+                    $request->ip(),
+                    [
+                        'resource_id' => $resource->id,
+                        'resource_name' => $resource->name,
+                        'long_name' => $resource->long_name,
+                        'category' => $resource->category,
+                        'version' => $currentVersion?->version,
+                        'version_id' => $currentVersion?->id,
+                        'tag_count' => count($tagIds),
+                        'language_count' => count($languageIds),
+                        'image_count' => count($images),
+                        'has_github_url' => ! empty($githubUrl),
+                        'has_forum_url' => ! empty($forumThreadUrl),
+                    ],
+                    $request->userAgent()
+                );
+            }
 
             return redirect()
                 ->route('resources.show', $resource)

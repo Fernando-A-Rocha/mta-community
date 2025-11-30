@@ -128,6 +128,15 @@
                                 Edit Resource
                             </flux:link>
                         @endcan
+                        @auth
+                            @if (auth()->user()->isModerator())
+                                <x-entity-logs-modal
+                                    type="resource"
+                                    :entityId="$resource->id"
+                                    :entityName="$resource->display_name"
+                                />
+                            @endif
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -326,7 +335,22 @@
                                                     @endfor
                                                 </div>
                                             </div>
-                                            <span class="text-xs text-slate-500 dark:text-slate-400">{{ $rating->created_at->diffForHumans() }}</span>
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-xs text-slate-500 dark:text-slate-400">{{ $rating->created_at->diffForHumans() }}</span>
+                                                @auth
+                                                    @if (auth()->user()->isModerator())
+                                                        <form action="{{ route('resources.rating.delete', [$resource, $rating]) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Delete review">
+                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @endauth
+                                            </div>
                                         </div>
                                         @if ($rating->comment)
                                             <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ $rating->comment }}</p>
@@ -502,49 +526,15 @@
 
                 @auth
                     @if (auth()->id() !== $resource->user_id)
-                        <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Report this resource</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">Flag abuse, scams, malware, or other policy violations.</p>
-                                </div>
-                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Confidential</span>
-                            </div>
-
-                            @if ($existingReport && $existingReport->status === ReportStatus::Pending)
-                                <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100">
-                                    <p class="font-semibold">Pending review</p>
-                                    <p class="mt-1 text-xs text-amber-800/80 dark:text-amber-200/80">
-                                        You already reported this resource ({{ $existingReport->reasonLabel() }}). Moderators were notified {{ $existingReport->updated_at->diffForHumans() }}.
-                                    </p>
-                                    <form method="POST" action="{{ route('reports.destroy', $existingReport) }}" class="mt-3 flex justify-end">
-                                        @csrf
-                                        @method('DELETE')
-                                        <flux:button type="submit" variant="ghost" size="sm">
-                                            {{ __('Withdraw report') }}
-                                        </flux:button>
-                                    </form>
-                                </div>
-                            @else
-                                @if ($existingReport)
-                                    <div class="mt-4 rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-xs text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/30 dark:text-blue-100">
-                                        <p class="font-semibold">
-                                            Last report status: {{ $existingReport->status->label() }}
-                                        </p>
-                                        <p class="mt-1">
-                                            {{ $existingReport->reasonLabel() }} • {{ $existingReport->updated_at->diffForHumans() }}
-                                        </p>
-                                    </div>
-                                @endif
-
-                                <div class="mt-4">
-                                    <x-report.form
-                                        :action="route('reports.resources.store', $resource)"
-                                        :reasons="ReportModel::RESOURCE_REASONS"
-                                        :button-text="__('Submit report')"
-                                    />
-                                </div>
-                            @endif
+                        <div class="flex justify-end">
+                            <x-report-modal
+                                type="resource"
+                                :entityId="$resource->id"
+                                :entityName="$resource->display_name"
+                                :action="route('reports.resources.store', $resource)"
+                                :reasons="ReportModel::RESOURCE_REASONS"
+                                :existingReport="$existingReport"
+                            />
                         </div>
                     @endif
                 @endauth

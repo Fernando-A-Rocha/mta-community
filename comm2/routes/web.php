@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Resource rating
     Route::post('resources/{resource}/rating', [ResourceController::class, 'storeRating'])->name('resources.rating.store');
+    Route::delete('resources/{resource}/ratings/{rating}', [ResourceController::class, 'deleteRating'])->name('resources.rating.delete');
 
     // Resource moderation (moderator+)
     Route::post('resources/{resource}/disable', [ResourceController::class, 'disable'])->name('resources.disable');
@@ -93,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('reports/cleanup', [AdminReportController::class, 'cleanup'])->name('reports.cleanup');
 
         Route::get('logs', [AdminLogController::class, 'index'])->name('logs.index');
+        Route::get('logs/entity', [AdminLogController::class, 'entityLogs'])->name('logs.entity');
     });
 });
 

@@ -13,6 +13,7 @@ use App\Models\ResourceImage;
 use App\Models\ResourceRating;
 use App\Models\ResourceVersion;
 use App\Models\Tag;
+use App\Services\ActivityLogger;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -146,7 +147,18 @@ class ResourceController extends Controller
     {
         $this->authorize('update', $resource);
 
-        DB::transaction(function () use ($request, $resource) {
+        $user = Auth::user();
+        $changes = [];
+
+        DB::transaction(function () use ($request, $resource, &$changes) {
+            // Track changes for logging
+            $oldValues = [
+                'short_description' => $resource->short_description,
+                'long_description' => $resource->long_description,
+                'github_url' => $resource->github_url,
+                'forum_thread_url' => $resource->forum_thread_url,
+            ];
+
             // Update basic fields
             $resource->update([
                 'short_description' => $request->input('short_description'),
@@ -155,21 +167,44 @@ class ResourceController extends Controller
                 'forum_thread_url' => $request->input('forum_thread_url'),
             ]);
 
+            // Track what changed
+            foreach ($oldValues as $field => $oldValue) {
+                $newValue = $resource->$field;
+                if ($oldValue !== $newValue) {
+                    $changes[$field] = ['old' => $oldValue, 'new' => $newValue];
+                }
+            }
+
             // Update tags
             if ($request->has('tags')) {
-                $resource->tags()->sync($request->input('tags', []));
+                $oldTagIds = $resource->tags()->pluck('tags.id')->toArray();
+                $newTagIds = $request->input('tags', []);
+                $resource->tags()->sync($newTagIds);
+                if ($oldTagIds !== $newTagIds) {
+                    $changes['tags'] = ['old' => $oldTagIds, 'new' => $newTagIds];
+                }
             }
 
             // Update languages
             if ($request->has('languages')) {
-                $resource->languages()->sync($request->input('languages', []));
+                $oldLanguageIds = $resource->languages()->pluck('languages.id')->toArray();
+                $newLanguageIds = $request->input('languages', []);
+                $resource->languages()->sync($newLanguageIds);
+                if ($oldLanguageIds !== $newLanguageIds) {
+                    $changes['languages'] = ['old' => $oldLanguageIds, 'new' => $newLanguageIds];
+                }
             }
+
+            $imagesRemoved = 0;
+            $imagesAdded = 0;
 
             // Remove images
             if ($request->has('remove_images')) {
                 $imagesToRemove = ResourceImage::whereIn('id', $request->input('remove_images', []))
                     ->where('resource_id', $resource->id)
                     ->get();
+
+                $imagesRemoved = $imagesToRemove->count();
 
                 foreach ($imagesToRemove as $image) {
                     Storage::disk('public')->delete($image->path);
@@ -196,13 +231,37 @@ class ResourceController extends Controller
                     if ($remainingSlots > 0) {
                         $imagesToAdd = array_slice($images, 0, $remainingSlots);
                         $this->storeImages($resource, $imagesToAdd, $existingCount);
+                        $imagesAdded = count($imagesToAdd);
                     }
                 }
+            }
+
+            if ($imagesRemoved > 0 || $imagesAdded > 0) {
+                $changes['images'] = [
+                    'removed' => $imagesRemoved,
+                    'added' => $imagesAdded,
+                ];
             }
 
             // Touch updated_at
             $resource->touch();
         });
+
+        // Log the update if there were changes
+        if (! empty($changes)) {
+            ActivityLogger::log(
+                'resource.updated',
+                $user,
+                $request->ip(),
+                [
+                    'resource_id' => $resource->id,
+                    'resource_name' => $resource->name,
+                    'changes' => $changes,
+                    'is_moderator_edit' => $user->id !== $resource->user_id,
+                ],
+                $request->userAgent()
+            );
+        }
 
         return redirect()
             ->route('resources.show', $resource)
@@ -216,7 +275,9 @@ class ResourceController extends Controller
     {
         $user = Auth::user();
 
-        ResourceRating::updateOrCreate(
+        $wasUpdate = $resource->ratings()->where('user_id', $user->id)->exists();
+
+        $rating = ResourceRating::updateOrCreate(
             [
                 'resource_id' => $resource->id,
                 'user_id' => $user->id,
@@ -227,9 +288,62 @@ class ResourceController extends Controller
             ]
         );
 
+        ActivityLogger::log(
+            $wasUpdate ? 'review.updated' : 'review.created',
+            $user,
+            $request->ip(),
+            [
+                'rating_id' => $rating->id,
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->name,
+                'rating' => $rating->rating,
+                'has_comment' => ! empty($rating->comment),
+            ],
+            $request->userAgent()
+        );
+
         return redirect()
             ->route('resources.show', $resource)
             ->with('success', 'Rating saved successfully!');
+    }
+
+    /**
+     * Delete a rating/review (moderator+ only).
+     */
+    public function deleteRating(Request $request, Resource $resource, ResourceRating $rating): RedirectResponse
+    {
+        // Verify rating belongs to resource
+        if ($rating->resource_id !== $resource->id) {
+            abort(404);
+        }
+
+        // Only moderators+ can delete reviews
+        abort_unless(Auth::user()?->isModerator(), 403);
+
+        $ratingUser = $rating->user;
+        $context = [
+            'rating_id' => $rating->id,
+            'resource_id' => $resource->id,
+            'resource_name' => $resource->name,
+            'reviewer_id' => $ratingUser->id,
+            'reviewer_name' => $ratingUser->name,
+            'rating' => $rating->rating,
+            'had_comment' => ! empty($rating->comment),
+        ];
+
+        $rating->delete();
+
+        ActivityLogger::log(
+            'review.deleted',
+            Auth::user(),
+            $request->ip(),
+            $context,
+            $request->userAgent()
+        );
+
+        return redirect()
+            ->route('resources.show', $resource)
+            ->with('success', 'Review deleted successfully.');
     }
 
     /**
@@ -365,6 +479,19 @@ class ResourceController extends Controller
 
         $resource->update(['is_disabled' => true]);
 
+        ActivityLogger::log(
+            'resource.disabled',
+            Auth::user(),
+            $request->ip(),
+            [
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->name,
+                'resource_owner_id' => $resource->user_id,
+                'resource_owner_name' => $resource->user->name,
+            ],
+            $request->userAgent()
+        );
+
         return redirect()
             ->route('resources.show', $resource)
             ->with('success', 'Resource has been disabled.');
@@ -378,6 +505,19 @@ class ResourceController extends Controller
         $this->authorize('disable', $resource);
 
         $resource->update(['is_disabled' => false]);
+
+        ActivityLogger::log(
+            'resource.enabled',
+            Auth::user(),
+            $request->ip(),
+            [
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->name,
+                'resource_owner_id' => $resource->user_id,
+                'resource_owner_name' => $resource->user->name,
+            ],
+            $request->userAgent()
+        );
 
         return redirect()
             ->route('resources.show', $resource)
@@ -393,11 +533,29 @@ class ResourceController extends Controller
             ->where('resource_id', $resource->id)
             ->firstOrFail();
 
+        $oldStatus = $version->is_verified;
+        $newStatus = $request->boolean('is_verified');
+
         $version->update([
-            'is_verified' => $request->boolean('is_verified'),
+            'is_verified' => $newStatus,
         ]);
 
-        $status = $request->boolean('is_verified') ? 'verified' : 'unverified';
+        ActivityLogger::log(
+            'resource.version.verification.updated',
+            Auth::user(),
+            $request->ip(),
+            [
+                'version_id' => $version->id,
+                'version' => $version->version,
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->name,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+            ],
+            $request->userAgent()
+        );
+
+        $status = $newStatus ? 'verified' : 'unverified';
 
         return redirect()
             ->route('resources.show', $resource)
@@ -416,6 +574,8 @@ class ResourceController extends Controller
 
         $this->authorize('deleteVersion', $resource);
 
+        $user = Auth::user();
+
         // Get the first version (oldest)
         $firstVersion = $resource->versions()->orderBy('created_at', 'asc')->first();
 
@@ -429,7 +589,19 @@ class ResourceController extends Controller
             return $this->destroy($request, $resource);
         }
 
-        DB::transaction(function () use ($resource, $version) {
+        // Store version info for logging before deletion
+        $versionInfo = [
+            'version_id' => $version->id,
+            'version' => $version->version,
+            'resource_id' => $resource->id,
+            'resource_name' => $resource->name,
+            'was_current' => $version->is_current,
+            'is_owner_delete' => $resource->user_id === $user->id,
+        ];
+
+        $newCurrentVersion = null;
+
+        DB::transaction(function () use ($resource, $version, &$newCurrentVersion) {
             // Delete the ZIP file
             if (Storage::disk('local')->exists($version->zip_path)) {
                 Storage::disk('local')->delete($version->zip_path);
@@ -444,6 +616,7 @@ class ResourceController extends Controller
 
                 if ($newCurrent) {
                     $newCurrent->update(['is_current' => true]);
+                    $newCurrentVersion = $newCurrent->version;
                 }
             }
 
@@ -453,6 +626,18 @@ class ResourceController extends Controller
             // Touch resource updated_at
             $resource->touch();
         });
+
+        if ($newCurrentVersion !== null) {
+            $versionInfo['new_current_version'] = $newCurrentVersion;
+        }
+
+        ActivityLogger::log(
+            'resource.version.deleted',
+            $user,
+            $request->ip(),
+            $versionInfo,
+            $request->userAgent()
+        );
 
         return redirect()
             ->route('resources.edit', $resource)
@@ -466,8 +651,10 @@ class ResourceController extends Controller
     {
         $this->authorize('delete', $resource);
 
+        $user = Auth::user();
+
         // For authors (non-admins), require confirmation by typing resource name
-        if ($resource->user_id === Auth::id() && ! Auth::user()->isAdmin()) {
+        if ($resource->user_id === $user->id && ! $user->isAdmin()) {
             $confirmedName = $request->input('resource_name');
             if ($confirmedName !== $resource->name) {
                 return redirect()
@@ -475,6 +662,19 @@ class ResourceController extends Controller
                     ->withErrors(['resource_name' => 'Resource name does not match. Deletion cancelled.']);
             }
         }
+
+        // Store resource info for logging before deletion
+        $resourceInfo = [
+            'resource_id' => $resource->id,
+            'resource_name' => $resource->name,
+            'resource_owner_id' => $resource->user_id,
+            'resource_owner_name' => $resource->user->name,
+            'category' => $resource->category,
+            'version_count' => $resource->versions()->count(),
+            'rating_count' => $resource->ratings()->count(),
+            'download_count' => $resource->downloads()->count(),
+            'is_owner_delete' => $resource->user_id === $user->id,
+        ];
 
         DB::transaction(function () use ($resource) {
             // Delete files first
@@ -492,10 +692,19 @@ class ResourceController extends Controller
             $resource->images()->delete();
             $resource->tags()->detach();
             $resource->downloads()->delete();
+            $resource->reports()->delete();
 
             // Delete the resource
             $resource->delete();
         });
+
+        ActivityLogger::log(
+            'resource.deleted',
+            $user,
+            $request->ip(),
+            $resourceInfo,
+            $request->userAgent()
+        );
 
         return redirect()
             ->route('resources.index')

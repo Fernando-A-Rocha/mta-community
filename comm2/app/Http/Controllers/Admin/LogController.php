@@ -59,6 +59,76 @@ class LogController extends Controller
         ]);
     }
 
+    /**
+     * Get logs for a specific entity (user or resource).
+     */
+    public function entityLogs(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $this->ensureModerator();
+
+        $type = $request->string('type')->toString(); // 'user' or 'resource'
+        $id = $request->integer('id');
+        $search = $request->string('search')->toString();
+        $page = $request->integer('page', 1);
+
+        if (! in_array($type, ['user', 'resource'], true) || $id <= 0) {
+            return response()->json(['error' => 'Invalid parameters'], 400);
+        }
+
+        $query = ActivityLog::query()->with('user')->latest();
+
+        // Filter by entity type
+        if ($type === 'user') {
+            $query->where(function ($q) use ($id) {
+                $q->where('user_id', $id)
+                    ->orWhere('context->user_id', $id)
+                    ->orWhere('context->reviewer_id', $id)
+                    ->orWhere('context->resource_owner_id', $id);
+            });
+        } else { // resource
+            $query->where(function ($q) use ($id) {
+                $q->where('context->resource_id', $id)
+                    ->orWhere('context->rating_id', $id)
+                    ->orWhere('context->version_id', $id);
+            });
+        }
+
+        // Search filter
+        if ($search) {
+            $term = '%'.$search.'%';
+            $query->where(function ($sub) use ($term) {
+                $sub->where('action', 'like', $term)
+                    ->orWhere('context', 'like', $term);
+            });
+        }
+
+        $logs = $query->paginate(20, ['*'], 'page', $page);
+
+        return response()->json([
+            'logs' => $logs->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'action' => $log->action,
+                    'user_id' => $log->user_id,
+                    'user' => $log->user ? [
+                        'id' => $log->user->id,
+                        'name' => $log->user->name,
+                    ] : null,
+                    'ip_address' => $log->ip_address,
+                    'user_agent' => $log->user_agent,
+                    'context' => $log->context,
+                    'created_at' => $log->created_at->toIso8601String(),
+                ];
+            }),
+            'pagination' => [
+                'current_page' => $logs->currentPage(),
+                'last_page' => $logs->lastPage(),
+                'per_page' => $logs->perPage(),
+                'total' => $logs->total(),
+            ],
+        ]);
+    }
+
     private function ensureModerator(): void
     {
         abort_unless(auth()->user()?->isModerator(), 403);
