@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\GitHubActivityService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\View\View;
@@ -16,54 +18,55 @@ class DevelopmentController extends Controller
     ) {}
 
     /**
-     * Display the development page with GitHub activity.
+     * Display the development page.
      */
     public function index(): View
     {
-        $allMtasaBlueActivity = $this->githubActivityService->getActivity('mtasa-blue');
-        $allMtasaResourcesActivity = $this->githubActivityService->getActivity('mtasa-resources');
+        return view('development.index');
+    }
 
-        // Paginate each repository's activity (10 per page)
+    /**
+     * Get GitHub activity for a specific repository.
+     */
+    public function activity(Request $request): JsonResponse
+    {
+        $repo = $request->string('repo')->toString(); // 'mtasa-blue' or 'mtasa-resources'
+        $page = $request->integer('page', 1);
         $perPage = 10;
 
-        // Paginate mtasa-blue activity
-        $currentPageBlue = Paginator::resolveCurrentPage('page_blue');
-        $offsetBlue = ($currentPageBlue - 1) * $perPage;
-        $paginatedBlue = array_slice($allMtasaBlueActivity, $offsetBlue, $perPage);
-        $mtasaBluePaginator = new LengthAwarePaginator(
-            $paginatedBlue,
-            count($allMtasaBlueActivity),
-            $perPage,
-            $currentPageBlue,
-            [
-                'path' => request()->url(),
-                'pageName' => 'page_blue',
-            ]
-        );
+        if (! in_array($repo, ['mtasa-blue', 'mtasa-resources'], true)) {
+            return response()->json(['error' => 'Invalid repository'], 400);
+        }
 
-        // Paginate mtasa-resources activity
-        $currentPageResources = Paginator::resolveCurrentPage('page_resources');
-        $offsetResources = ($currentPageResources - 1) * $perPage;
-        $paginatedResources = array_slice($allMtasaResourcesActivity, $offsetResources, $perPage);
-        $mtasaResourcesPaginator = new LengthAwarePaginator(
-            $paginatedResources,
-            count($allMtasaResourcesActivity),
-            $perPage,
-            $currentPageResources,
-            [
-                'path' => request()->url(),
-                'pageName' => 'page_resources',
-            ]
-        );
+        $allActivity = $this->githubActivityService->getActivity($repo);
+        $fetchTimestamp = $this->githubActivityService->getFetchTimestamp($repo);
 
-        $mtasaBlueFetchTimestamp = $this->githubActivityService->getFetchTimestamp('mtasa-blue');
-        $mtasaResourcesFetchTimestamp = $this->githubActivityService->getFetchTimestamp('mtasa-resources');
+        // Paginate activity
+        $offset = ($page - 1) * $perPage;
+        $paginatedActivity = array_slice($allActivity, $offset, $perPage);
+        $total = count($allActivity);
 
-        return view('development.index', [
-            'mtasaBlueActivity' => $mtasaBluePaginator,
-            'mtasaResourcesActivity' => $mtasaResourcesPaginator,
-            'mtasaBlueFetchTimestamp' => $mtasaBlueFetchTimestamp,
-            'mtasaResourcesFetchTimestamp' => $mtasaResourcesFetchTimestamp,
+        // Format activity for JSON response
+        $formattedActivity = array_map(function ($activity) {
+            return [
+                'type' => $activity['type'],
+                'title' => $activity['title'],
+                'author' => $activity['author'],
+                'date' => $activity['date']->toIso8601String(),
+                'date_human' => $activity['date']->diffForHumans(),
+                'url' => $activity['url'],
+            ];
+        }, $paginatedActivity);
+
+        return response()->json([
+            'activity' => $formattedActivity,
+            'pagination' => [
+                'current_page' => $page,
+                'last_page' => (int) ceil($total / $perPage),
+                'per_page' => $perPage,
+                'total' => $total,
+            ],
+            'fetch_timestamp' => $fetchTimestamp,
         ]);
     }
 }

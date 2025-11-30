@@ -23,6 +23,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
 
 Route::get('development', [DevelopmentController::class, 'index'])->name('development.index');
+Route::get('development/activity', [DevelopmentController::class, 'activity'])->name('development.activity');
 
 // Resources
 Route::get('resources', [ResourceController::class, 'index'])->name('resources.index');
