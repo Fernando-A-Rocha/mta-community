@@ -39,49 +39,6 @@
             </div>
         @endif
 
-        @if ($profileIsPublic && auth()->check() && ! $isOwner)
-            <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/30">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">{{ __('Report this profile') }}</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Let moderators know about impersonation, harassment, or spam coming from this user.') }}</p>
-                    </div>
-                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Confidential</span>
-                </div>
-
-                @if ($viewerReport && $viewerReport->status === ReportStatus::Pending)
-                    <div class="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100">
-                        <p class="font-semibold">{{ __('Pending review') }}</p>
-                        <p class="mt-1 text-xs text-amber-800/80 dark:text-amber-200/80">
-                            {{ __('You reported this profile (:reason). Moderators last updated it :time.', ['reason' => $viewerReport->reasonLabel(), 'time' => $viewerReport->updated_at->diffForHumans()]) }}
-                        </p>
-                        <form method="POST" action="{{ route('reports.destroy', $viewerReport) }}" class="mt-3 flex justify-end">
-                            @csrf
-                            @method('DELETE')
-                            <flux:button type="submit" variant="ghost" size="sm">
-                                {{ __('Withdraw report') }}
-                            </flux:button>
-                        </form>
-                    </div>
-                @else
-                    @if ($viewerReport)
-                        <div class="rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-xs text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/30 dark:text-blue-100">
-                            <p class="font-semibold">{{ __('Previous report status: :status', ['status' => $viewerReport->status->label()]) }}</p>
-                            <p class="mt-1">{{ $viewerReport->reasonLabel() }} • {{ $viewerReport->updated_at->diffForHumans() }}</p>
-                        </div>
-                    @endif
-
-                    <x-report.form
-                        :action="route('reports.users.store', $user)"
-                        :reasons="ReportModel::USER_REASONS"
-                        :button-text="__('Submit report')"
-                    />
-                @endif
-            </div>
-
-            <flux:separator />
-        @endif
-
         @php
             $hasFavorites = $user->favorite_city || $user->favorite_vehicle || $user->favorite_character
                 || $user->favorite_gang || $user->favorite_weapon || $user->favorite_radio_station;
@@ -147,6 +104,49 @@
                 </div>
             @endif
         </div>
+
+        @if (auth()->check() && ! $isOwner && ($profileIsPublic || ($isModerator ?? false)))
+            <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/30">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">{{ __('Report this profile') }}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Let moderators know about impersonation, harassment, or spam coming from this user.') }}</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Confidential</span>
+                </div>
+
+                @if ($viewerReport && $viewerReport->status === ReportStatus::Pending)
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100">
+                        <p class="font-semibold">{{ __('Pending review') }}</p>
+                        <p class="mt-1 text-xs text-amber-800/80 dark:text-amber-200/80">
+                            {{ __('You reported this profile (:reason). It was last updated :time.', ['reason' => $viewerReport->reasonLabel(), 'time' => $viewerReport->updated_at->diffForHumans()]) }}
+                        </p>
+                        <form method="POST" action="{{ route('reports.destroy', $viewerReport) }}" class="mt-3 flex justify-end">
+                            @csrf
+                            @method('DELETE')
+                            <flux:button type="submit" variant="ghost" size="sm">
+                                {{ __('Withdraw report') }}
+                            </flux:button>
+                        </form>
+                    </div>
+                @else
+                    @if ($viewerReport)
+                        <div class="rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-xs text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/30 dark:text-blue-100">
+                            <p class="font-semibold">{{ __('Previous report status: :status', ['status' => $viewerReport->status->label()]) }}</p>
+                            <p class="mt-1">{{ $viewerReport->reasonLabel() }} • {{ $viewerReport->updated_at->diffForHumans() }}</p>
+                        </div>
+                    @endif
+
+                    <x-report.form
+                        :action="route('reports.users.store', $user)"
+                        :reasons="ReportModel::USER_REASONS"
+                        :button-text="__('Submit report')"
+                    />
+                @endif
+            </div>
+
+            <flux:separator />
+        @endif
     </div>
 </x-layouts.app>
 

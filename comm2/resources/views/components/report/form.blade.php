@@ -7,6 +7,17 @@
 
 <form method="POST" action="{{ $action }}" class="space-y-4">
     @csrf
+
+    @if ($errors->report->any())
+        <div class="rounded-2xl border border-red-200 bg-red-50/70 p-4 text-sm text-red-900 dark:border-red-500/40 dark:bg-red-900/20 dark:text-red-100">
+            <ul class="list-disc list-inside space-y-1">
+                @foreach ($errors->report->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <flux:field>
         <flux:label>{{ __('Reason') }}</flux:label>
         <flux:select name="report_reason" required>
@@ -34,7 +45,7 @@
             <flux:error>{{ $message }}</flux:error>
         @enderror
         <flux:description>
-            {{ __('Minimum :min characters, English only. HTML is stripped and vague notes get ignored.', ['min' => $minLength]) }}
+            {{ __('Minimum :min characters, English only. Vague notes get ignored.', ['min' => $minLength]) }}
         </flux:description>
     </flux:field>
 

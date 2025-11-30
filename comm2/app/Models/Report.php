@@ -36,9 +36,8 @@ class Report extends Model
      * @var array<string, string>
      */
     public const USER_REASONS = [
-        'abusive_language' => 'Abusive language or hate speech',
         'impersonation' => 'Impersonation or identity abuse',
-        'harassment' => 'Harassment or threats',
+        'harassment' => 'Harassment, abusive language or threats',
         'spam' => 'Spam, scams or advertising',
         'cheating' => 'Cheating, fraud or exploits',
         'other' => 'Other (explain below)',

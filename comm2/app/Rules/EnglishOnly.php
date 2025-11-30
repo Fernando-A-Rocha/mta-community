@@ -20,10 +20,5 @@ class EnglishOnly implements ValidationRule
             $fail(__('The :attribute must be written in English (ASCII characters only).'));
             return;
         }
-
-        // Ensure we have a reasonable amount of Latin characters to discourage non-English submissions
-        if (! preg_match('/[A-Za-z]{5,}/', $value)) {
-            $fail(__('Please describe the issue in clear English.'));
-        }
     }
 }

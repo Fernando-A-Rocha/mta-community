@@ -25,8 +25,11 @@ class ReportController extends Controller
             ->with(['reporter', 'reportable'])
             ->latest();
 
+        // Default to pending if no status filter is provided
+        $statusFilter = $request->has('status') ? $request->string('status')->toString() : ReportStatus::Pending->value;
+        
         $filters = [
-            'status' => $request->string('status')->toString(),
+            'status' => $statusFilter,
             'type' => $request->string('type')->toString(),
             'reason' => $request->string('reason')->toString(),
             'search' => $request->string('search')->toString(),

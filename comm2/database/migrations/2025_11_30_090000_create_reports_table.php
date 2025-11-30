@@ -23,7 +23,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['status', 'updated_at']);
-            $table->index(['reportable_type', 'reportable_id']);
         });
     }
 

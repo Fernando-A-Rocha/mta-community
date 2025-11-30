@@ -54,24 +54,24 @@ class ReportController extends Controller
         return Redirect::back()->with('report_success', __('Thanks. Your report was submitted to the moderation team.'));
     }
 
-    public function storeUser(StoreReportRequest $request, User $reportedUser): RedirectResponse
+    public function storeUser(StoreReportRequest $request, User $user): RedirectResponse
     {
-        $user = $request->user();
+        $reporter = $request->user();
 
-        if ($reportedUser->id === $user->id) {
+        if ($user->id === $reporter->id) {
             return Redirect::back()->withErrors([
                 'report' => __('You cannot report yourself.'),
             ], 'report');
         }
 
-        if (($reportedUser->profile_visibility ?? 'public') !== 'public' && ! $user->isModerator()) {
+        if (($user->profile_visibility ?? 'public') !== 'public' && ! $reporter->isModerator()) {
             abort(403);
         }
 
         $hasPending = Report::query()
-            ->where('reporter_id', $user->id)
+            ->where('reporter_id', $reporter->id)
             ->where('reportable_type', Report::TYPE_USER)
-            ->where('reportable_id', $reportedUser->id)
+            ->where('reportable_id', $user->id)
             ->where('status', ReportStatus::Pending->value)
             ->exists();
 
@@ -82,17 +82,17 @@ class ReportController extends Controller
         }
 
         $report = Report::create([
-            'reporter_id' => $user->id,
+            'reporter_id' => $reporter->id,
             'reportable_type' => Report::TYPE_USER,
-            'reportable_id' => $reportedUser->id,
+            'reportable_id' => $user->id,
             'reason' => $request->input('reason'),
             'comment' => $request->input('comment'),
             'status' => ReportStatus::Pending,
         ]);
 
-        ActivityLogger::log('report.user.created', $user, $request->ip(), [
+        ActivityLogger::log('report.user.created', $reporter, $request->ip(), [
             'report_id' => $report->id,
-            'user_id' => $reportedUser->id,
+            'user_id' => $user->id,
             'reason' => $report->reason,
             'reportable_type' => Report::TYPE_USER,
         ], $request->userAgent());
