@@ -13,10 +13,10 @@ use Illuminate\Support\Str;
 class NotificationService
 {
     /**
-     * @param  User|Collection<int, User>|iterable<int, User>|array<int, User>|int|null  $recipients
+     * @param  User|Collection<int, User>|iterable<int, User>|int|null  $recipients
      */
     public function notify(
-        User|Collection|iterable|array|int|null $recipients,
+        User|Collection|iterable|int|null $recipients,
         NotificationCategory $category,
         string $title,
         string $body,
@@ -49,9 +49,9 @@ class NotificationService
     }
 
     /**
-     * @param  User|Collection<int, User>|iterable<int, User>|array<int, User>|int|null  $recipients
+     * @param  User|Collection<int, User>|iterable<int, User>|int|null  $recipients
      */
-    private function normalizeRecipients(User|Collection|iterable|array|int|null $recipients): Collection
+    private function normalizeRecipients(User|Collection|iterable|int|null $recipients): Collection
     {
         $collection = collect();
 
