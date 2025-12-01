@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\LogController as AdminLogController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\DevelopmentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegacyResourceVersionController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -20,6 +21,9 @@ use Laravel\Fortify\Features;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('home/news', [HomeController::class, 'news'])->name('home.news');
+
+Route::get('legacy/mta/resources', LegacyResourceVersionController::class)
+    ->name('legacy.mta.resources');
 
 Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
 Route::get('servers/list', [ServerController::class, 'servers'])->name('servers.list');
