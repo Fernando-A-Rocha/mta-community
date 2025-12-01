@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -33,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'favorite_gang',
         'favorite_weapon',
         'favorite_radio_station',
+        'friends_visibility',
     ];
 
     /**
@@ -109,6 +111,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function receivedReports(): MorphMany
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+
+    /**
+     * Get the user's friends (directional, duplicates are prevented at DB layer)
+     */
+    public function friends(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'friendships', 'user_id', 'friend_id')
+            ->withTimestamps()
+            ->orderBy('users.name');
+    }
+
+    /**
+     * Check if the user already has the given friend
+     */
+    public function hasFriend(self $user): bool
+    {
+        if ($this->relationLoaded('friends')) {
+            return $this->friends->contains('id', $user->id);
+        }
+
+        return $this->friends()
+            ->where('friend_id', $user->id)
+            ->exists();
     }
 
     /**

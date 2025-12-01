@@ -43,13 +43,25 @@ class ProfileController extends Controller
             ->get();
 
         $viewerReport = null;
+        $viewerIsFriend = false;
         if (auth()->check() && auth()->id() !== $user->id) {
+            $viewerIsFriend = auth()->user()->hasFriend($user);
             $viewerReport = Report::query()
                 ->where('reporter_id', auth()->id())
                 ->where('reportable_type', Report::TYPE_USER)
                 ->where('reportable_id', $user->id)
                 ->latest('id')
                 ->first();
+        }
+
+        $friendsVisibility = $user->friends_visibility ?? 'public';
+        $canViewFriends = $isOwner || $friendsVisibility === 'public' || $isModerator;
+        $friends = collect();
+
+        if ($canViewFriends) {
+            $friends = $user->friends()
+                ->withPivot('created_at')
+                ->get();
         }
 
         return view('profile.show', [
@@ -59,6 +71,10 @@ class ProfileController extends Controller
             'resources' => $resources,
             'profileIsPublic' => $isPublic,
             'viewerReport' => $viewerReport,
+            'viewerIsFriend' => $viewerIsFriend,
+            'friends' => $friends,
+            'canViewFriends' => $canViewFriends,
+            'friendsVisibility' => $friendsVisibility,
         ]);
     }
 }

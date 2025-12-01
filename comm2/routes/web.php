@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LogController as AdminLogController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\DevelopmentController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\ResourceUploadController;
 use App\Http\Controllers\ServerController;
 use App\Livewire\Settings\Account;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Settings\Friends;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
@@ -38,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/account', Account::class)->name('account.edit');
     Route::get('settings/profile', Profile::class)->name('profile.edit');
+    Route::get('settings/friends', Friends::class)->name('friends.edit');
     Route::get('settings/password', Password::class)->name('user-password.edit');
     Route::get('settings/appearance', Appearance::class)->name('appearance.edit');
 
@@ -89,6 +92,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('resources/{resource}/report', [ReportController::class, 'storeResource'])->name('reports.resources.store');
     Route::post('profile/{user}/report', [ReportController::class, 'storeUser'])->name('reports.users.store');
     Route::delete('reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+
+    Route::post('friends/{user}', [FriendController::class, 'store'])->name('friends.store');
+    Route::delete('friends/{user}', [FriendController::class, 'destroy'])->name('friends.destroy');
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');

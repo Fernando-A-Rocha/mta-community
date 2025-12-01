@@ -48,6 +48,24 @@
             </div>
         @endif
 
+        @if (session('friends_success'))
+            <div class="rounded-2xl border border-green-200 bg-green-50/80 p-4 text-sm text-green-900 dark:border-green-500/30 dark:bg-green-900/20 dark:text-green-100">
+                {{ session('friends_success') }}
+            </div>
+        @endif
+
+        @if (session('friends_error'))
+            <div class="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-sm text-red-900 dark:border-red-500/30 dark:bg-red-900/20 dark:text-red-100">
+                {{ session('friends_error') }}
+            </div>
+        @endif
+
+        @if (session('friends_info'))
+            <div class="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-100">
+                {{ session('friends_info') }}
+            </div>
+        @endif
+
         @php
             $hasFavorites = $user->favorite_city || $user->favorite_vehicle || $user->favorite_character
                 || $user->favorite_gang || $user->favorite_weapon || $user->favorite_radio_station;
@@ -96,6 +114,63 @@
                 </div>
             </div>
 
+            @if ($canViewFriends || $resources->isNotEmpty())
+                <flux:separator />
+            @endif
+        @endif
+
+        @if ($canViewFriends)
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold">{{ __('Friends') }}</h2>
+                    <span class="text-sm text-neutral-500 dark:text-neutral-400">
+                        {{ __(':count friends', ['count' => $friends->count()]) }}
+                    </span>
+                </div>
+
+                @if ($isOwner && $friendsVisibility === 'private')
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                        {{ __('Only you can see this list because it is set to private.') }}
+                    </p>
+                @elseif ($isModerator && ! $isOwner && $friendsVisibility === 'private')
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                        {{ __('This user keeps their friends list private, but moderators can review it.') }}
+                    </p>
+                @endif
+
+                @if ($friends->isEmpty())
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">
+                        {{ $isOwner ? __('You have not added any friends yet.') : __('This user has not added any friends yet.') }}
+                    </p>
+                @else
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        @foreach ($friends as $friend)
+                            <a
+                                href="{{ route('profile.show', $friend) }}"
+                                wire:navigate
+                                class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white/60 p-3 transition hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900/40 dark:hover:border-neutral-700"
+                            >
+                                <x-user-avatar :user="$friend" size="md" class="!h-12 !w-12" />
+                                <div>
+                                    <p class="font-medium">{{ $friend->name }}</p>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                                        {{ __('Friends since :date', ['date' => $friend->pivot->created_at->format('M Y')]) }}
+                                    </p>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            @if ($resources->isNotEmpty())
+                <flux:separator />
+            @endif
+        @elseif (! $isOwner && $friendsVisibility === 'private')
+            <div class="rounded-2xl border border-neutral-200 bg-neutral-50/80 p-4 text-sm text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900/40 dark:text-neutral-300">
+                {{ __('This user keeps their friends list private.') }}
+            </div>
+
             @if ($resources->isNotEmpty())
                 <flux:separator />
             @endif
@@ -115,7 +190,24 @@
         </div>
 
         @if (auth()->check() && ! $isOwner && ($profileIsPublic || ($isModerator ?? false)))
-            <div class="flex justify-end">
+            <div class="flex flex-wrap items-center justify-end gap-3">
+                <form
+                    method="POST"
+                    action="{{ $viewerIsFriend ? route('friends.destroy', $user) : route('friends.store', $user) }}"
+                >
+                    @csrf
+                    @if ($viewerIsFriend)
+                        @method('DELETE')
+                    @endif
+                    <flux:button
+                        type="submit"
+                        variant="{{ $viewerIsFriend ? 'ghost' : 'primary' }}"
+                        class="{{ $viewerIsFriend ? 'text-red-600 hover:text-red-700 dark:text-red-400' : '' }}"
+                    >
+                        {{ $viewerIsFriend ? __('Remove friend') : __('Add friend') }}
+                    </flux:button>
+                </form>
+
                 <x-report-modal
                     type="user"
                     :entityId="$user->id"
