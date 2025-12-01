@@ -55,6 +55,15 @@
                         <flux:radio value="private">{{ __('Private') }}</flux:radio>
                     </flux:radio.group>
                     <flux:description>{{ __('Control who can view') }} <a href="{{ route('profile.show', auth()->user()) }}" class="underline" wire:navigate>{{ __('your profile') }}</a>. {{__('Public profiles can be viewed by anyone, while private profiles are only visible to you.') }}</flux:description>
+                    @if ($profile_visibility === 'private')
+                        <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100">
+                            <p>{{ __('Switching to private removes all followers. You currently have :count follower(s).', ['count' => $currentFollowerCount]) }}</p>
+                            <label class="mt-2 flex items-center gap-2">
+                                <input type="checkbox" wire:model="confirmFollowerLoss" class="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                                <span>{{ __('I understand and want to continue.') }}</span>
+                            </label>
+                        </div>
+                    @endif
                     @error('profile_visibility')
                         <flux:error>{{ $message }}</flux:error>
                     @enderror

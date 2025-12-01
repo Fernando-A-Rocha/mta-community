@@ -88,6 +88,11 @@
                             <dd class="mt-1 text-3xl font-semibold">{{ number_format($resource->unique_downloads_count) }}</dd>
                             <dd class="text-xs text-slate-300">unique</dd>
                         </div>
+                            <div>
+                                <dt class="text-slate-200">{{ __('Followers') }}</dt>
+                                <dd class="mt-1 text-3xl font-semibold">{{ number_format($resource->followers_count ?? 0) }}</dd>
+                                <dd class="text-xs text-slate-300">{{ __('watching updates') }}</dd>
+                            </div>
                         <div>
                             <dt class="text-slate-200">Latest version</dt>
                             <dd class="mt-1 text-lg font-semibold">
@@ -128,6 +133,29 @@
                                 Edit Resource
                             </flux:link>
                         @endcan
+                        @auth
+                            @if (auth()->id() !== $resource->user_id)
+                                @php
+                                    $isFollowingResource = auth()->user()->isFollowingResource($resource);
+                                @endphp
+                                @if ($isFollowingResource)
+                                    <form method="POST" action="{{ route('resources.unfollow', $resource) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <flux:button variant="ghost" size="sm">
+                                            {{ __('Following updates') }}
+                                        </flux:button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('resources.follow', $resource) }}">
+                                        @csrf
+                                        <flux:button variant="ghost" size="sm">
+                                            {{ __('Follow updates') }}
+                                        </flux:button>
+                                    </form>
+                                @endif
+                            @endif
+                        @endauth
                         @auth
                             @if (auth()->user()->isModerator())
                                 <x-entity-logs-modal

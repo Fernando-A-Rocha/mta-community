@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\NotificationCategory;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateReportStatusRequest;
 use App\Models\Report;
 use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,6 +19,10 @@ use Illuminate\View\View;
 
 class ReportController extends Controller
 {
+    public function __construct(
+        private readonly NotificationService $notifications,
+    ) {}
+
     public function index(Request $request): View
     {
         $this->ensureModerator();
@@ -101,6 +107,8 @@ class ReportController extends Controller
             'reportable_type' => $report->reportable_type,
         ], $request->userAgent());
 
+        $this->notifyReporterAboutStatusUpdate($report);
+
         return back()->with('report_admin_notice', __('Report status updated.'));
     }
 
@@ -145,6 +153,50 @@ class ReportController extends Controller
         ], $request->userAgent());
 
         return back()->with('report_admin_notice', __(':count report(s) removed.', ['count' => $deleted]));
+    }
+
+    private function notifyReporterAboutStatusUpdate(Report $report): void
+    {
+        $reporter = $report->reporter;
+
+        if (! $reporter) {
+            return;
+        }
+
+        $statusLabel = $report->status->label();
+        $title = __('Your :type report was marked :status', [
+            'type' => strtolower($report->typeLabel()),
+            'status' => strtolower($statusLabel),
+        ]);
+
+        $subjectName = $report->reportable?->name ?? null;
+        $body = $subjectName
+            ? __('The report regarding :subject is now :status.', [
+                'subject' => $subjectName,
+                'status' => strtolower($statusLabel),
+            ])
+            : __('Your report is now :status.', ['status' => strtolower($statusLabel)]);
+
+        $actionUrl = null;
+        if ($report->reportable_type === Report::TYPE_RESOURCE && $report->reportable) {
+            $actionUrl = route('resources.show', $report->reportable);
+        } elseif ($report->reportable_type === Report::TYPE_USER && $report->reportable) {
+            $actionUrl = route('profile.show', $report->reportable);
+        }
+
+        $this->notifications->notify(
+            $reporter,
+            NotificationCategory::Reports,
+            $title,
+            $body,
+            [
+                'report_id' => $report->id,
+                'status' => $report->status->value,
+                'reportable_type' => $report->reportable_type,
+                'reportable_id' => $report->reportable_id,
+            ],
+            $actionUrl
+        );
     }
 
     private function ensureModerator(): void

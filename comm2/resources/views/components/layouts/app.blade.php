@@ -1,9 +1,14 @@
 @php
     use App\Enums\ReportStatus;
+    use App\Models\Notification;
     use App\Models\Report;
     
     $pendingReportsCount = auth()->check() && auth()->user()->isModerator()
         ? Report::where('status', ReportStatus::Pending)->count()
+        : 0;
+
+    $unreadNotificationsCount = auth()->check()
+        ? Notification::where('user_id', auth()->id())->whereNull('read_at')->count()
         : 0;
 @endphp
 <!DOCTYPE html>
@@ -23,6 +28,18 @@
                     <flux:navlist.item icon="server" :href="route('servers.index')" :current="request()->routeIs('servers.*')" wire:navigate>{{ __('Servers') }}</flux:navlist.item>
                     <flux:navlist.item icon="folder" :href="route('resources.index')" :current="request()->routeIs('resources.*')" wire:navigate>{{ __('Resources') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')" wire:navigate>{{ __('Members') }}</flux:navlist.item>
+                    @auth
+                        <flux:navlist.item icon="bell" :href="route('notifications.index')" :current="request()->routeIs('notifications.*')" wire:navigate>
+                            <span class="flex items-center gap-2">
+                                {{ __('Notifications') }}
+                                @if ($unreadNotificationsCount > 0)
+                                    <span class="inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-semibold h-5 w-5 min-w-[1.25rem]">
+                                        {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
+                                    </span>
+                                @endif
+                            </span>
+                        </flux:navlist.item>
+                    @endauth
                 </flux:navlist.group>
                 @auth
                     @if (auth()->user()->isModerator())
@@ -94,6 +111,24 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            @auth
+                <a
+                    href="{{ route('notifications.index') }}"
+                    class="relative rounded-full border border-neutral-200 p-2 text-neutral-600 transition hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    wire:navigate
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 10V6a4 4 0 00-8 0v4a4 4 0 01-.879 2.545L4 14h12l-1.121-1.455A4 4 0 0114 10z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h2a2 2 0 002-2v-1H5v1a2 2 0 002 2z" />
+                    </svg>
+                    @if ($unreadNotificationsCount > 0)
+                        <span class="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                            {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
+                        </span>
+                    @endif
+                </a>
+            @endauth
 
             @auth
             <flux:dropdown position="top" align="end">

@@ -7,11 +7,15 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ResourceFollowController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ResourceUploadController;
+use App\Http\Controllers\UserFollowController;
+use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\ServerController;
 use App\Livewire\Settings\Account;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Settings\Friends as FriendsSettings;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
@@ -36,10 +40,13 @@ Route::get('members', [MemberController::class, 'index'])->name('members.index')
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/account');
 
+    Route::view('notifications', 'notifications.index')->name('notifications.index');
+
     Route::get('settings/account', Account::class)->name('account.edit');
     Route::get('settings/profile', Profile::class)->name('profile.edit');
     Route::get('settings/password', Password::class)->name('user-password.edit');
     Route::get('settings/appearance', Appearance::class)->name('appearance.edit');
+    Route::get('settings/friends', FriendsSettings::class)->name('friends.manage');
 
     Route::get('settings/two-factor', TwoFactor::class)
         ->middleware(
@@ -69,6 +76,17 @@ Route::middleware(['auth'])->group(function () {
     // Resource rating
     Route::post('resources/{resource}/rating', [ResourceController::class, 'storeRating'])->name('resources.rating.store');
     Route::delete('resources/{resource}/ratings/{rating}', [ResourceController::class, 'deleteRating'])->name('resources.rating.delete');
+
+    Route::post('resources/{resource}/follow', [ResourceFollowController::class, 'store'])->name('resources.follow');
+    Route::delete('resources/{resource}/follow', [ResourceFollowController::class, 'destroy'])->name('resources.unfollow');
+
+    Route::post('profile/{user}/follow', [UserFollowController::class, 'store'])->name('users.follow');
+    Route::delete('profile/{user}/follow', [UserFollowController::class, 'destroy'])->name('users.unfollow');
+
+    Route::post('profile/{user}/friends', [FriendshipController::class, 'store'])->name('friends.request');
+    Route::patch('profile/{user}/friends', [FriendshipController::class, 'accept'])->name('friends.accept');
+    Route::delete('profile/{user}/friends', [FriendshipController::class, 'destroy'])->name('friends.destroy');
+    Route::post('friends/request-by-username', [FriendshipController::class, 'storeByUsername'])->name('friends.request-by-username');
 
     // Resource moderation (moderator+)
     Route::post('resources/{resource}/disable', [ResourceController::class, 'disable'])->name('resources.disable');

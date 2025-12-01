@@ -37,10 +37,89 @@
                 <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-500">
                     {{ __('Member since') }}: {{ $user->created_at->format('F Y') }}
                 </p>
+                <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-500">
+                    {{ __('Followers') }}: <span class="font-medium">{{ number_format($user->followers_count ?? 0) }}</span>
+                </p>
+                @auth
+                    @if (! $isOwner)
+                        <div class="mt-4 flex flex-wrap items-center gap-3">
+                            @if ($profileIsPublic)
+                                <form method="POST" action="{{ $isFollowingUser ? route('users.unfollow', $user) : route('users.follow', $user) }}">
+                                    @csrf
+                                    @if ($isFollowingUser)
+                                        @method('DELETE')
+                                    @endif
+                                    <flux:button variant="{{ $isFollowingUser ? 'ghost' : 'outline' }}" size="sm">
+                                        {{ $isFollowingUser ? __('Following') : __('Follow user') }}
+                                    </flux:button>
+                                </form>
+                            @endif
+
+                                @if ($isFriend)
+                                    <form method="POST" action="{{ route('friends.destroy', $user) }}" onsubmit="return confirm('{{ __('Remove friend?') }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <flux:button variant="ghost" size="sm">
+                                            {{ __('Unfriend') }}
+                                    </flux:button>
+                                </form>
+                            @elseif ($incomingFriendRequest)
+                                <form method="POST" action="{{ route('friends.accept', $user) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <flux:button variant="primary" size="sm">
+                                        {{ __('Accept friend request') }}
+                                    </flux:button>
+                                </form>
+                                <form method="POST" action="{{ route('friends.destroy', $user) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <flux:button variant="outline" size="sm">
+                                        {{ __('Decline') }}
+                                    </flux:button>
+                                </form>
+                            @elseif ($outgoingFriendRequest)
+                                <form method="POST" action="{{ route('friends.destroy', $user) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <flux:button variant="ghost" size="sm">
+                                        {{ __('Cancel request') }}
+                                    </flux:button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('friends.request', $user) }}">
+                                    @csrf
+                                    <flux:button
+                                        variant="outline"
+                                        size="sm"
+                                        type="submit"
+                                        @if (! $user->allow_friend_requests) disabled @endif
+                                    >
+                                        {{ __('Add friend') }}
+                                    </flux:button>
+                                </form>
+                                @unless ($user->allow_friend_requests)
+                                    <span class="text-xs text-neutral-500 dark:text-neutral-400">{{ __('Friend requests disabled') }}</span>
+                                @endunless
+                            @endif
+                        </div>
+                    @endif
+                @endauth
             </div>
         </div>
 
         <flux:separator />
+
+        @if ($errors->has('friend') || $errors->has('follow'))
+            <div class="rounded-2xl border border-amber-200 bg-amber-50/70 p-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/30 dark:text-amber-100">
+                {{ $errors->first('friend') ?? $errors->first('follow') }}
+            </div>
+        @endif
+        @if (session('success'))
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-100">
+                {{ session('success') }}
+            </div>
+        @endif
 
         @if (session('report_success'))
             <div class="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/20 dark:text-blue-100">

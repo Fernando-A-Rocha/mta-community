@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\FriendshipStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -33,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'favorite_gang',
         'favorite_weapon',
         'favorite_radio_station',
+        'allow_friend_requests',
     ];
 
     /**
@@ -58,6 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'allow_friend_requests' => 'boolean',
         ];
     }
 
@@ -153,5 +157,81 @@ class User extends Authenticatable implements MustVerifyEmail
             ],
             default => null,
         };
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function unreadNotifications(): HasMany
+    {
+        return $this->notifications()->whereNull('read_at');
+    }
+
+    public function followedResources(): BelongsToMany
+    {
+        return $this->belongsToMany(Resource::class, 'resource_follows')->withTimestamps();
+    }
+
+    public function followedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'user_follows', 'follower_id', 'followed_id')->withTimestamps();
+    }
+
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'user_follows', 'followed_id', 'follower_id')->withTimestamps();
+    }
+
+    public function sentFriendRequests(): HasMany
+    {
+        return $this->hasMany(Friendship::class, 'requester_id');
+    }
+
+    public function receivedFriendRequests(): HasMany
+    {
+        return $this->hasMany(Friendship::class, 'addressee_id');
+    }
+
+    public function friendshipWith(User $user): ?Friendship
+    {
+        if ($user->id === $this->id) {
+            return null;
+        }
+
+        return Friendship::between($this->id, $user->id)->first();
+    }
+
+    public function isFriendsWith(User $user): bool
+    {
+        $friendship = $this->friendshipWith($user);
+
+        return $friendship?->status === FriendshipStatus::Accepted;
+    }
+
+    public function hasPendingFriendRequestWith(User $user): bool
+    {
+        $friendship = $this->friendshipWith($user);
+
+        return $friendship?->status === FriendshipStatus::Pending;
+    }
+
+    public function isFollowingResource(Resource $resource): bool
+    {
+        return $this->followedResources()
+            ->where('resources.id', $resource->id)
+            ->exists();
+    }
+
+    public function isFollowingUser(User $user): bool
+    {
+        if ($user->id === $this->id) {
+            return false;
+        }
+
+        return $this->followedUsers()
+            ->where('followed_id', $user->id)
+            ->exists();
     }
 }
