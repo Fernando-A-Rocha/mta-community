@@ -182,15 +182,9 @@ fi
 # Laravel optimization
 log "${GREEN}⚡ Optimizing Laravel application...${NC}"
 
-# Clear and cache configurations
-sudo -u www-data php artisan config:clear
-sudo -u www-data php artisan config:cache
-
-sudo -u www-data php artisan route:clear
-sudo -u www-data php artisan route:cache
-
-sudo -u www-data php artisan view:clear
-sudo -u www-data php artisan view:cache
+# Clear and optimize
+sudo -u www-data php artisan optimize:clear
+sudo -u www-data php artisan optimize
 
 # Create storage link if it doesn't exist
 if [ ! -L "$LARAVEL_DIR/public/storage" ]; then
