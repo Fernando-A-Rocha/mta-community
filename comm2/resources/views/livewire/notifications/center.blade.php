@@ -9,7 +9,7 @@
                 size="sm"
                 variant="ghost"
                 wire:click="markSelectedAsUnread"
-                @disabled(empty($selected))
+                :disabled="empty($selected)"
             >
                 {{ __('Mark unread') }}
             </flux:button>
@@ -17,7 +17,7 @@
                 size="sm"
                 variant="ghost"
                 wire:click="markSelectedAsRead"
-                @disabled(empty($selected))
+                :disabled="empty($selected)"
             >
                 {{ __('Mark read') }}
             </flux:button>
@@ -25,7 +25,7 @@
                 size="sm"
                 variant="outline"
                 wire:click="deleteSelected"
-                @disabled(empty($selected))
+                :disabled="empty($selected)"
             >
                 {{ __('Delete') }}
             </flux:button>
