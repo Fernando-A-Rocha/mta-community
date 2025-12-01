@@ -77,4 +77,7 @@ jobs:
 
       - name: Execute tests
         run: composer run test
+ 
+      - name: Optimize for prod
+        run: php artisan optimize
 
