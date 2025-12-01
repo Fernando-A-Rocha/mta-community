@@ -1,9 +1,3 @@
-@php
-    use App\Enums\ReportStatus;
-    use App\Models\Report as ReportModel;
-    use Illuminate\Support\Str;
-@endphp
-
 <x-layouts.app :title="__('Reports Center')">
     <div class="flex w-full flex-1 flex-col gap-6">
         <div class="flex items-center justify-between gap-3">
@@ -90,10 +84,10 @@
             @forelse ($reports as $report)
                 @php
                     $target = $report->reportable;
-                    $isResource = $report->reportable_type === ReportModel::TYPE_RESOURCE;
+                    $isResource = $report->reportable_type === \App\Models\Report::TYPE_RESOURCE;
                     $targetUrl = $target ? ($isResource ? route('resources.show', $target) : route('profile.show', $target)) : null;
                     $updateAllowed = true;
-                    $canDelete = auth()->user()?->isAdmin() || (auth()->user()?->isModerator() && $report->status === ReportStatus::Invalid);
+                    $canDelete = auth()->user()?->isAdmin() || (auth()->user()?->isModerator() && $report->status === \App\Enums\ReportStatus::Invalid);
                 @endphp
                 <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
                     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -122,7 +116,7 @@
                         </div>
                         <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $report->status->badgeClasses() }}">{{ $report->status->label() }}</span>
                     </div>
-                    <p class="mt-4 text-sm text-slate-800 dark:text-slate-200">{{ Str::limit($report->comment, 400) }}</p>
+                    <p class="mt-4 text-sm text-slate-800 dark:text-slate-200">{{ \Illuminate\Support\Str::limit($report->comment, 400) }}</p>
                     <div class="mt-4 grid gap-2 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-2">
                         <div>
                         </div>

@@ -2,10 +2,6 @@
     'log',
 ])
 
-@php
-    use Illuminate\Support\Str;
-@endphp
-
 <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -30,7 +26,7 @@
         <div class="md:col-span-1">
             <span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('User agent') }}:</span>
             <span class="block truncate" title="{{ $log->user_agent ?? __('n/a') }}">
-                {{ $log->user_agent ? Str::limit($log->user_agent, 80) : __('n/a') }}
+                {{ $log->user_agent ? \Illuminate\Support\Str::limit($log->user_agent, 80) : __('n/a') }}
             </span>
         </div>
     </div>
