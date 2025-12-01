@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\NotificationCategory;
 use App\Http\Requests\StoreRatingRequest;
 use App\Http\Requests\UpdateResourceRequest;
 use App\Http\Requests\UpdateVersionVerificationRequest;
@@ -13,19 +14,26 @@ use App\Models\ResourceImage;
 use App\Models\ResourceRating;
 use App\Models\ResourceVersion;
 use App\Models\Tag;
+use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ResourceController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private readonly NotificationService $notifications,
+    ) {}
 
     /**
      * Display a listing of resources.
@@ -115,6 +123,8 @@ class ResourceController extends Controller
                 ->latest('id')
                 ->first()
             : null;
+
+        $resource->loadCount('followers');
 
         return view('resources.show', compact('resource', 'userRating', 'existingReport'));
     }
@@ -261,6 +271,8 @@ class ResourceController extends Controller
                 ],
                 $request->userAgent()
             );
+
+            $this->notifyResourceFollowersAboutUpdate($resource, array_keys($changes), $user);
         }
 
         return redirect()
@@ -301,6 +313,10 @@ class ResourceController extends Controller
             ],
             $request->userAgent()
         );
+
+        if (! $wasUpdate) {
+            $this->notifyFollowersAboutNewReview($user, $resource, $rating);
+        }
 
         return redirect()
             ->route('resources.show', $resource)
@@ -376,6 +392,95 @@ class ResourceController extends Controller
                 'order' => $order++,
             ]);
         }
+    }
+
+    /**
+     * Notify followers of a resource about metadata updates.
+     *
+     * @param  list<string>  $changedFields
+     */
+    private function notifyResourceFollowersAboutUpdate(Resource $resource, array $changedFields, User $actor): void
+    {
+        if (empty($changedFields)) {
+            return;
+        }
+
+        $followerIds = $resource->followers()
+            ->where('users.id', '!=', $actor->id)
+            ->pluck('users.id');
+
+        if ($followerIds->isEmpty()) {
+            return;
+        }
+
+        $fieldsList = collect($changedFields)
+            ->map(fn (string $field) => Str::of($field)->replace('_', ' ')->title())
+            ->implode(', ');
+
+        $title = __(':resource was updated', ['resource' => $resource->display_name]);
+        $body = __(':user updated :resource (:fields)', [
+            'user' => $actor->name,
+            'resource' => $resource->display_name,
+            'fields' => $fieldsList,
+        ]);
+
+        $this->notifications->notify(
+            $followerIds,
+            NotificationCategory::Resource,
+            $title,
+            $body,
+            [
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->display_name,
+                'updated_by' => [
+                    'id' => $actor->id,
+                    'name' => $actor->name,
+                ],
+                'changed_fields' => $changedFields,
+            ],
+            route('resources.show', $resource)
+        );
+    }
+
+    /**
+     * Notify followers of a user about a new review they wrote.
+     */
+    private function notifyFollowersAboutNewReview(User $reviewer, Resource $resource, ResourceRating $rating): void
+    {
+        $followerIds = $reviewer->followers()
+            ->where('users.id', '!=', $reviewer->id)
+            ->pluck('users.id');
+
+        if ($followerIds->isEmpty()) {
+            return;
+        }
+
+        $title = __(':user reviewed :resource', [
+            'user' => $reviewer->name,
+            'resource' => $resource->display_name,
+        ]);
+
+        $body = $rating->comment
+            ? Str::limit($rating->comment, 140)
+            : __('Left a :stars★ rating.', ['stars' => $rating->rating]);
+
+        $this->notifications->notify(
+            $followerIds,
+            NotificationCategory::Resource,
+            $title,
+            $body,
+            [
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->display_name,
+                'rating' => $rating->rating,
+                'comment_excerpt' => $rating->comment ? Str::limit($rating->comment, 200) : null,
+                'reviewer' => [
+                    'id' => $reviewer->id,
+                    'name' => $reviewer->name,
+                ],
+            ],
+            route('resources.show', $resource)
+        );
     }
 
     /**

@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\NotificationCategory;
 use App\Http\Requests\StoreResourceRequest;
 use App\Models\Resource;
+use App\Models\ResourceVersion;
 use App\Models\Tag;
+use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use App\Services\ResourceUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ResourceUploadController extends Controller
 {
     public function __construct(
-        private readonly ResourceUploadService $uploadService
+        private readonly ResourceUploadService $uploadService,
+        private readonly NotificationService $notifications,
     ) {}
 
     /**
@@ -166,6 +172,9 @@ class ResourceUploadController extends Controller
                     ],
                     $request->userAgent()
                 );
+
+                $this->notifyResourceFollowersAboutNewRelease($resource, $currentVersion, $changelog);
+                $this->notifyUserFollowersAboutResourcePublication($user, $resource, $currentVersion, $changelog, true);
             } else {
                 // New resource created
                 ActivityLogger::log(
@@ -187,6 +196,8 @@ class ResourceUploadController extends Controller
                     ],
                     $request->userAgent()
                 );
+
+                $this->notifyUserFollowersAboutResourcePublication($user, $resource, $currentVersion, $changelog, false);
             }
 
             return redirect()
@@ -206,5 +217,88 @@ class ResourceUploadController extends Controller
                 ->withErrors(['submit' => 'An error occurred: '.$e->getMessage()])
                 ->withInput();
         }
+    }
+
+    private function notifyResourceFollowersAboutNewRelease(Resource $resource, ?ResourceVersion $version, string $changelog): void
+    {
+        $followers = $resource->followers()
+            ->where('users.id', '!=', $resource->user_id)
+            ->pluck('users.id');
+
+        if ($followers->isEmpty()) {
+            return;
+        }
+
+        $versionLabel = $version?->version ?? null;
+        $title = __('New release for :resource', ['resource' => $resource->display_name]);
+        $body = $versionLabel
+            ? __('Version :version is now available.', ['version' => $versionLabel])
+            : __('A new release is now available.');
+
+        $this->notifications->notify(
+            $followers,
+            NotificationCategory::Resource,
+            $title,
+            $body.' '.Str::limit($changelog, 140),
+            [
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->display_name,
+                'version' => $versionLabel,
+                'changelog_excerpt' => Str::limit($changelog, 200),
+                'uploaded_by' => [
+                    'id' => $resource->user_id,
+                    'name' => $resource->user->name,
+                ],
+            ],
+            route('resources.show', $resource)
+        );
+    }
+
+    private function notifyUserFollowersAboutResourcePublication(
+        User $author,
+        Resource $resource,
+        ?ResourceVersion $version,
+        string $changelog,
+        bool $isUpdate
+    ): void {
+        $followers = $author->followers()
+            ->where('users.id', '!=', $author->id)
+            ->pluck('users.id');
+
+        if ($isUpdate) {
+            $resourceFollowerIds = $resource->followers()->pluck('users.id');
+            $followers = $followers->diff($resourceFollowerIds);
+        }
+
+        if ($followers->isEmpty()) {
+            return;
+        }
+
+        $versionLabel = $version?->version;
+        $title = $isUpdate
+            ? __(':user shipped a new release for :resource', [
+                'user' => $author->name,
+                'resource' => $resource->display_name,
+            ])
+            : __(':user published a new resource', ['user' => $author->name]);
+
+        $body = $isUpdate
+            ? __('Version :version just dropped.', ['version' => $versionLabel ?? __('latest')])
+            : __('Check out :resource on the Community.', ['resource' => $resource->display_name]);
+
+        $this->notifications->notify(
+            $followers,
+            NotificationCategory::Resource,
+            $title,
+            $body.' '.Str::limit($changelog, 140),
+            [
+                'resource_id' => $resource->id,
+                'resource_name' => $resource->display_name,
+                'version' => $versionLabel,
+                'is_update' => $isUpdate,
+                'changelog_excerpt' => Str::limit($changelog, 200),
+            ],
+            route('resources.show', $resource)
+        );
     }
 }

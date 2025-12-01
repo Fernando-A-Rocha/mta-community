@@ -16,6 +16,10 @@ class Profile extends Component
 
     public string $profile_visibility = 'public';
 
+    public bool $confirmFollowerLoss = false;
+
+    public int $currentFollowerCount = 0;
+
     public ?string $favorite_city = null;
 
     public ?string $favorite_vehicle = null;
@@ -46,6 +50,7 @@ class Profile extends Component
         $this->favorite_weapon = $user->favorite_weapon;
         $this->favorite_radio_station = $user->favorite_radio_station;
         $this->avatarPreview = $user->avatarUrl();
+        $this->currentFollowerCount = $user->followers()->count();
     }
 
     /**
@@ -90,6 +95,23 @@ class Profile extends Component
             ]);
         }
 
+        $currentVisibility = $user->profile_visibility ?? 'public';
+        $newVisibility = $validated['profile_visibility'] ?? 'public';
+
+        if ($currentVisibility === 'public' && $newVisibility === 'private') {
+            $followerCount = $user->followers()->count();
+            if ($followerCount > 0) {
+                if (! $this->confirmFollowerLoss) {
+                    throw ValidationException::withMessages([
+                        'profile_visibility' => [__('Confirm follower removal before making your profile private.')],
+                    ]);
+                }
+
+                $user->followers()->detach();
+                $this->currentFollowerCount = 0;
+            }
+        }
+
         // Handle avatar upload
         if ($this->avatar) {
             $this->validateImageType($this->avatar);
@@ -115,9 +137,14 @@ class Profile extends Component
 
         $user->save();
 
+        if ($newVisibility === 'public') {
+            $this->currentFollowerCount = $user->followers()->count();
+        }
+
         // Reset avatar property
         $this->avatar = null;
         $this->avatarPreview = $user->avatarUrl();
+        $this->confirmFollowerLoss = false;
 
         $this->dispatch('profile-updated');
     }

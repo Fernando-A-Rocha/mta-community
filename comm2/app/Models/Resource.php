@@ -79,6 +79,11 @@ class Resource extends Model
         return $this->belongsToMany(Language::class, 'resource_language');
     }
 
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'resource_follows')->withTimestamps();
+    }
+
     public function downloads(): HasMany
     {
         return $this->hasMany(ResourceDownload::class);
