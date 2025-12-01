@@ -1,7 +1,3 @@
-@php
-    use Illuminate\Support\Str;
-@endphp
-
 <x-layouts.app :title="__('Activity logs')">
     <div class="flex w-full flex-1 flex-col gap-6">
         <div>

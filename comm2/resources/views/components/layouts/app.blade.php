@@ -1,14 +1,10 @@
 @php
-    use App\Enums\ReportStatus;
-    use App\Models\Notification;
-    use App\Models\Report;
-    
     $pendingReportsCount = auth()->check() && auth()->user()->isModerator()
-        ? Report::where('status', ReportStatus::Pending)->count()
+        ? \App\Models\Report::where('status', \App\Enums\ReportStatus::Pending)->count()
         : 0;
 
     $unreadNotificationsCount = auth()->check()
-        ? Notification::where('user_id', auth()->id())->whereNull('read_at')->count()
+        ? \App\Models\Notification::where('user_id', auth()->id())->whereNull('read_at')->count()
         : 0;
 @endphp
 <!DOCTYPE html>

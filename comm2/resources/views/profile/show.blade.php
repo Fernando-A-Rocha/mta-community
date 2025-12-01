@@ -1,8 +1,3 @@
-@php
-    use App\Enums\ReportStatus;
-    use App\Models\Report as ReportModel;
-@endphp
-
 <x-layouts.app :title="__('Profile') . ' - ' . $user->name">
     <div class="flex w-full flex-1 flex-col gap-6 rounded-xl">
         <div class="flex items-center gap-4">
@@ -200,7 +195,7 @@
                     :entityId="$user->id"
                     :entityName="$user->name"
                     :action="route('reports.users.store', $user)"
-                    :reasons="ReportModel::USER_REASONS"
+                    :reasons="\App\Models\Report::USER_REASONS"
                     :existingReport="$viewerReport"
                 />
             </div>

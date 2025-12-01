@@ -1,8 +1,3 @@
-@php
-    use App\Enums\ReportStatus;
-    use App\Models\Report as ReportModel;
-@endphp
-
 <x-layouts.app :title="$resource->display_name">
     @php
         $avgRating = $resource->average_rating;
@@ -560,7 +555,7 @@
                                 :entityId="$resource->id"
                                 :entityName="$resource->display_name"
                                 :action="route('reports.resources.store', $resource)"
-                                :reasons="ReportModel::RESOURCE_REASONS"
+                                :reasons="\App\Models\Report::RESOURCE_REASONS"
                                 :existingReport="$existingReport"
                             />
                         </div>

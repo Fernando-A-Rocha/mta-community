@@ -8,7 +8,6 @@
 ])
 
 @php
-    use App\Enums\ReportStatus;
     $modalName = 'report-modal-' . $type . '-' . $entityId;
 @endphp
 
@@ -39,7 +38,7 @@
             </flux:subheading>
         </div>
 
-        @if ($existingReport && $existingReport->status === ReportStatus::Pending)
+        @if ($existingReport && $existingReport->status === \App\Enums\ReportStatus::Pending)
             <div class="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100">
                 <p class="font-semibold">{{ __('Pending review') }}</p>
                 <p class="mt-1 text-xs text-amber-800/80 dark:text-amber-200/80">
