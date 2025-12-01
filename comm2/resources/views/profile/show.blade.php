@@ -188,18 +188,11 @@
             @endif
         </div>
 
-        @if (auth()->check() && ! $isOwner && ($profileIsPublic || ($isModerator ?? false)))
-            <div class="flex justify-end">
-                <x-report-modal
-                    type="user"
-                    :entityId="$user->id"
-                    :entityName="$user->name"
-                    :action="route('reports.users.store', $user)"
-                    :reasons="\App\Models\Report::USER_REASONS"
-                    :existingReport="$viewerReport"
-                />
-            </div>
-        @endif
+        @includeWhen(
+            auth()->check() && ! $isOwner && ($profileIsPublic || ($isModerator ?? false)),
+            'profile.partials.report-modal',
+            ['user' => $user, 'viewerReport' => $viewerReport]
+        )
     </div>
 </x-layouts.app>
 
