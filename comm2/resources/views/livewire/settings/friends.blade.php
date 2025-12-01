@@ -11,7 +11,23 @@
         <div class="space-y-6">
             <flux:field>
                 <flux:label>{{ __('Allow Friend Requests') }}</flux:label>
-                <flux:toggle wire:model="allowFriendRequests" />
+                <label class="inline-flex items-center gap-3 select-none">
+                    <input
+                        type="checkbox"
+                        wire:model="allowFriendRequests"
+                        role="switch"
+                        class="peer sr-only"
+                    />
+                    <span
+                        class="relative inline-flex h-6 w-11 items-center rounded-full bg-neutral-300 transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500 peer-checked:bg-primary-500 peer-disabled:opacity-50 dark:bg-neutral-700 dark:peer-checked:bg-primary-400"
+                        aria-hidden="true"
+                    >
+                        <span class="mx-0.5 h-5 w-5 rounded-full bg-white shadow transition-all duration-200 peer-checked:translate-x-5 dark:bg-neutral-200"></span>
+                    </span>
+                    <span class="text-sm text-neutral-700 dark:text-neutral-200">
+                        {{ __('Enable this to allow new friend requests.') }}
+                    </span>
+                </label>
                 <flux:description>{{ __('Disable this to prevent new friend requests.') }}</flux:description>
             </flux:field>
 
