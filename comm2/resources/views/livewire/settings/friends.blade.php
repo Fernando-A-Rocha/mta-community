@@ -10,8 +10,17 @@
 
         <div class="space-y-6">
             <flux:field>
-                <flux:label>{{ __('Allow Friend Requests') }}</flux:label>
-                <flux:toggle wire:model="allowFriendRequests" />
+                @php($toggleId = 'allowFriendRequestsToggle')
+                <flux:label for="{{ $toggleId }}">{{ __('Allow Friend Requests') }}</flux:label>
+                <label for="{{ $toggleId }}" class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-200">
+                    <input
+                        type="checkbox"
+                        id="{{ $toggleId }}"
+                        wire:model="allowFriendRequests"
+                        class="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 dark:border-neutral-600"
+                    />
+                    <span>{{ __('Enable this to allow new friend requests.') }}</span>
+                </label>
                 <flux:description>{{ __('Disable this to prevent new friend requests.') }}</flux:description>
             </flux:field>
 
