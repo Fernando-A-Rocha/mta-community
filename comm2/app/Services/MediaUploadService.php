@@ -83,21 +83,79 @@ class MediaUploadService
      */
     public function extractYouTubeVideoId(string $url): ?string
     {
-        // Patterns for various YouTube URL formats
-        $patterns = [
-            '/^https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/',
-            '/^https?:\/\/(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)/',
-            '/^https?:\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/',
-            '/^https?:\/\/(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]+)/',
+        $url = trim($url);
+
+        if ($url === '') {
+            return null;
+        }
+
+        if (! str_starts_with($url, 'http://') && ! str_starts_with($url, 'https://')) {
+            $url = 'https://' . ltrim($url, '/');
+        }
+
+        $parsedUrl = parse_url($url);
+
+        if ($parsedUrl === false || empty($parsedUrl['host'])) {
+            return null;
+        }
+
+        $host = strtolower($parsedUrl['host']);
+        $host = str_starts_with($host, 'www.') ? substr($host, 4) : $host;
+        $path = $parsedUrl['path'] ?? '';
+        $segments = array_values(array_filter(explode('/', trim($path, '/'))));
+
+        if ($host === 'youtu.be' && isset($segments[0])) {
+            return $this->sanitizeYouTubeVideoId($segments[0]);
+        }
+
+        $youtubeHosts = [
+            'youtube.com',
+            'm.youtube.com',
+            'music.youtube.com',
+            'youtube-nocookie.com',
         ];
 
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $url, $matches)) {
-                return $matches[1];
+        if (in_array($host, $youtubeHosts, true)) {
+            parse_str($parsedUrl['query'] ?? '', $query);
+
+            if (isset($query['v'])) {
+                return $this->sanitizeYouTubeVideoId($query['v']);
+            }
+
+            if (isset($segments[0]) && in_array($segments[0], ['embed', 'shorts', 'v', 'live'], true)) {
+                $videoIdSegment = $segments[1] ?? null;
+
+                return $this->sanitizeYouTubeVideoId($videoIdSegment);
             }
         }
 
         return null;
+    }
+
+    private function sanitizeYouTubeVideoId(?string $candidate): ?string
+    {
+        if (! $candidate) {
+            return null;
+        }
+
+        $candidate = trim($candidate);
+
+        if ($candidate === '') {
+            return null;
+        }
+
+        $candidate = preg_split('/[?&#]/', $candidate, 2);
+        $candidate = $candidate[0] ?? '';
+
+        if ($candidate === '') {
+            return null;
+        }
+
+        if (! preg_match('/^[A-Za-z0-9_-]{6,15}$/', $candidate)) {
+            return null;
+        }
+
+        return $candidate;
     }
 
     /**
