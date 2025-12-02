@@ -5,7 +5,7 @@
                 <div>
                     <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Members</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                        Discover the most active and talented creators in our community. Top creators are ranked by their resource downloads and ratings.
+                        Discover the most active and talented creators in our community. Top creators are ranked by their resource downloads, ratings, media posts, and reactions.
                     </p>
                 </div>
             </div>
@@ -16,7 +16,7 @@
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Top Creators</h2>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                        Members ranked by total downloads and average ratings of their resources.
+                        Members ranked by total downloads, average ratings of their resources, media posts, and reactions received.
                     </p>
                 </div>
 
@@ -64,6 +64,22 @@
                                             </span>
                                         @else
                                             <span class="text-xs text-slate-400 dark:text-slate-500">No ratings yet</span>
+                                        @endif
+                                        @if (isset($creator['media_count']) && $creator['media_count'] > 0)
+                                            <span class="flex items-center gap-1">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                {{ number_format($creator['media_count']) }} {{ $creator['media_count'] === 1 ? 'media' : 'media' }}
+                                            </span>
+                                        @endif
+                                        @if (isset($creator['total_reactions']) && $creator['total_reactions'] > 0)
+                                            <span class="flex items-center gap-1">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                </svg>
+                                                {{ number_format($creator['total_reactions']) }} {{ $creator['total_reactions'] === 1 ? 'reaction' : 'reactions' }}
+                                            </span>
                                         @endif
                                     </div>
                                 </div>

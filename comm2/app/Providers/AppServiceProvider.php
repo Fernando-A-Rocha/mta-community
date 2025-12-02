@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Media;
 use App\Models\Resource;
+use App\Policies\MediaPolicy;
 use App\Policies\ResourcePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Resource::class => ResourcePolicy::class,
+        Media::class => MediaPolicy::class,
     ];
 
     /**
@@ -58,6 +61,26 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('resource-download', function (Request $request) {
             return Limit::perHour(60)->by($request->ip());
+        });
+
+        RateLimiter::for('media-upload', function (Request $request) {
+            return Limit::perDay(1)
+                ->by($request->user()?->id ?: $request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return redirect()
+                        ->route('media.index')
+                        ->withErrors(['upload' => 'You can only upload media once per 24 hours. Please try again later.']);
+                });
+        });
+
+        RateLimiter::for('media-reactions', function (Request $request) {
+            return Limit::perDay(10)
+                ->by($request->user()?->id ?: $request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'message' => 'You have reached the daily reaction limit of 10 reactions. Please try again tomorrow.',
+                    ], 429);
+                });
         });
     }
 }

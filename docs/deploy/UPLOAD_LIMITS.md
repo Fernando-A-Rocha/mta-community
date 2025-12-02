@@ -7,6 +7,7 @@ This document outlines the maximum upload file sizes configured across the appli
 The application allows users to upload:
 - Resource ZIP files and associated images (up to 20MB)
 - Profile avatars (up to 500KB)
+- Media images (up to 1MB each, max 5 images per post, 1920x1080 resolution max)
 
 The upload limits are enforced at multiple layers:
 
@@ -22,9 +23,15 @@ All three layers must be configured consistently to prevent upload failures.
 
 - **Resource ZIP files**: 20MB (defined in `comm2/app/Http/Requests/StoreResourceRequest.php`)
 - **Resource images**: 20MB (defined in `comm2/app/Http/Requests/StoreResourceRequest.php`)
+  - Automatically optimized and resized to maximum 1920x1080 pixels
+  - Compressed for optimal file size
 - **Profile avatars**: 500KB (512KB in validation, defined in `comm2/app/Livewire/Settings/Profile.php`)
   - Automatically resized to maximum 500x500 pixels
   - Stored as JPEG with 85% quality for optimal file size
+- **Media images**: 1MB per image, max 5 images per post (defined in `comm2/app/Http/Requests/StoreMediaRequest.php`)
+  - Maximum resolution: 1920x1080 pixels
+  - Automatically optimized and compressed
+  - Supported formats: JPG, JPEG, PNG, WebP
 
 ### Nginx Configuration
 
@@ -64,7 +71,13 @@ PHP upload_max_filesize (25M)
 Laravel validation max (20MB for resources, 500KB for avatars)
 ```
 
-**Note:** Profile avatars have a separate 500KB limit enforced at the Laravel validation level. The nginx and PHP limits (25M) are sufficient for avatar uploads as they are well below the configured limits.
+**Note:** Profile avatars (500KB) and media images (1MB each, max 5 = 5MB total) have separate limits enforced at the Laravel validation level. The nginx and PHP limits (25M) are sufficient for these uploads as they are well below the configured limits.
+
+**Image Optimization:** All uploaded images (avatars, resource images, media images) are automatically optimized using the `ImageOptimizationService` which:
+- Resizes images that exceed maximum dimensions while maintaining aspect ratio
+- Compresses images to reduce file size
+- Preserves transparency for PNG/WebP formats
+- Uses PHP GD library for server-side processing
 
 **Critical:** If any layer has a limit lower than the Laravel validation, uploads will fail with:
 

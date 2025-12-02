@@ -6,6 +6,8 @@ use App\Http\Controllers\DevelopmentController;
 use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegacyResourceVersionController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MediaReactionController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -41,6 +43,9 @@ Route::get('resources', [ResourceController::class, 'index'])->name('resources.i
 
 // Members
 Route::get('members', [MemberController::class, 'index'])->name('members.index');
+
+// Media (public index)
+Route::get('media', [MediaController::class, 'index'])->name('media.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -101,6 +106,19 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('profile/{user}/follow', [UserFollowController::class, 'store'])->name('users.follow');
     Route::delete('profile/{user}/follow', [UserFollowController::class, 'destroy'])->name('users.unfollow');
+
+    // Media upload
+    Route::get('media/upload', [MediaController::class, 'create'])->name('media.upload');
+    Route::post('media', [MediaController::class, 'store'])
+        ->middleware('throttle:media-upload')
+        ->name('media.store');
+    Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
+
+    // Media reactions
+    // Note: Rate limiting is handled in the controller to allow removals to bypass the limit
+    Route::post('media/{media}/reactions', [MediaReactionController::class, 'store'])
+        ->name('media.reactions.store');
+    Route::delete('media/{media}/reactions/{reaction}', [MediaReactionController::class, 'destroy'])->name('media.reactions.destroy');
 
     Route::post('profile/{user}/friends', [FriendshipController::class, 'store'])->name('friends.request');
     Route::patch('profile/{user}/friends', [FriendshipController::class, 'accept'])->name('friends.accept');
