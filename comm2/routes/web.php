@@ -16,6 +16,7 @@ use App\Http\Controllers\ServerController;
 use App\Http\Controllers\UserFollowController;
 use App\Livewire\Settings\Account;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Settings\Following;
 use App\Livewire\Settings\Friends as FriendsSettings;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -42,14 +43,15 @@ Route::get('resources', [ResourceController::class, 'index'])->name('resources.i
 Route::get('members', [MemberController::class, 'index'])->name('members.index');
 
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/account');
+    Route::redirect('settings', 'settings/profile');
 
     Route::view('notifications', 'notifications.index')->name('notifications.index');
 
-    Route::get('settings/account', Account::class)->name('account.edit');
     Route::get('settings/profile', Profile::class)->name('profile.edit');
+    Route::get('settings/account', Account::class)->name('account.edit');
     Route::get('settings/password', Password::class)->name('user-password.edit');
     Route::get('settings/appearance', Appearance::class)->name('appearance.edit');
+    Route::get('settings/following', Following::class)->name('following.manage');
     Route::get('settings/friends', FriendsSettings::class)->name('friends.manage');
 
     Route::get('settings/two-factor', TwoFactor::class)
