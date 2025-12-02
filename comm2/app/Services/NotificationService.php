@@ -62,7 +62,19 @@ class NotificationService
         if ($recipients instanceof User) {
             $collection->push($recipients->id);
         } elseif ($recipients instanceof Collection) {
-            $collection = $recipients->pluck('id');
+            // Check if it's already a collection of integers/IDs
+            if ($recipients->isEmpty()) {
+                $collection = $recipients;
+            } else {
+                $firstItem = $recipients->first();
+                if (is_int($firstItem) || (is_numeric($firstItem) && ! is_object($firstItem))) {
+                    // Already a collection of IDs, use as-is
+                    $collection = $recipients;
+                } else {
+                    // Collection of models/objects, pluck the id
+                    $collection = $recipients->pluck('id');
+                }
+            }
         } elseif (is_int($recipients)) {
             $collection->push($recipients);
         } else {
