@@ -137,7 +137,7 @@ class ResourceController extends Controller
         $this->authorize('update', $resource);
 
         $tags = Tag::orderBy('name')->get();
-        $languages = \App\Models\Language::orderBy('order')->get();
+        $languages = \App\Models\Language::orderBy('name')->get();
         $resource->load([
             'tags',
             'languages',
@@ -196,6 +196,8 @@ class ResourceController extends Controller
             }
 
             // Update languages
+            // Note: If no checkboxes are checked, the field won't be in the request
+            // We only update if the field is explicitly present
             if ($request->has('languages')) {
                 $oldLanguageIds = $resource->languages()->pluck('languages.id')->toArray();
                 $newLanguageIds = $request->input('languages', []);

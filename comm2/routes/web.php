@@ -67,9 +67,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('resources/upload', [ResourceUploadController::class, 'create'])
         ->middleware('ensure.resource.modification.enabled')
         ->name('resources.upload.create');
-    Route::post('resources/upload', [ResourceUploadController::class, 'store'])
+    
+    // Upload new resource
+    Route::get('resources/upload/new', [ResourceUploadController::class, 'createNew'])
+        ->middleware('ensure.resource.modification.enabled')
+        ->name('resources.upload.new');
+    Route::post('resources/upload/new', [ResourceUploadController::class, 'storeNew'])
         ->middleware(['throttle:resource-upload', 'ensure.resource.modification.enabled'])
-        ->name('resources.upload.store');
+        ->name('resources.upload.new.store');
+    
+    // Upload new version
+    Route::get('resources/upload/version', [ResourceUploadController::class, 'createVersion'])
+        ->middleware('ensure.resource.modification.enabled')
+        ->name('resources.upload.version');
+    Route::post('resources/upload/version', [ResourceUploadController::class, 'storeVersion'])
+        ->middleware(['throttle:resource-upload', 'ensure.resource.modification.enabled'])
+        ->name('resources.upload.version.store');
 
     // Resource edit (author or admin+)
     Route::get('resources/{resource}/edit', [ResourceController::class, 'edit'])->name('resources.edit');

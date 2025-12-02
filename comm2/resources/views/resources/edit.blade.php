@@ -46,21 +46,14 @@
                 <div>
                     <flux:field>
                         <flux:label>Long Description</flux:label>
-                        <div class="relative">
-                            <flux:textarea
-                                name="long_description"
-                                rows="10"
-                                id="long_description"
-                                data-min="50"
-                                data-max="10000"
-                                class="pb-8"
-                            >{{ old('long_description', $resource->long_description) }}</flux:textarea>
-                            <div class="absolute bottom-3 right-3 text-xs bg-white dark:bg-zinc-800 px-2 py-1 rounded" id="long_description_counter">
-                                <span id="long_description_count">0</span>/<span id="long_description_max">10000</span>
-                                <span id="long_description_min_status" class="ml-2"></span>
-                            </div>
-                        </div>
-                        <flux:description>Detailed description of your resource (minimum 50 characters)</flux:description>
+                        <flux:textarea
+                            name="long_description"
+                            rows="10"
+                            id="long_description"
+                            minlength="50"
+                            maxlength="10000"
+                        >{{ old('long_description', $resource->long_description) }}</flux:textarea>
+                        <flux:description>Detailed description of your resource (minimum 50 characters if provided)</flux:description>
                         @error('long_description')
                             <flux:error>{{ $message }}</flux:error>
                         @enderror
@@ -104,7 +97,7 @@
                                 />
                             @endforeach
                         </div>
-                        <flux:description>Select the language(s) your resource supports. You can select multiple languages if your resource is multi-lingual.</flux:description>
+                        <flux:description>Select the language(s) your resource supports. You can select multiple languages if your resource is multi-lingual. Languages are optional - you can leave this empty if your resource doesn't output any text.</flux:description>
                         @error('languages')
                             <flux:error>{{ $message }}</flux:error>
                         @enderror
@@ -370,41 +363,6 @@
                         submitLoading.classList.remove('hidden');
                     }
                 });
-
-                // Character counter for long description
-                function updateLongDescCounter() {
-                    const textarea = document.querySelector('textarea[name="long_description"]');
-                    const countEl = document.getElementById('long_description_count');
-                    const statusEl = document.getElementById('long_description_min_status');
-
-                    if (!textarea || !countEl || !statusEl) {
-                        return;
-                    }
-
-                    const length = (textarea.value || '').length;
-                    const min = 50;
-                    countEl.textContent = length;
-
-                    if (length >= min) {
-                        statusEl.textContent = '✓';
-                        statusEl.className = 'ml-2 text-green-600 dark:text-green-400 font-semibold';
-                    } else {
-                        const remaining = min - length;
-                        statusEl.textContent = `${remaining} more needed`;
-                        statusEl.className = 'ml-2 text-red-600 dark:text-red-400';
-                    }
-                }
-
-                // Initialize character counter
-                const form = document.getElementById('resource-edit-form');
-                if (form) {
-                    form.addEventListener('input', function(e) {
-                        if (e.target.name === 'long_description') {
-                            updateLongDescCounter();
-                        }
-                    });
-                    updateLongDescCounter();
-                }
             </script>
         </div>
 </x-layouts.app>

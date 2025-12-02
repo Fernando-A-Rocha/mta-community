@@ -54,7 +54,6 @@ class UpdateResourceRequest extends FormRequest
             'languages' => [
                 'nullable',
                 'array',
-                'min:1',
             ],
             'languages.*' => [
                 'required',

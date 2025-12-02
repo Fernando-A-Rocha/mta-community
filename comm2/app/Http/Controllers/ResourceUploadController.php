@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\NotificationCategory;
-use App\Http\Requests\StoreResourceRequest;
+use App\Http\Requests\StoreNewResourceRequest;
+use App\Http\Requests\StoreNewVersionRequest;
 use App\Models\Resource;
 use App\Models\ResourceVersion;
 use App\Models\Tag;
@@ -26,25 +27,45 @@ class ResourceUploadController extends Controller
     ) {}
 
     /**
-     * Show the resource upload form.
+     * Show the resource upload selection page.
      */
     public function create(): View
     {
         $user = Auth::user();
         $canUpload = ($user->profile_visibility ?? 'public') === 'public';
 
-        $tags = Tag::orderBy('name')->get();
-        $languages = \App\Models\Language::orderBy('order')->get();
-        $userOwnedResources = Auth::user()
-            ? Resource::where('user_id', Auth::id())
-                ->orderBy('name')
-                ->get(['id', 'name', 'long_name'])
-            : collect();
-
         return view('resources.upload', [
+            'canUpload' => $canUpload,
+        ]);
+    }
+
+    /**
+     * Show the form for uploading a new resource.
+     */
+    public function createNew(): View
+    {
+        $user = Auth::user();
+        $canUpload = ($user->profile_visibility ?? 'public') === 'public';
+
+        $tags = Tag::orderBy('name')->get();
+        $languages = \App\Models\Language::orderBy('name')->get();
+
+        return view('resources.upload-new', [
             'tags' => $tags,
             'languages' => $languages,
-            'userOwnedResources' => $userOwnedResources,
+            'canUpload' => $canUpload,
+        ]);
+    }
+
+    /**
+     * Show the form for uploading a new version.
+     */
+    public function createVersion(): View
+    {
+        $user = Auth::user();
+        $canUpload = ($user->profile_visibility ?? 'public') === 'public';
+
+        return view('resources.upload-version', [
             'canUpload' => $canUpload,
         ]);
     }
@@ -52,7 +73,7 @@ class ResourceUploadController extends Controller
     /**
      * Store a newly uploaded resource.
      */
-    public function store(StoreResourceRequest $request): RedirectResponse
+    public function storeNew(StoreNewResourceRequest $request): RedirectResponse
     {
         $user = Auth::user();
 
@@ -70,135 +91,62 @@ class ResourceUploadController extends Controller
                 ->withInput();
         }
 
-        // Check upload mode from request
-        $isFirstVersion = $request->input('upload_mode') === 'first_version';
-
-        // Quick check for existing resource to determine if this is an update
-        // This allows us to show better validation messages before processing
+        // Check if resource already exists
         $zipFileName = pathinfo($zipFile->getClientOriginalName(), PATHINFO_FILENAME);
         $existingResource = Resource::where('name', $zipFileName)->first();
-        $isUpdate = $existingResource && $existingResource->user_id === Auth::id();
 
-        // Validate required fields based on upload mode
-        if ($isFirstVersion) {
-            // First version mode: require long_description, tags, images are optional
-            // Cannot be first version if resource already exists
-            if ($existingResource) {
-                return redirect()->back()
-                    ->withErrors(['upload_mode' => 'A resource with this name already exists. Please select "New release of existing resource" to update it.'])
-                    ->withInput();
-            }
-
-            if (empty($request->input('long_description'))) {
-                return redirect()->back()
-                    ->withErrors(['long_description' => 'Long description is required for first-time uploads.'])
-                    ->withInput();
-            }
-        } else {
-            // New release mode: require changelog, and must be updating an existing resource
-            if (empty($request->input('changelog'))) {
-                return redirect()->back()
-                    ->withErrors(['changelog' => 'Changelog is required for resource updates.'])
-                    ->withInput();
-            }
-
-            if (! $isUpdate) {
-                return redirect()->back()
-                    ->withErrors(['changelog' => 'You can only upload a new release for a resource you own. Please select "First version of the resource" for new resources.'])
-                    ->withInput();
-            }
+        if ($existingResource) {
+            return redirect()->back()
+                ->withErrors(['zip_file' => 'A resource with this name already exists. Please use "Upload New Version" to update it.'])
+                ->withInput();
         }
 
         try {
-            $changelog = $isFirstVersion ? 'First public release' : $request->input('changelog');
-
-            // Get images - handle both single and multiple file inputs
-            // When using name="images[]" with multiple, Laravel returns an array
+            // Get images
             $images = [];
-            if ($isFirstVersion) {
-                $uploadedImages = $request->file('images');
-                if ($uploadedImages) {
-                    // Ensure it's an array (Laravel returns array for multiple file inputs)
-                    $images = is_array($uploadedImages) ? $uploadedImages : [$uploadedImages];
-                    // Filter out any null/invalid entries
-                    $images = array_filter($images, fn ($img) => $img && $img->isValid());
-                }
+            $uploadedImages = $request->file('images');
+            if ($uploadedImages) {
+                $images = is_array($uploadedImages) ? $uploadedImages : [$uploadedImages];
+                $images = array_filter($images, fn ($img) => $img && $img->isValid());
             }
 
-            $longDescription = $isFirstVersion ? $request->input('long_description') : null;
-            $tagIds = $isFirstVersion ? ($request->input('tags', [])) : [];
-            $languageIds = $isFirstVersion ? ($request->input('languages', [])) : [];
-            $githubUrl = $isFirstVersion ? $request->input('github_url') : null;
-            $forumThreadUrl = $isFirstVersion ? $request->input('forum_thread_url') : null;
-
-            // Check if resource exists before upload to determine if it's a new resource or update
-            $zipFileName = pathinfo($zipFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $resourceExistedBefore = Resource::where('name', $zipFileName)
-                ->where('user_id', $user->id)
-                ->exists();
-
-            // The service will handle all validation, parsing, and business logic
-            // Version will be extracted from meta.xml by the service
             $resource = $this->uploadService->upload(
                 user: $user,
                 zipFile: $zipFile,
                 version: null,
-                changelog: $changelog,
-                tagIds: $tagIds,
-                languageIds: $languageIds,
+                changelog: 'First public release',
+                tagIds: $request->input('tags', []),
+                languageIds: $request->input('languages', []),
                 images: $images,
-                longDescription: $longDescription,
-                githubUrl: $githubUrl,
-                forumThreadUrl: $forumThreadUrl
+                longDescription: $request->input('long_description'),
+                githubUrl: $request->input('github_url'),
+                forumThreadUrl: $request->input('forum_thread_url')
             );
 
-            // Reload to get the latest version info
             $resource->refresh();
             $currentVersion = $resource->currentVersion;
 
-            // Log the action
-            if ($resourceExistedBefore) {
-                // New version uploaded
-                ActivityLogger::log(
-                    'resource.version.uploaded',
-                    $user,
-                    $request->ip(),
-                    [
-                        'resource_id' => $resource->id,
-                        'resource_name' => $resource->name,
-                        'version' => $currentVersion?->version,
-                        'version_id' => $currentVersion?->id,
-                        'changelog' => $changelog,
-                    ],
-                    $request->userAgent()
-                );
+            ActivityLogger::log(
+                'resource.created',
+                $user,
+                $request->ip(),
+                [
+                    'resource_id' => $resource->id,
+                    'resource_name' => $resource->name,
+                    'long_name' => $resource->long_name,
+                    'category' => $resource->category,
+                    'version' => $currentVersion?->version,
+                    'version_id' => $currentVersion?->id,
+                    'tag_count' => count($request->input('tags', [])),
+                    'language_count' => count($request->input('languages', [])),
+                    'image_count' => count($images),
+                    'has_github_url' => ! empty($request->input('github_url')),
+                    'has_forum_url' => ! empty($request->input('forum_thread_url')),
+                ],
+                $request->userAgent()
+            );
 
-                $this->notifyResourceFollowersAboutNewRelease($resource, $currentVersion, $changelog);
-                $this->notifyUserFollowersAboutResourcePublication($user, $resource, $currentVersion, $changelog, true);
-            } else {
-                // New resource created
-                ActivityLogger::log(
-                    'resource.created',
-                    $user,
-                    $request->ip(),
-                    [
-                        'resource_id' => $resource->id,
-                        'resource_name' => $resource->name,
-                        'long_name' => $resource->long_name,
-                        'category' => $resource->category,
-                        'version' => $currentVersion?->version,
-                        'version_id' => $currentVersion?->id,
-                        'tag_count' => count($tagIds),
-                        'language_count' => count($languageIds),
-                        'image_count' => count($images),
-                        'has_github_url' => ! empty($githubUrl),
-                        'has_forum_url' => ! empty($forumThreadUrl),
-                    ],
-                    $request->userAgent()
-                );
-
-                $this->notifyUserFollowersAboutResourcePublication($user, $resource, $currentVersion, $changelog, false);
-            }
+            $this->notifyUserFollowersAboutResourcePublication($user, $resource, $currentVersion, 'First public release', false);
 
             return redirect()
                 ->route('resources.show', $resource)
@@ -209,6 +157,92 @@ class ResourceUploadController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             \Log::error('Resource upload error: '.$e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['submit' => 'An error occurred: '.$e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Store a new version of an existing resource.
+     */
+    public function storeVersion(StoreNewVersionRequest $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (($user->profile_visibility ?? 'public') !== 'public') {
+            return redirect()
+                ->route('resources.upload.create')
+                ->withErrors(['profile_visibility' => __('Set your profile visibility to public before publishing resources.')]);
+        }
+
+        $zipFile = $request->file('zip_file');
+
+        if (! $zipFile || ! $zipFile->isValid()) {
+            return redirect()->back()
+                ->withErrors(['zip_file' => 'Invalid file upload. Please try again.'])
+                ->withInput();
+        }
+
+        // Check if resource exists and user owns it
+        $zipFileName = pathinfo($zipFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $existingResource = Resource::where('name', $zipFileName)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (! $existingResource) {
+            return redirect()->back()
+                ->withErrors(['zip_file' => 'No resource found with this name that you own. Please ensure the ZIP filename matches an existing resource you own.'])
+                ->withInput();
+        }
+
+        try {
+            $resource = $this->uploadService->upload(
+                user: $user,
+                zipFile: $zipFile,
+                version: null,
+                changelog: $request->input('changelog'),
+                tagIds: [],
+                languageIds: [],
+                images: [],
+                longDescription: null,
+                githubUrl: null,
+                forumThreadUrl: null
+            );
+
+            $resource->refresh();
+            $currentVersion = $resource->currentVersion;
+
+            ActivityLogger::log(
+                'resource.version.uploaded',
+                $user,
+                $request->ip(),
+                [
+                    'resource_id' => $resource->id,
+                    'resource_name' => $resource->name,
+                    'version' => $currentVersion?->version,
+                    'version_id' => $currentVersion?->id,
+                    'changelog' => $request->input('changelog'),
+                ],
+                $request->userAgent()
+            );
+
+            $this->notifyResourceFollowersAboutNewRelease($resource, $currentVersion, $request->input('changelog'));
+            $this->notifyUserFollowersAboutResourcePublication($user, $resource, $currentVersion, $request->input('changelog'), true);
+
+            return redirect()
+                ->route('resources.show', $resource)
+                ->with('success', 'New version uploaded successfully!');
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()
+                ->withErrors(['zip_file' => $e->getMessage()])
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Resource version upload error: '.$e->getMessage(), [
                 'exception' => $e,
                 'trace' => $e->getTraceAsString(),
             ]);

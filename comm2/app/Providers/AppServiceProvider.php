@@ -47,7 +47,13 @@ class AppServiceProvider extends ServiceProvider
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('resource-upload', function (Request $request) {
-            return Limit::perHour(5)->by($request->user()?->id ?: $request->ip());
+            return Limit::perHour(5)
+                ->by($request->user()?->id ?: $request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return redirect()
+                        ->route('resources.index')
+                        ->withErrors(['upload' => 'You have exceeded the upload limit of 5 resources per hour. Please try again later.']);
+                });
         });
 
         RateLimiter::for('resource-download', function (Request $request) {
