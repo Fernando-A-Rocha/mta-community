@@ -2,7 +2,7 @@
     use App\Enums\ReportStatus;
     use App\Models\Notification;
     use App\Models\Report;
-    
+
     $pendingReportsCount = auth()->check() && auth()->user()->isModerator()
         ? Report::where('status', ReportStatus::Pending)->count()
         : 0;
@@ -28,18 +28,6 @@
                     <flux:navlist.item icon="server" :href="route('servers.index')" :current="request()->routeIs('servers.*')" wire:navigate>{{ __('Servers') }}</flux:navlist.item>
                     <flux:navlist.item icon="folder" :href="route('resources.index')" :current="request()->routeIs('resources.*')" wire:navigate>{{ __('Resources') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')" wire:navigate>{{ __('Members') }}</flux:navlist.item>
-                    @auth
-                        <flux:navlist.item icon="bell" :href="route('notifications.index')" :current="request()->routeIs('notifications.*')" wire:navigate>
-                            <span class="flex items-center gap-2">
-                                {{ __('Notifications') }}
-                                @if ($unreadNotificationsCount > 0)
-                                    <span class="inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-semibold h-5 w-5 min-w-[1.25rem]">
-                                        {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
-                                    </span>
-                                @endif
-                            </span>
-                        </flux:navlist.item>
-                    @endauth
                 </flux:navlist.group>
                 @auth
                     @if (auth()->user()->isModerator())
@@ -67,9 +55,12 @@
             @auth
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
-                <button type="button" class="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                <button type="button" class="relative flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800" x-data="{ count: {{ $unreadNotificationsCount }} }" @notification-updated.window="count = $event.detail.count !== undefined ? $event.detail.count : count">
                     <x-user-avatar :user="auth()->user()" size="sm" />
                     <span class="flex-1 truncate">{{ auth()->user()->name }}</span>
+                    <template x-if="count > 0">
+                        <span class="absolute left-1 top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white" x-text="count > 99 ? '99+' : count"></span>
+                    </template>
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
@@ -82,6 +73,15 @@
 
                     <flux:menu.radio.group>
                         <flux:menu.item :href="route('account.edit')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item
+                            :href="route('notifications.index')"
+                            icon="bell"
+                            wire:navigate
+                            x-data="{ count: {{ $unreadNotificationsCount }} }"
+                            @notification-updated.window="count = $event.detail.count !== undefined ? $event.detail.count : count"
+                        >
+                            <span x-bind:class="count > 0 ? '!text-red-600 dark:!text-red-400' : ''">{{ __('Notifications') }}</span>
+                        </flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -113,27 +113,12 @@
             <flux:spacer />
 
             @auth
-                <a
-                    href="{{ route('notifications.index') }}"
-                    class="relative rounded-full border border-neutral-200 p-2 text-neutral-600 transition hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                    wire:navigate
-                >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 10V6a4 4 0 00-8 0v4a4 4 0 01-.879 2.545L4 14h12l-1.121-1.455A4 4 0 0114 10z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h2a2 2 0 002-2v-1H5v1a2 2 0 002 2z" />
-                    </svg>
-                    @if ($unreadNotificationsCount > 0)
-                        <span class="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                            {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
-                        </span>
-                    @endif
-                </a>
-            @endauth
-
-            @auth
             <flux:dropdown position="top" align="end">
-                <button type="button" class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                <button type="button" class="relative flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800" x-data="{ count: {{ $unreadNotificationsCount }} }" @notification-updated.window="count = $event.detail.count !== undefined ? $event.detail.count : count">
                     <x-user-avatar :user="auth()->user()" size="sm" />
+                    <template x-if="count > 0">
+                        <span class="absolute left-1 top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white" x-text="count > 99 ? '99+' : count"></span>
+                    </template>
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
@@ -146,7 +131,9 @@
                                 <x-user-avatar :user="auth()->user()" size="sm" />
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <a href="{{ route('profile.show', auth()->user()) }}" class="truncate font-semibold hover:underline" wire:navigate>{{ auth()->user()->name }}</a>
+                                    <a href="{{ route('profile.show', auth()->user()) }}" class="truncate font-semibold hover:underline" wire:navigate>
+                                        {{ auth()->user()->name }}
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -156,6 +143,15 @@
 
                     <flux:menu.radio.group>
                         <flux:menu.item :href="route('account.edit')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item
+                            :href="route('notifications.index')"
+                            icon="bell"
+                            wire:navigate
+                            x-data="{ count: {{ $unreadNotificationsCount }} }"
+                            @notification-updated.window="count = $event.detail.count !== undefined ? $event.detail.count : count"
+                        >
+                            <span x-bind:class="count > 0 ? '!text-red-600 dark:!text-red-400' : ''">{{ __('Notifications') }}</span>
+                        </flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />

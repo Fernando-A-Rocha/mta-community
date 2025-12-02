@@ -12,21 +12,27 @@ use Livewire\Component;
 
 class Friends extends Component
 {
-    public bool $allowFriendRequests = true;
+    public string $allowFriendRequests = '1';
 
     public function mount(): void
     {
         $user = Auth::user();
-        $this->allowFriendRequests = (bool) ($user->allow_friend_requests ?? true);
+        // Convert boolean to string for radio group compatibility
+        $this->allowFriendRequests = (bool) ($user->allow_friend_requests ?? true) ? '1' : '0';
     }
 
     public function updatedAllowFriendRequests($value): void
     {
         $user = Auth::user();
-        $user->allow_friend_requests = (bool) $value;
+        // Convert string value to boolean
+        $boolValue = $value === '1' || $value === 1 || $value === true;
+        $user->allow_friend_requests = $boolValue;
         $user->save();
 
-        session()->flash('success', $value ? __('Friend requests enabled.') : __('Friend requests disabled.'));
+        // Keep the property as string for radio group
+        $this->allowFriendRequests = $boolValue ? '1' : '0';
+
+        session()->flash('success', $boolValue ? __('Friend requests enabled.') : __('Friend requests disabled.'));
     }
 
     public function render(): View

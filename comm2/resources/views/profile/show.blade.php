@@ -49,7 +49,7 @@
                                     @if ($isFollowingUser)
                                         @method('DELETE')
                                     @endif
-                                    <flux:button variant="{{ $isFollowingUser ? 'ghost' : 'outline' }}" size="sm">
+                                    <flux:button variant="{{ $isFollowingUser ? 'ghost' : 'outline' }}" size="sm" type="submit">
                                         {{ $isFollowingUser ? __('Following') : __('Follow user') }}
                                     </flux:button>
                                 </form>
@@ -59,7 +59,7 @@
                                     <form method="POST" action="{{ route('friends.destroy', $user) }}" onsubmit="return confirm('{{ __('Remove friend?') }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button variant="ghost" size="sm">
+                                    <flux:button variant="ghost" size="sm" type="submit">
                                             {{ __('Unfriend') }}
                                     </flux:button>
                                 </form>
@@ -67,14 +67,14 @@
                                 <form method="POST" action="{{ route('friends.accept', $user) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <flux:button variant="primary" size="sm">
+                                    <flux:button variant="primary" size="sm" type="submit">
                                         {{ __('Accept friend request') }}
                                     </flux:button>
                                 </form>
                                 <form method="POST" action="{{ route('friends.destroy', $user) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button variant="outline" size="sm">
+                                    <flux:button variant="outline" size="sm" type="submit">
                                         {{ __('Decline') }}
                                     </flux:button>
                                 </form>
@@ -82,7 +82,7 @@
                                 <form method="POST" action="{{ route('friends.destroy', $user) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button variant="ghost" size="sm">
+                                    <flux:button variant="ghost" size="sm" type="submit">
                                         {{ __('Cancel request') }}
                                     </flux:button>
                                 </form>
@@ -93,7 +93,7 @@
                                         variant="outline"
                                         size="sm"
                                         type="submit"
-                                        @if (! $user->allow_friend_requests) disabled @endif
+                                        :disabled="! $user->allow_friend_requests"
                                     >
                                         {{ __('Add friend') }}
                                     </flux:button>

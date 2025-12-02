@@ -9,7 +9,7 @@
                 size="sm"
                 variant="ghost"
                 wire:click="markSelectedAsUnread"
-                @disabled(empty($selected))
+                :disabled="count($selected) === 0"
             >
                 {{ __('Mark unread') }}
             </flux:button>
@@ -17,7 +17,7 @@
                 size="sm"
                 variant="ghost"
                 wire:click="markSelectedAsRead"
-                @disabled(empty($selected))
+                :disabled="count($selected) === 0"
             >
                 {{ __('Mark read') }}
             </flux:button>
@@ -25,7 +25,7 @@
                 size="sm"
                 variant="outline"
                 wire:click="deleteSelected"
-                @disabled(empty($selected))
+                :disabled="count($selected) === 0"
             >
                 {{ __('Delete') }}
             </flux:button>
@@ -37,16 +37,16 @@
             @forelse ($notifications as $notification)
                 <div
                     wire:key="notification-{{ $notification->id }}"
-                    class="flex flex-col gap-2 p-4 transition hover:bg-neutral-50 dark:hover:bg-neutral-800/50 {{ $notification->isRead() ? '' : 'bg-blue-50/70 dark:bg-blue-900/10' }}"
+                    class="flex flex-col gap-2 p-4 transition {{ $notification->isRead() ? 'bg-neutral-50/50 dark:bg-neutral-800/30 hover:bg-neutral-100 dark:hover:bg-neutral-800/50' : 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400' }}"
                 >
                     <div class="flex items-start gap-3">
                         <input
                             type="checkbox"
-                            wire:model="selected"
+                            wire:model.live="selected"
                             value="{{ $notification->id }}"
                             class="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-neutral-600"
                         />
-                        <div class="flex-1 space-y-1" wire:click="openNotification('{{ $notification->id }}')">
+                        <div class="flex-1 space-y-1 cursor-pointer" wire:click="openNotification('{{ $notification->id }}')">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium {{ $notification->category->colorClasses() }}">
                                     {{ $notification->category->label() }}
@@ -61,29 +61,6 @@
                             <p class="text-sm text-neutral-600 dark:text-neutral-300">
                                 {{ \Illuminate\Support\Str::limit($notification->body, 140) }}
                             </p>
-                        </div>
-                        <div class="flex gap-1">
-                            <button
-                                type="button"
-                                class="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                                wire:click="markAsUnread('{{ $notification->id }}')"
-                            >
-                                {{ __('Unread') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                                wire:click="markAsRead('{{ $notification->id }}')"
-                            >
-                                {{ __('Read') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="rounded-lg border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30"
-                                wire:click="deleteNotification('{{ $notification->id }}')"
-                            >
-                                {{ __('Delete') }}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -120,14 +97,8 @@
                     {{ $this->activeNotification->body }}
                 </p>
 
-                @if (! empty($this->activeNotification->payload))
-                    <div class="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-xs text-neutral-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
-                        <pre class="overflow-auto">{{ json_encode($this->activeNotification->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                    </div>
-                @endif
-
                 @if ($this->activeNotification->action_url)
-                    <flux:link :href="$this->activeNotification->action_url" target="_blank" rel="noopener" variant="primary">
+                    <flux:link :href="$this->activeNotification->action_url" variant="primary">
                         {{ __('Open related page') }}
                     </flux:link>
                 @endif

@@ -59,23 +59,36 @@ class Center extends Component
     public function markAsRead(string $notificationId): void
     {
         $notification = $this->notificationQuery()->findOrFail($notificationId);
+        $wasUnread = $notification->isRead() === false;
         $notification->markAsRead();
-        $this->dispatch('notification-updated');
+
+        $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+        $this->dispatch('notification-updated', count: $newCount);
     }
 
     public function markAsUnread(string $notificationId): void
     {
         $notification = $this->notificationQuery()->findOrFail($notificationId);
         $notification->markAsUnread();
-        $this->dispatch('notification-updated');
+
+        $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+        $this->dispatch('notification-updated', count: $newCount);
     }
 
     public function deleteNotification(string $notificationId): void
     {
         $notification = $this->notificationQuery()->findOrFail($notificationId);
+        $wasUnread = $notification->isRead() === false;
         $notification->delete();
         $this->selected = array_values(array_diff($this->selected, [$notificationId]));
-        $this->dispatch('notification-updated');
+
+        // Close modal if the deleted notification was the active one
+        if ($this->activeNotificationId === $notificationId) {
+            $this->closeModal();
+        }
+
+        $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+        $this->dispatch('notification-updated', count: $newCount);
     }
 
     public function markSelectedAsRead(): void
@@ -91,7 +104,9 @@ class Center extends Component
             ->update(['read_at' => now()]);
 
         $this->resetSelection();
-        $this->dispatch('notification-updated');
+
+        $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+        $this->dispatch('notification-updated', count: $newCount);
     }
 
     public function markSelectedAsUnread(): void
@@ -107,7 +122,9 @@ class Center extends Component
             ->update(['read_at' => null]);
 
         $this->resetSelection();
-        $this->dispatch('notification-updated');
+
+        $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+        $this->dispatch('notification-updated', count: $newCount);
     }
 
     public function deleteSelected(): void
@@ -123,18 +140,24 @@ class Center extends Component
             ->delete();
 
         $this->resetSelection();
-        $this->dispatch('notification-updated');
+
+        $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+        $this->dispatch('notification-updated', count: $newCount);
     }
 
     public function openNotification(string $notificationId): void
     {
         $notification = $this->notificationQuery()->findOrFail($notificationId);
+        $wasUnread = $notification->isRead() === false;
         $notification->markAsRead();
 
         $this->activeNotificationId = $notificationId;
         $this->showModal = true;
 
-        $this->dispatch('notification-updated');
+        if ($wasUnread) {
+            $newCount = $this->notificationQuery()->whereNull('read_at')->count();
+            $this->dispatch('notification-updated', count: $newCount);
+        }
     }
 
     public function closeModal(): void

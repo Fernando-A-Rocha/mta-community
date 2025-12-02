@@ -142,14 +142,14 @@
                                     <form method="POST" action="{{ route('resources.unfollow', $resource) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <flux:button variant="ghost" size="sm">
+                                        <flux:button variant="ghost" size="sm" type="submit">
                                             {{ __('Following updates') }}
                                         </flux:button>
                                     </form>
                                 @else
                                     <form method="POST" action="{{ route('resources.follow', $resource) }}">
                                         @csrf
-                                        <flux:button variant="ghost" size="sm">
+                                        <flux:button variant="ghost" size="sm" type="submit">
                                             {{ __('Follow updates') }}
                                         </flux:button>
                                     </form>

@@ -11,7 +11,10 @@
         <div class="space-y-6">
             <flux:field>
                 <flux:label>{{ __('Allow Friend Requests') }}</flux:label>
-                <flux:toggle wire:model="allowFriendRequests" />
+                <flux:radio.group wire:model.live="allowFriendRequests" variant="segmented">
+                    <flux:radio value="1">{{ __('Enabled') }}</flux:radio>
+                    <flux:radio value="0">{{ __('Disabled') }}</flux:radio>
+                </flux:radio.group>
                 <flux:description>{{ __('Disable this to prevent new friend requests.') }}</flux:description>
             </flux:field>
 
@@ -54,12 +57,12 @@
                                     <form method="POST" action="{{ route('friends.accept', $request->requester) }}">
                                         @csrf
                                         @method('PATCH')
-                                        <flux:button size="sm" variant="primary">{{ __('Accept') }}</flux:button>
+                                        <flux:button size="sm" variant="primary" type="submit">{{ __('Accept') }}</flux:button>
                                     </form>
                                     <form method="POST" action="{{ route('friends.destroy', $request->requester) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <flux:button size="sm" variant="outline">{{ __('Decline') }}</flux:button>
+                                        <flux:button size="sm" variant="outline" type="submit">{{ __('Decline') }}</flux:button>
                                     </form>
                                 </div>
                             </div>
@@ -85,7 +88,7 @@
                                 <form method="POST" action="{{ route('friends.destroy', $request->addressee) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                    <flux:button size="sm" variant="ghost" type="submit">{{ __('Cancel') }}</flux:button>
                                 </form>
                             </div>
                         @endforeach
@@ -109,7 +112,7 @@
                                 <form method="POST" action="{{ route('friends.destroy', $friend['user']) }}" onsubmit="return confirm('{{ __('Remove friend?') }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button size="sm" variant="outline">{{ __('Remove') }}</flux:button>
+                                    <flux:button size="sm" variant="outline" type="submit">{{ __('Remove') }}</flux:button>
                                 </form>
                             </div>
                         @endforeach
