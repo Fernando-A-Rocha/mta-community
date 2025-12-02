@@ -256,8 +256,8 @@ class ResourceUploadController extends Controller
     private function notifyResourceFollowersAboutNewRelease(Resource $resource, ?ResourceVersion $version, string $changelog): void
     {
         $followers = $resource->followers()
-            ->where('id', '!=', $resource->user_id)
-            ->pluck('id');
+            ->where('users.id', '!=', $resource->user_id)
+            ->pluck('users.id');
 
         if ($followers->isEmpty()) {
             return;
@@ -300,7 +300,7 @@ class ResourceUploadController extends Controller
             ->pluck('users.id');
 
         if ($isUpdate) {
-            $resourceFollowerIds = $resource->followers()->pluck('id');
+            $resourceFollowerIds = $resource->followers()->pluck('users.id');
             $followers = $followers->diff($resourceFollowerIds);
         }
 
