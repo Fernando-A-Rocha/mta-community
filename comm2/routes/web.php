@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('resources/upload', [ResourceUploadController::class, 'create'])
         ->middleware('ensure.resource.modification.enabled')
         ->name('resources.upload.create');
-    
+
     // Upload new resource
     Route::get('resources/upload/new', [ResourceUploadController::class, 'createNew'])
         ->middleware('ensure.resource.modification.enabled')
@@ -75,7 +75,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('resources/upload/new', [ResourceUploadController::class, 'storeNew'])
         ->middleware(['throttle:resource-upload', 'ensure.resource.modification.enabled'])
         ->name('resources.upload.new.store');
-    
+
     // Upload new version
     Route::get('resources/upload/version', [ResourceUploadController::class, 'createVersion'])
         ->middleware('ensure.resource.modification.enabled')

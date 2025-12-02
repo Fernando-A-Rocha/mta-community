@@ -88,4 +88,3 @@ class StoreNewResourceRequest extends FormRequest
         ];
     }
 }
-
