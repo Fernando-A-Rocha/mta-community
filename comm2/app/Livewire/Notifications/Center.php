@@ -13,6 +13,8 @@ class Center extends Component
 {
     use WithPagination;
 
+    private const PER_PAGE = 15;
+
     /**
      * @var list<string>
      */
@@ -40,11 +42,31 @@ class Center extends Component
     {
         $notifications = $this->notificationQuery()
             ->latest()
-            ->paginate(15);
+            ->paginate(self::PER_PAGE);
 
         return view('livewire.notifications.center', [
             'notifications' => $notifications,
         ]);
+    }
+
+    public function toggleSelectAll($value): void
+    {
+        $currentIds = $this->currentPageNotificationIds();
+
+        if ($currentIds === []) {
+            return;
+        }
+
+        $shouldSelectAll = in_array($value, [true, 'true', 1, '1'], true);
+
+        if ($shouldSelectAll) {
+            $merged = array_merge($this->selected, $currentIds);
+            $this->selected = array_values(array_unique($merged));
+
+            return;
+        }
+
+        $this->selected = array_values(array_diff($this->selected, $currentIds));
     }
 
     public function toggleSelection(string $notificationId): void
@@ -180,6 +202,23 @@ class Center extends Component
         return Notification::query()
             ->where('user_id', auth()->id())
             ->whereNull('deleted_at');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function currentPageNotificationIds(): array
+    {
+        $page = (int) data_get($this, 'page', 1);
+        $page = $page > 0 ? $page : 1;
+
+        return $this->notificationQuery()
+            ->latest()
+            ->forPage($page, self::PER_PAGE)
+            ->pluck('id')
+            ->map(static fn ($id): string => (string) $id)
+            ->values()
+            ->all();
     }
 
     private function selectedIds()

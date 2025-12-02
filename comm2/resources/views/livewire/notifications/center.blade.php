@@ -1,10 +1,24 @@
 <div class="space-y-6">
+    @php
+        $currentPageNotificationIds = $notifications->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $isCurrentPageFullySelected = $currentPageNotificationIds !== [] && empty(array_diff($currentPageNotificationIds, $selected));
+    @endphp
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
             <flux:heading size="lg">{{ __('Notifications') }}</flux:heading>
             <flux:subheading>{{ __('Stay on top of resource, friend, and report activity.') }}</flux:subheading>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-neutral-600"
+                    wire:change="toggleSelectAll($event.target.checked)"
+                    @checked($isCurrentPageFullySelected)
+                    @disabled(empty($currentPageNotificationIds))
+                />
+                {{ __('Select all') }}
+            </label>
             <flux:button
                 size="sm"
                 variant="ghost"
