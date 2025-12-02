@@ -22,6 +22,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -185,26 +186,37 @@ class ResourceController extends Controller
                 }
             }
 
+            // Log request - DEBUG
+            Log::info('Request:', $request->all());
+
             // Update tags
+            $oldTagIds = $resource->tags()->pluck('tags.id')->toArray();
             if ($request->has('tags')) {
-                $oldTagIds = $resource->tags()->pluck('tags.id')->toArray();
                 $newTagIds = $request->input('tags', []);
                 $resource->tags()->sync($newTagIds);
                 if ($oldTagIds !== $newTagIds) {
                     $changes['tags'] = ['old' => $oldTagIds, 'new' => $newTagIds];
                 }
+            } else {
+                // Set no tags
+                $resource->tags()->sync([]);
+                $changes['tags'] = ['old' => $oldTagIds, 'new' => []];
             }
 
             // Update languages
             // Note: If no checkboxes are checked, the field won't be in the request
             // We only update if the field is explicitly present
+            $oldLanguageIds = $resource->languages()->pluck('languages.id')->toArray();
             if ($request->has('languages')) {
-                $oldLanguageIds = $resource->languages()->pluck('languages.id')->toArray();
                 $newLanguageIds = $request->input('languages', []);
                 $resource->languages()->sync($newLanguageIds);
                 if ($oldLanguageIds !== $newLanguageIds) {
                     $changes['languages'] = ['old' => $oldLanguageIds, 'new' => $newLanguageIds];
                 }
+            } else {
+                // Set no languages
+                $resource->languages()->sync([]);
+                $changes['languages'] = ['old' => $oldLanguageIds, 'new' => []];
             }
 
             $imagesRemoved = 0;
