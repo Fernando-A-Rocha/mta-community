@@ -42,7 +42,7 @@ class StoreMediaRequest extends FormRequest
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:1024', // 1MB in KB
-                'dimensions:max_width=1920,max_height=1080',
+                'dimensions:max_width=3840,max_height=2160', // Allow up to 4K, will be auto-resized to 1080p
             ],
             'youtube_url' => [
                 'required_if:type,video',
@@ -81,7 +81,7 @@ class StoreMediaRequest extends FormRequest
             'images.*.image' => 'Each file must be an image.',
             'images.*.mimes' => 'Images must be in JPEG, PNG, or WebP format.',
             'images.*.max' => 'Each image must not exceed 1MB.',
-            'images.*.dimensions' => 'Each image must not exceed 1920x1080 pixels.',
+            'images.*.dimensions' => 'Each image must not exceed 3840x2160 pixels (4K). Images will be automatically resized to 1080p if larger.',
             'youtube_url.required_if' => 'YouTube URL is required for video type media.',
             'youtube_url.url' => 'Please provide a valid URL.',
             'description.required' => 'A description is required.',
