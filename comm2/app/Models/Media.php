@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class Media extends Model
 {
@@ -87,6 +87,7 @@ class Media extends Model
                 $emoji = $reaction->emoji;
                 $counts[$emoji] = ($counts[$emoji] ?? 0) + 1;
             }
+
             return $counts;
         }
 

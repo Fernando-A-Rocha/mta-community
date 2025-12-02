@@ -9,7 +9,6 @@ use App\Models\MediaImage;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 class MediaUploadService
@@ -28,9 +27,22 @@ class MediaUploadService
             return false;
         }
 
-        // Check 24h upload limit
+        // Check 24h upload limit - only count successfully completed uploads
+        // For image type: must have at least one image
+        // For video type: must have a youtube_url
         $lastUpload = $user->media()
             ->where('created_at', '>=', now()->subDay())
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    // Image type with at least one image
+                    $q->where('type', 'image')
+                        ->has('images');
+                })->orWhere(function ($q) {
+                    // Video type with youtube_url
+                    $q->where('type', 'video')
+                        ->whereNotNull('youtube_url');
+                });
+            })
             ->exists();
 
         return ! $lastUpload;
@@ -41,7 +53,19 @@ class MediaUploadService
      */
     public function getTimeUntilNextUpload(User $user): ?\Carbon\Carbon
     {
+        // Only count successfully completed uploads
         $lastUpload = $user->media()
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    // Image type with at least one image
+                    $q->where('type', 'image')
+                        ->has('images');
+                })->orWhere(function ($q) {
+                    // Video type with youtube_url
+                    $q->where('type', 'video')
+                        ->whereNotNull('youtube_url');
+                });
+            })
             ->orderBy('created_at', 'desc')
             ->first();
 
@@ -139,6 +163,12 @@ class MediaUploadService
             // Store images if type is image
             if ($type === 'image' && $images) {
                 $this->storeImages($media, $images);
+
+                // Ensure at least one image was successfully stored
+                $media->refresh();
+                if ($media->images()->count() === 0) {
+                    throw new InvalidArgumentException('Failed to process images. Please try again.');
+                }
             }
 
             return $media;
@@ -168,4 +198,3 @@ class MediaUploadService
         }
     }
 }
-

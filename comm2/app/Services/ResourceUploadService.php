@@ -9,7 +9,6 @@ use App\Models\Resource;
 use App\Models\ResourceVersion;
 use App\Models\Tag;
 use App\Models\User;
-use App\Services\ImageOptimizationService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
