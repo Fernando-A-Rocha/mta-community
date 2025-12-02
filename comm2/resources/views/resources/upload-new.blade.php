@@ -92,7 +92,7 @@
                 <div>
                     <flux:field>
                         <flux:label>Languages</flux:label>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
                             @foreach ($languages as $language)
                                 <flux:checkbox
                                     name="languages[]"
@@ -116,7 +116,7 @@
                 <div>
                     <flux:field>
                         <flux:label>Tags (max 5)</flux:label>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
                             @foreach ($tags as $tag)
                                 <flux:checkbox
                                     name="tags[]"

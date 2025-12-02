@@ -64,7 +64,7 @@
                 <div>
                     <flux:field>
                         <flux:label>Tags (max 5)</flux:label>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
                             @foreach ($tags as $tag)
                                 <flux:checkbox
                                     name="tags[]"
@@ -87,7 +87,7 @@
                 <div>
                     <flux:field>
                         <flux:label>Languages</flux:label>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-zinc-800 max-h-48 overflow-y-auto">
                             @foreach ($languages as $language)
                                 <flux:checkbox
                                     name="languages[]"
@@ -226,54 +226,52 @@
                 <div class="mt-6">
                     <flux:field>
                         <flux:label>Releases</flux:label>
-                        <div class="space-y-2 border rounded-lg p-4 bg-white dark:bg-zinc-800">
+                        @php
+                            $firstVersion = $resource->versions->sortBy('created_at')->first();
+                        @endphp
+                        @foreach ($resource->versions as $version)
                             @php
-                                $firstVersion = $resource->versions->sortBy('created_at')->first();
+                                $isFirstVersion = $firstVersion->id === $version->id;
                             @endphp
-                            @foreach ($resource->versions as $version)
-                                @php
-                                    $isFirstVersion = $firstVersion->id === $version->id;
-                                @endphp
-                                <div class="flex items-center justify-between p-3 border rounded {{ $version->is_current ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-medium">Version {{ $version->version }}</span>
-                                            @if ($version->is_current)
-                                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
-                                                    Latest
-                                                </span>
-                                            @endif
-                                            @if ($isFirstVersion)
-                                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-xs font-medium">
-                                                    First Release
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            Released {{ $version->created_at->format('M d, Y') }}
-                                        </p>
+                            <div class="flex items-center justify-between p-3 border rounded {{ $version->is_current ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-medium">Version {{ $version->version }}</span>
+                                        @if ($version->is_current)
+                                            <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
+                                                Latest
+                                            </span>
+                                        @endif
+                                        @if ($isFirstVersion)
+                                            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-xs font-medium">
+                                                First Release
+                                            </span>
+                                        @endif
                                     </div>
-                                    @auth
-                                        @can('deleteVersion', $resource)
-                                            @if (!$isFirstVersion)
-                                                <form method="POST" action="{{ route('resources.versions.destroy', [$resource, $version]) }}"
-                                                      onsubmit="return confirm('Are you sure you want to delete release v{{ $version->version }}? This action cannot be undone.');"
-                                                      class="ml-4">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <flux:button type="submit" variant="danger" size="sm">
-                                                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                        Delete Release
-                                                    </flux:button>
-                                                </form>
-                                            @endif
-                                        @endcan
-                                    @endauth
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        Released {{ $version->created_at->format('M d, Y') }}
+                                    </p>
                                 </div>
-                            @endforeach
-                        </div>
+                                @auth
+                                    @can('deleteVersion', $resource)
+                                        @if (!$isFirstVersion)
+                                            <form method="POST" action="{{ route('resources.versions.destroy', [$resource, $version]) }}"
+                                                    onsubmit="return confirm('Are you sure you want to delete release v{{ $version->version }}? This action cannot be undone.');"
+                                                    class="ml-4">
+                                                @csrf
+                                                @method('DELETE')
+                                                <flux:button type="submit" variant="danger" size="sm">
+                                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    Delete Release
+                                                </flux:button>
+                                            </form>
+                                        @endif
+                                    @endcan
+                                @endauth
+                            </div>
+                        @endforeach
                         <flux:description>Manage your resource releases. You can delete individual releases (except the first one).</flux:description>
                     </flux:field>
                 </div>
