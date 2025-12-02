@@ -16,6 +16,7 @@ use App\Models\ResourceVersion;
 use App\Models\Tag;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\ImageOptimizationService;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,7 @@ class ResourceController extends Controller
 
     public function __construct(
         private readonly NotificationService $notifications,
+        private readonly ImageOptimizationService $imageOptimizer,
     ) {}
 
     /**
@@ -381,7 +383,6 @@ class ResourceController extends Controller
      */
     private function storeImages(Resource $resource, array $images, int $startOrder = 0): void
     {
-        $directory = "resources/{$resource->id}";
         $order = $startOrder;
 
         foreach ($images as $index => $image) {
@@ -389,12 +390,8 @@ class ResourceController extends Controller
                 continue;
             }
 
-            $filename = uniqid().'.'.$image->getClientOriginalExtension();
-            $path = $image->storeAs($directory, $filename, 'public');
-
-            if ($path === false) {
-                continue;
-            }
+            // Optimize and store image using ImageOptimizationService
+            $path = $this->imageOptimizer->optimizeResourceImage($image, $resource->id);
 
             // First image added becomes display image if none exists
             $isDisplayImage = $index === 0 && $resource->displayImage === null;

@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Data\ProfileFavorites;
+use App\Services\ImageOptimizationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -121,8 +122,9 @@ class Profile extends Component
                 Storage::disk('public')->delete($user->avatar_path);
             }
 
-            // Resize and store new avatar
-            $avatarPath = $this->storeAvatar($this->avatar, $user->id);
+            // Optimize and store new avatar using ImageOptimizationService
+            $imageOptimizer = app(ImageOptimizationService::class);
+            $avatarPath = $imageOptimizer->optimizeAvatar($this->avatar, $user->id);
             $user->avatar_path = $avatarPath;
         }
 

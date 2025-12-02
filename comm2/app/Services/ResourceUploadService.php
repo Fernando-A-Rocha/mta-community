@@ -9,6 +9,7 @@ use App\Models\Resource;
 use App\Models\ResourceVersion;
 use App\Models\Tag;
 use App\Models\User;
+use App\Services\ImageOptimizationService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,8 @@ class ResourceUploadService
 {
     public function __construct(
         private readonly MetaXmlParser $metaXmlParser,
-        private readonly VersionValidationService $versionValidator
+        private readonly VersionValidationService $versionValidator,
+        private readonly ImageOptimizationService $imageOptimizer
     ) {}
 
     /**
@@ -299,7 +301,6 @@ class ResourceUploadService
      */
     private function storeImages(Resource $resource, array $images): void
     {
-        $directory = "resources/{$resource->id}";
         $order = 0;
 
         foreach ($images as $index => $image) {
@@ -314,12 +315,12 @@ class ResourceUploadService
                 }
             }
 
-            $filename = uniqid().'.'.$image->getClientOriginalExtension();
-            $path = $image->storeAs($directory, $filename, 'public');
-
-            if ($path === false) {
+            if (! $image->isValid()) {
                 continue;
             }
+
+            // Optimize and store image using ImageOptimizationService
+            $path = $this->imageOptimizer->optimizeResourceImage($image, $resource->id);
 
             \App\Models\ResourceImage::create([
                 'resource_id' => $resource->id,

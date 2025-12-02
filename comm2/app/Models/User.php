@@ -105,6 +105,22 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Resource::class);
     }
 
+    /**
+     * Get the media created by this user
+     */
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class);
+    }
+
+    /**
+     * Get the reactions created by this user
+     */
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(MediaReaction::class);
+    }
+
     public function submittedReports(): HasMany
     {
         return $this->hasMany(Report::class, 'reporter_id');

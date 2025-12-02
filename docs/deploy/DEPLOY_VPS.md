@@ -12,6 +12,8 @@
 
 Ensure you have PHP 8.4 installed with GD extension. Install PHP 8.4 FPM.
 
+**Image Optimization:** The application uses PHP GD library for server-side image optimization. All uploaded images (avatars, resource images, media images) are automatically optimized to reduce file size and ensure consistent dimensions. Make sure the GD extension is enabled in your PHP configuration.
+
 Install Nginx and PHP-FPM for the correct PHP version.
 
 Configure the site with nginx.conf and the domain (generate a certificate for it).
