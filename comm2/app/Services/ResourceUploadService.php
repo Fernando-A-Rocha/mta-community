@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class ResourceUploadService
 {
+    private const DEFAULT_VERSION = '1.0.0';
+
     public function __construct(
         private readonly MetaXmlParser $metaXmlParser,
         private readonly VersionValidationService $versionValidator,
@@ -29,7 +31,7 @@ class ResourceUploadService
      *
      * @param  User  $user  The user uploading the resource
      * @param  UploadedFile|string|array  $zipFile  The ZIP file (UploadedFile, file path, or array with 'path' and 'originalName')
-     * @param  string|null  $version  Semantic version string (if null, will be extracted from meta.xml)
+     * @param  string|null  $version  Semantic version string (if null, will be extracted from meta.xml or default to 1.0.0)
      * @param  string  $changelog  Changelog text
      * @param  array  $tagIds  Array of tag IDs (max 5)
      * @param  array  $languageIds  Array of language IDs (required for first upload)
@@ -69,12 +71,9 @@ class ResourceUploadService
 
         $metaData = $this->metaXmlParser->parse($tempZipPath);
 
-        // Extract version from meta.xml if not provided
+        // Extract version from meta.xml if not provided (default to 1.0.0)
         if ($version === null) {
-            $version = $metaData['version'] ?? null;
-            if (empty($version)) {
-                throw new InvalidArgumentException('Version not found in meta.xml. Please ensure the info node has a version attribute.');
-            }
+            $version = $metaData['version'] ?? self::DEFAULT_VERSION;
         }
 
         // Extract resource short name from ZIP filename (this is the actual resource identifier)
