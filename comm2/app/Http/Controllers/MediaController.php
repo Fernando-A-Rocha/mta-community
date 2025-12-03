@@ -52,9 +52,6 @@ class MediaController extends Controller
                     ->orderBy('reactions_count', $sortOrder)
                     ->orderBy('created_at', 'desc'); // Secondary sort
                 break;
-            case 'date':
-                $query->orderBy('created_at', $sortOrder);
-                break;
             case 'recent':
             default:
                 $query->orderBy('created_at', $sortOrder);

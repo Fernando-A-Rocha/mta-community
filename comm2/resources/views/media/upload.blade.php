@@ -119,7 +119,7 @@
                             value="{{ old('youtube_url') }}"
                             id="youtube_url"
                         />
-                        <flux:description>Paste a YouTube video URL (watch, youtu.be, embed formats supported)</flux:description>
+                        <flux:description>Paste a YouTube video URL</flux:description>
                         @error('youtube_url')
                             <flux:error>{{ $message }}</flux:error>
                         @enderror

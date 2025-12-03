@@ -29,7 +29,7 @@ class MediaUploadService
 
         // Check 24h upload limit - only count successfully completed uploads
         // For image type: must have at least one image
-        // For video type: must have a youtube_url
+        // For video type: must have a youtube_video_id
         $lastUpload = $user->media()
             ->where('created_at', '>=', now()->subDay())
             ->where(function ($query) {
@@ -38,9 +38,9 @@ class MediaUploadService
                     $q->where('type', 'image')
                         ->has('images');
                 })->orWhere(function ($q) {
-                    // Video type with youtube_url
+                    // Video type with youtube_video_id
                     $q->where('type', 'video')
-                        ->whereNotNull('youtube_url');
+                        ->whereNotNull('youtube_video_id');
                 });
             })
             ->exists();
@@ -61,9 +61,9 @@ class MediaUploadService
                     $q->where('type', 'image')
                         ->has('images');
                 })->orWhere(function ($q) {
-                    // Video type with youtube_url
+                    // Video type with youtube_video_id
                     $q->where('type', 'video')
-                        ->whereNotNull('youtube_url');
+                        ->whereNotNull('youtube_video_id');
                 });
             })
             ->orderBy('created_at', 'desc')
@@ -90,7 +90,7 @@ class MediaUploadService
         }
 
         if (! str_starts_with($url, 'http://') && ! str_starts_with($url, 'https://')) {
-            $url = 'https://' . ltrim($url, '/');
+            $url = 'https://'.ltrim($url, '/');
         }
 
         $parsedUrl = parse_url($url);
@@ -112,7 +112,6 @@ class MediaUploadService
             'youtube.com',
             'm.youtube.com',
             'music.youtube.com',
-            'youtube-nocookie.com',
         ];
 
         if (in_array($host, $youtubeHosts, true)) {
@@ -210,11 +209,20 @@ class MediaUploadService
         }
 
         return DB::transaction(function () use ($user, $type, $images, $youtubeUrl, $description) {
+            // Extract video ID if type is video
+            $youtubeVideoId = null;
+            if ($type === 'video' && $youtubeUrl) {
+                $youtubeVideoId = $this->extractYouTubeVideoId($youtubeUrl);
+                if (! $youtubeVideoId) {
+                    throw new InvalidArgumentException('Invalid YouTube URL format.');
+                }
+            }
+
             // Create media record
             $media = Media::create([
                 'user_id' => $user->id,
                 'type' => $type,
-                'youtube_url' => $type === 'video' ? $youtubeUrl : null,
+                'youtube_video_id' => $youtubeVideoId,
                 'description' => $description,
             ]);
 

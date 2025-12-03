@@ -46,6 +46,7 @@ Route::get('members', [MemberController::class, 'index'])->name('members.index')
 
 // Media (public index)
 Route::get('media', [MediaController::class, 'index'])->name('media.index');
+Route::get('media/{media}/reactions', [MediaReactionController::class, 'index'])->name('media.reactions.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
