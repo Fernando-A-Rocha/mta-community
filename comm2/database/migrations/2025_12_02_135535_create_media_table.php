@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['image', 'video']);
-            $table->string('youtube_url')->nullable();
+            $table->string('youtube_video_id')->nullable();
             $table->string('description', 100);
             $table->timestamps();
 

@@ -4,16 +4,24 @@
     $user = auth()->user();
     // Ensure reactions are loaded for counting
     if (!$media->relationLoaded('reactions')) {
-        $media->load('reactions');
+        $media->load('reactions.user');
     }
     $userReaction = $media->userReaction($user);
     $reactionCounts = $media->reaction_counts;
     $totalReactions = $media->reactions_count ?? $media->reactionCount();
-    $uploadService = app(\App\Services\MediaUploadService::class);
-    $youtubeVideoId = $media->isVideo() ? $uploadService->extractYouTubeVideoId($media->youtube_url) : null;
+    $youtubeVideoId = $media->isVideo() ? $media->youtube_video_id : null;
+
+    // Group reactions by emoji with user names for tooltips
+    $reactionUsersByEmoji = [];
+    foreach ($media->reactions as $reaction) {
+        if (!isset($reactionUsersByEmoji[$reaction->emoji])) {
+            $reactionUsersByEmoji[$reaction->emoji] = [];
+        }
+        $reactionUsersByEmoji[$reaction->emoji][] = $reaction->user->name;
+    }
 @endphp
 
-<div class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/60">
+<div class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/60">
     <!-- Media Content -->
     <div class="relative aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
         @if ($media->isImage())
@@ -67,13 +75,26 @@
                 </div>
             @endif
         @elseif ($media->isVideo() && $youtubeVideoId)
-            <iframe
-                class="h-full w-full"
-                src="https://www.youtube.com/embed/{{ $youtubeVideoId }}"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-            ></iframe>
+            <div class="youtube-thumbnail-container relative h-full w-full group" data-youtube-id="{{ $youtubeVideoId }}" data-media-id="{{ $media->id }}">
+                <img
+                    src="https://img.youtube.com/vi/{{ $youtubeVideoId }}/maxresdefault.jpg"
+                    alt="Video thumbnail"
+                    class="h-full w-full object-cover"
+                    loading="lazy"
+                />
+                <div class="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity group-hover:bg-black/30">
+                    <button
+                        type="button"
+                        onclick="loadYouTubeVideo({{ $media->id }}, '{{ $youtubeVideoId }}', this)"
+                        class="youtube-play-button rounded-full bg-red-600 p-4 shadow-lg transition-all hover:bg-red-700 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        aria-label="Play video"
+                    >
+                        <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         @endif
     </div>
 
@@ -85,111 +106,153 @@
         </p>
 
         <!-- Author Info -->
-        <div class="flex items-center gap-2">
-            <x-user-avatar :user="$media->user" size="sm" />
-            <a
-                href="{{ route('profile.show', $media->user) }}"
-                wire:navigate
-                class="text-sm font-medium text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
-            >
-                {{ $media->user->name }}
-            </a>
-            <span class="text-xs text-slate-500 dark:text-slate-400">
-                • {{ $media->created_at->diffForHumans() }}
-            </span>
-            @auth
-                @if ($user && ($user->id === $media->user_id || $user->isModerator()))
-                    <form
-                        action="{{ route('media.destroy', $media) }}"
-                        method="POST"
-                        onsubmit="return confirm('Are you sure you want to delete this media?');"
-                        class="inline"
-                    >
-                        @csrf
-                        @method('DELETE')
-                        <button
-                            type="submit"
-                            class="ml-1 inline-flex items-center justify-center rounded-full p-1 text-slate-400 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                            title="Delete media"
+        <div class="flex items-center gap-2 justify-between">
+            <div class="flex items-center gap-2">
+                <x-user-avatar :user="$media->user" size="sm" />
+                <a
+                    href="{{ route('profile.show', $media->user) }}"
+                    wire:navigate
+                    class="text-sm font-medium text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                >
+                    {{ $media->user->name }}
+                </a>
+                <span class="text-xs text-slate-500 dark:text-slate-400">
+                    • {{ $media->created_at->diffForHumans() }}
+                </span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-1">
+                @auth
+                    @if ($user && ($user->id === $media->user_id || $user->isModerator()))
+                        <form
+                            action="{{ route('media.destroy', $media) }}"
+                            method="POST"
+                            onsubmit="return confirm('Are you sure you want to delete this media?');"
+                            class="inline"
                         >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </form>
+                            @csrf
+                            @method('DELETE')
+                            <button
+                                type="submit"
+                                class="inline-flex items-center justify-center rounded-full p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                                title="Delete"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </form>
+                    @endif
+                @endauth
+
+                @if ($media->isVideo() && $youtubeVideoId)
+                    <button
+                        type="button"
+                        onclick="copyVideoLink({{ $media->id }}, '{{ $youtubeVideoId }}', event)"
+                        class="inline-flex items-center justify-center rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                        title="Copy Link"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </button>
                 @endif
-            @endauth
+
+                <button
+                    type="button"
+                    id="view-reactions-btn-{{ $media->id }}"
+                    x-data="{ totalReactions: {{ $totalReactions }} }"
+                    x-show="totalReactions > 0"
+                    onclick="openReactionsModal({{ $media->id }})"
+                    class="inline-flex items-center justify-center rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                    title="View Reactions"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Reactions -->
-        <div class="relative flex items-center gap-2 flex-wrap">
-            @php
-                $validEmojis = \App\Models\MediaReaction::VALID_EMOJIS;
-                $isOwner = $user && $user->id === $media->user_id;
-            @endphp
-            @foreach ($validEmojis as $emoji)
+        @php
+            $validEmojis = \App\Models\MediaReaction::VALID_EMOJIS;
+            $isOwner = $user && $user->id === $media->user_id;
+
+            // Sort emojis by count (highest first), but include user's reaction even if count is 0
+            $sortedEmojis = collect($validEmojis)->sortByDesc(function ($emoji) use ($reactionCounts, $userReaction) {
+                $count = $reactionCounts[$emoji] ?? 0;
+                // If user has this reaction but count is 0, treat it as 1 for sorting
+                if ($count === 0 && $userReaction && $userReaction->emoji === $emoji) {
+                    return 1;
+                }
+                return $count;
+            })->values()->all();
+        @endphp
+        <div
+            x-data="reactionState({{ $media->id }}, {{ json_encode($reactionCounts) }}, {{ $userReaction ? json_encode(['emoji' => $userReaction->emoji]) : 'null' }}, {{ $isOwner ? 'true' : 'false' }}, {{ json_encode($reactionUsersByEmoji) }})"
+            class="relative flex items-center gap-2 flex-wrap"
+        >
+            @foreach ($sortedEmojis as $emoji)
                 @php
                     $count = $reactionCounts[$emoji] ?? 0;
                     $isUserReaction = $userReaction && $userReaction->emoji === $emoji;
                 @endphp
-                @if ($count > 0 || $isUserReaction)
-                    @if (!$isOwner)
-                        <button
-                            class="reaction-button flex items-center gap-1 rounded-full border px-2 py-1 text-sm transition {{ $isUserReaction ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800' }}"
-                            data-emoji="{{ $emoji }}"
-                            data-media-id="{{ $media->id }}"
-                            data-is-user-reaction="{{ $isUserReaction ? 'true' : 'false' }}"
-                            onclick="toggleReaction({{ $media->id }}, '{{ $emoji }}', {{ $isUserReaction ? 'true' : 'false' }})"
-                        >
-                            <span>{{ $emoji }}</span>
-                            <span class="text-xs font-semibold">{{ $count }}</span>
-                        </button>
-                    @else
-                        <div
-                            class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
-                        >
-                            <span>{{ $emoji }}</span>
-                            <span class="text-xs font-semibold">{{ $count }}</span>
-                        </div>
-                    @endif
-                @endif
+                <template x-if="getCount('{{ $emoji }}') > 0 || getUserReaction() === '{{ $emoji }}'">
+                    <div>
+                        @if (!$isOwner)
+                            <button
+                                @click="toggleReaction('{{ $emoji }}')"
+                                :class="getUserReaction() === '{{ $emoji }}' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800'"
+                                :title="getReactionTooltip('{{ $emoji }}')"
+                                class="reaction-button flex items-center gap-1 rounded-full border px-2 py-1 text-sm transition"
+                            >
+                                <span>{{ $emoji }}</span>
+                                <span class="text-xs font-semibold" x-text="getCount('{{ $emoji }}')"></span>
+                            </button>
+                        @else
+                            <div
+                                :title="getReactionTooltip('{{ $emoji }}')"
+                                class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
+                            >
+                                <span>{{ $emoji }}</span>
+                                <span class="text-xs font-semibold" x-text="getCount('{{ $emoji }}')"></span>
+                            </div>
+                        @endif
+                    </div>
+                </template>
             @endforeach
 
             @auth
                 @if (!$isOwner)
                     <div class="flex items-center gap-1">
                         <button
-                            id="reaction-toggle-{{ $media->id }}"
+                            @click="togglePicker()"
                             class="reaction-toggle-button flex items-center justify-center rounded-full border border-slate-200 bg-white p-1.5 text-sm transition hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800 shrink-0"
-                            onclick="toggleEmojiPicker({{ $media->id }}, event)"
                             title="Add reaction"
                         >
                             <!-- Plus Icon (default) -->
-                            <svg id="plus-icon-{{ $media->id }}" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="!pickerOpen" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
                             <!-- Minus Icon (when open) -->
-                            <svg id="minus-icon-{{ $media->id }}" class="h-4 w-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="pickerOpen" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                             </svg>
                         </button>
 
                         <!-- Inline Emoji Picker -->
-                        <div id="emoji-picker-{{ $media->id }}" class="emoji-picker hidden flex items-center gap-1 flex-wrap">
+                        <div x-show="pickerOpen" @click.away="pickerOpen = false" class="emoji-picker flex items-center gap-1 flex-wrap">
                             @foreach (\App\Models\MediaReaction::VALID_EMOJIS as $emoji)
-                                @php
-                                    // Skip the emoji if user has already reacted with it
-                                    $isUserReactionEmoji = $userReaction && $userReaction->emoji === $emoji;
-                                @endphp
-                                @if (!$isUserReactionEmoji)
-                                    <button
-                                        class="emoji-option flex items-center justify-center rounded-full border border-slate-200 bg-white p-1 text-base transition hover:border-blue-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
-                                        onclick="addReaction({{ $media->id }}, '{{ $emoji }}')"
-                                        title="React with {{ $emoji }}"
-                                    >
-                                        {{ $emoji }}
-                                    </button>
-                                @endif
+                                <button
+                                    x-show="getUserReaction() !== '{{ $emoji }}'"
+                                    @click="addReaction('{{ $emoji }}')"
+                                    class="emoji-option flex items-center justify-center rounded-full border border-slate-200 bg-white p-1 text-base transition hover:border-blue-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+                                    title="React with {{ $emoji }}"
+                                >
+                                    {{ $emoji }}
+                                </button>
                             @endforeach
                         </div>
                     </div>
@@ -199,7 +262,154 @@
     </div>
 </div>
 
+<!-- Reactions Modal -->
+<div
+    id="reactions-modal-{{ $media->id }}"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    onclick="closeReactionsModal({{ $media->id }}, event)"
+>
+    <div
+        class="relative max-w-md w-full max-h-[80vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800"
+        onclick="event.stopPropagation()"
+    >
+        <!-- Modal Header -->
+        <div class="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Reactions</h3>
+            <button
+                onclick="closeReactionsModal({{ $media->id }})"
+                class="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+            >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div id="reactions-content-{{ $media->id }}" class="p-6">
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    function reactionState(mediaId, initialCounts, initialUserReaction, isOwner, initialReactionUsers) {
+        return {
+            mediaId: mediaId,
+            reactionCounts: initialCounts || {},
+            userReaction: initialUserReaction ? initialUserReaction.emoji : null,
+            isOwner: isOwner,
+            pickerOpen: false,
+            loading: false,
+            reactionUsers: initialReactionUsers || {},
+
+            getCount(emoji) {
+                return this.reactionCounts[emoji] || 0;
+            },
+
+            getUserReaction() {
+                return this.userReaction;
+            },
+
+            getReactionTooltip(emoji) {
+                const users = this.reactionUsers[emoji] || [];
+                if (users.length === 0) {
+                    return '';
+                }
+
+                const maxNames = 3;
+                const displayNames = users.slice(0, maxNames);
+                const remaining = users.length - maxNames;
+
+                let tooltip = displayNames.join(', ');
+                if (remaining > 0) {
+                    tooltip += `, ...`;
+                }
+
+                return tooltip;
+            },
+
+            togglePicker() {
+                this.pickerOpen = !this.pickerOpen;
+            },
+
+            async toggleReaction(emoji) {
+                if (this.loading) return;
+                await this.addReaction(emoji);
+            },
+
+            async addReaction(emoji) {
+                if (this.loading) return;
+
+                this.loading = true;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                if (!csrfToken) {
+                    alert('CSRF token not found. Please refresh the page and try again.');
+                    this.loading = false;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/media/${this.mediaId}/reactions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ emoji: emoji })
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.message || 'Failed to add reaction');
+                    }
+
+                    const data = await response.json();
+
+                    // Update reaction counts
+                    if (data.reaction_counts) {
+                        this.reactionCounts = data.reaction_counts;
+                    }
+
+                    // Update user reaction
+                    if (data.removed) {
+                        this.userReaction = null;
+                    } else if (data.user_reaction) {
+                        this.userReaction = data.user_reaction.emoji;
+                    }
+
+                    // Update reaction users for tooltips
+                    if (data.reaction_users) {
+                        this.reactionUsers = data.reaction_users;
+                    }
+
+                    // Close picker
+                    this.pickerOpen = false;
+
+                    // Update total reactions count for the view reactions button
+                    const totalReactions = Object.values(this.reactionCounts).reduce((sum, count) => sum + count, 0);
+                    const viewReactionsBtn = document.getElementById(`view-reactions-btn-${this.mediaId}`);
+                    if (viewReactionsBtn) {
+                        const alpineData = Alpine.$data(viewReactionsBtn);
+                        if (alpineData) {
+                            alpineData.totalReactions = totalReactions;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(error.message || 'Failed to add reaction. Please try again.');
+                } finally {
+                    this.loading = false;
+                }
+            }
+        };
+    }
+
     function changeSlide(mediaId, direction) {
         const slideshow = document.querySelector(`.media-slideshow[data-media-id="${mediaId}"]`);
         const slides = slideshow.querySelectorAll('.media-slide');
@@ -234,103 +444,179 @@
         });
     }
 
-    function toggleEmojiPicker(mediaId, event) {
-        const picker = document.getElementById(`emoji-picker-${mediaId}`);
-        const plusIcon = document.getElementById(`plus-icon-${mediaId}`);
-        const minusIcon = document.getElementById(`minus-icon-${mediaId}`);
-        const isCurrentlyOpen = !picker.classList.contains('hidden');
+    function loadYouTubeVideo(mediaId, youtubeVideoId, button) {
+        const container = document.querySelector(`.youtube-thumbnail-container[data-media-id="${mediaId}"]`);
+        if (!container) return;
 
-        // Hide all other pickers and reset their icons
-        document.querySelectorAll('.emoji-picker').forEach(p => {
-            if (p.id !== `emoji-picker-${mediaId}`) {
-                p.classList.add('hidden');
-                const otherMediaId = p.id.replace('emoji-picker-', '');
-                const otherPlus = document.getElementById(`plus-icon-${otherMediaId}`);
-                const otherMinus = document.getElementById(`minus-icon-${otherMediaId}`);
-                if (otherPlus) otherPlus.classList.remove('hidden');
-                if (otherMinus) otherMinus.classList.add('hidden');
-            }
-        });
+        // Create iframe
+        const iframe = document.createElement('iframe');
+        iframe.className = 'h-full w-full';
+        iframe.src = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`;
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.loading = 'lazy';
 
-        // Toggle this picker
-        if (isCurrentlyOpen) {
-            picker.classList.add('hidden');
-            plusIcon.classList.remove('hidden');
-            minusIcon.classList.add('hidden');
-        } else {
-            picker.classList.remove('hidden');
-            plusIcon.classList.add('hidden');
-            minusIcon.classList.remove('hidden');
-        }
-
-        // Prevent event bubbling
-        if (event) {
-            event.stopPropagation();
-        }
+        // Replace container content with iframe
+        container.innerHTML = '';
+        container.appendChild(iframe);
     }
 
-    function addReaction(mediaId, emoji) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        if (!csrfToken) {
-            alert('CSRF token not found. Please refresh the page and try again.');
+    function copyVideoLink(mediaId, youtubeVideoId, event) {
+        const videoUrl = `https://www.youtube.com/watch?v=${youtubeVideoId}`;
+
+        navigator.clipboard.writeText(videoUrl).then(() => {
+            // Show feedback
+            const button = event.target.closest('button');
+            const originalSvg = button.querySelector('svg').outerHTML;
+            button.innerHTML = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+            button.classList.add('text-green-600', 'dark:text-green-400');
+
+            setTimeout(() => {
+                button.innerHTML = originalSvg;
+                button.classList.remove('text-green-600', 'dark:text-green-400');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Failed to copy link. Please try again.');
+        });
+    }
+
+    function openReactionsModal(mediaId) {
+        const modal = document.getElementById(`reactions-modal-${mediaId}`);
+        const content = document.getElementById(`reactions-content-${mediaId}`);
+
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Fetch reactions
+        fetch(`/media/${mediaId}/reactions`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            renderReactions(mediaId, data.reactions);
+        })
+        .catch(error => {
+            console.error('Error fetching reactions:', error);
+            content.innerHTML = '<div class="text-center py-8 text-slate-500 dark:text-slate-400">Failed to load reactions. Please try again.</div>';
+        });
+    }
+
+    function formatUserName(user) {
+        const userName = escapeHtml(user.user_name);
+        if (user.profile_is_public) {
+            const profileUrl = `/profile/${user.user_id}`;
+            return `<a href="${profileUrl}" class="hover:underline" wire:navigate>${userName}</a>`;
+        }
+        return userName;
+    }
+
+    function renderReactions(mediaId, reactions) {
+        const content = document.getElementById(`reactions-content-${mediaId}`);
+
+        if (!reactions || Object.keys(reactions).length === 0) {
+            content.innerHTML = '<div class="text-center py-8 text-slate-500 dark:text-slate-400">No reactions yet.</div>';
             return;
         }
 
-        fetch(`/media/${mediaId}/reactions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ emoji: emoji })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.message || 'Failed to add reaction');
-                });
+        let html = '<div class="space-y-4">';
+
+        const validEmojis = @json(\App\Models\MediaReaction::VALID_EMOJIS);
+
+        // Sort emojis by count (highest first)
+        const sortedEmojis = validEmojis
+            .filter(emoji => reactions[emoji] && reactions[emoji].length > 0)
+            .sort((a, b) => {
+                const countA = reactions[a] ? reactions[a].length : 0;
+                const countB = reactions[b] ? reactions[b].length : 0;
+                return countB - countA; // Descending order
+            });
+
+        sortedEmojis.forEach(emoji => {
+            if (reactions[emoji] && reactions[emoji].length > 0) {
+                const users = reactions[emoji];
+                const maxVisible = 5;
+                const hasMore = users.length > maxVisible;
+                const visibleUsers = users.slice(0, maxVisible);
+                const hiddenUsers = hasMore ? users.slice(maxVisible) : [];
+
+                html += `
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">${users.length}</span>
+                        <span class="text-xl">${emoji}</span>
+                        <span class="text-sm text-slate-600 dark:text-slate-400">
+                            <span id="reaction-users-visible-${mediaId}-${emoji}">
+                                ${visibleUsers.map(user => formatUserName(user)).join(', ')}
+                            </span>
+                            ${hasMore ? `
+                                <span id="reaction-users-hidden-${mediaId}-${emoji}" class="hidden" data-count="${hiddenUsers.length}">
+                                    , ${hiddenUsers.map(user => formatUserName(user)).join(', ')}
+                                </span>
+                                <button
+                                    onclick="toggleReactionUsers(${mediaId}, '${emoji}')"
+                                    class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-1"
+                                >
+                                    <span id="reaction-toggle-text-${mediaId}-${emoji}">and ${hiddenUsers.length} more...</span>
+                                </button>
+                            ` : ''}
+                        </span>
+                    </div>
+                `;
             }
-            return response.json();
-        })
-        .then(data => {
-            if (data.message) {
-                // Reload to show updated reactions
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert(error.message || 'Failed to add reaction. Please try again.');
         });
 
-        // Hide picker and reset icon
-        const picker = document.getElementById(`emoji-picker-${mediaId}`);
-        const plusIcon = document.getElementById(`plus-icon-${mediaId}`);
-        const minusIcon = document.getElementById(`minus-icon-${mediaId}`);
-        if (picker) picker.classList.add('hidden');
-        if (plusIcon) plusIcon.classList.remove('hidden');
-        if (minusIcon) minusIcon.classList.add('hidden');
+        html += '</div>';
+        content.innerHTML = html;
     }
 
-    function toggleReaction(mediaId, emoji, isUserReaction) {
-        // If user already has this reaction, it will be removed by the backend
-        addReaction(mediaId, emoji);
+    function toggleReactionUsers(mediaId, emoji) {
+        const hiddenSpan = document.getElementById(`reaction-users-hidden-${mediaId}-${emoji}`);
+        const toggleText = document.getElementById(`reaction-toggle-text-${mediaId}-${emoji}`);
+
+        if (!hiddenSpan || !toggleText) return;
+
+        const hiddenCount = parseInt(hiddenSpan.getAttribute('data-count')) || 0;
+
+        if (hiddenSpan.classList.contains('hidden')) {
+            hiddenSpan.classList.remove('hidden');
+            toggleText.textContent = 'Show less';
+        } else {
+            hiddenSpan.classList.add('hidden');
+            toggleText.textContent = `and ${hiddenCount} more...`;
+        }
     }
 
-    // Close emoji picker when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.reaction-toggle-button') && !e.target.closest('.emoji-picker') && !e.target.closest('.emoji-option')) {
-            document.querySelectorAll('.emoji-picker').forEach(p => {
-                p.classList.add('hidden');
-                const mediaId = p.id.replace('emoji-picker-', '');
-                const plusIcon = document.getElementById(`plus-icon-${mediaId}`);
-                const minusIcon = document.getElementById(`minus-icon-${mediaId}`);
-                if (plusIcon) plusIcon.classList.remove('hidden');
-                if (minusIcon) minusIcon.classList.add('hidden');
+    function closeReactionsModal(mediaId, event) {
+        if (event && event.target !== event.currentTarget) {
+            return;
+        }
+
+        const modal = document.getElementById(`reactions-modal-${mediaId}`);
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('[id^="reactions-modal-"]').forEach(modal => {
+                if (!modal.classList.contains('hidden')) {
+                    const mediaId = modal.id.replace('reactions-modal-', '');
+                    closeReactionsModal(mediaId);
+                }
             });
         }
     });
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 </script>
 

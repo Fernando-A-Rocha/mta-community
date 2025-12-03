@@ -91,14 +91,30 @@ class MediaReactionController extends Controller
         // If user already has this exact emoji reaction, remove it (toggle off)
         // This bypasses the daily limit since they're removing, not adding
         if ($existingReaction && $existingReaction->emoji === $validated['emoji']) {
-            return DB::transaction(function () use ($existingReaction) {
+            return DB::transaction(function () use ($media, $existingReaction) {
                 $existingReaction->delete();
+
+                // Refresh media to get updated reaction counts
+                $media->refresh();
+                $media->load('reactions.user');
+
+                // Group reactions by emoji with user names
+                $reactionUsersByEmoji = [];
+                foreach ($media->reactions as $reaction) {
+                    if (! isset($reactionUsersByEmoji[$reaction->emoji])) {
+                        $reactionUsersByEmoji[$reaction->emoji] = [];
+                    }
+                    $reactionUsersByEmoji[$reaction->emoji][] = $reaction->user->name;
+                }
 
                 if (request()->expectsJson()) {
                     return response()->json([
                         'message' => 'Reaction removed successfully.',
                         'removed' => true,
                         'remaining_reactions' => $this->getRemainingReactions(),
+                        'reaction_counts' => $media->reaction_counts,
+                        'user_reaction' => null,
+                        'reaction_users' => $reactionUsersByEmoji,
                     ]);
                 }
 
@@ -136,12 +152,30 @@ class MediaReactionController extends Controller
                 ]);
             }
 
+            // Refresh media to get updated reaction counts
+            $media->refresh();
+            $media->load('reactions.user');
+
+            // Group reactions by emoji with user names
+            $reactionUsersByEmoji = [];
+            foreach ($media->reactions as $reaction) {
+                if (! isset($reactionUsersByEmoji[$reaction->emoji])) {
+                    $reactionUsersByEmoji[$reaction->emoji] = [];
+                }
+                $reactionUsersByEmoji[$reaction->emoji][] = $reaction->user->name;
+            }
+
             if (request()->expectsJson()) {
                 return response()->json([
                     'message' => 'Reaction added successfully.',
                     'removed' => false,
                     'reaction' => $reaction,
                     'remaining_reactions' => $this->getRemainingReactions(),
+                    'reaction_counts' => $media->reaction_counts,
+                    'user_reaction' => [
+                        'emoji' => $reaction->emoji,
+                    ],
+                    'reaction_users' => $reactionUsersByEmoji,
                 ]);
             }
 
@@ -178,5 +212,36 @@ class MediaReactionController extends Controller
         return redirect()
             ->route('media.index')
             ->with('success', __('Reaction removed successfully.'));
+    }
+
+    /**
+     * Get all reactions for a media with user information.
+     */
+    public function index(Request $request, Media $media): JsonResponse
+    {
+        $reactions = $media->reactions()
+            ->with('user:id,name,profile_visibility')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Group reactions by emoji
+        $groupedReactions = $reactions->groupBy('emoji')->map(function ($reactionGroup) {
+            return $reactionGroup->map(function ($reaction) {
+                $profileVisibility = $reaction->user->profile_visibility ?? 'public';
+                $isPublic = $profileVisibility === 'public';
+
+                return [
+                    'id' => $reaction->id,
+                    'user_id' => $reaction->user_id,
+                    'user_name' => $reaction->user->name,
+                    'profile_is_public' => $isPublic,
+                    'created_at' => $reaction->created_at->toIso8601String(),
+                ];
+            })->values();
+        });
+
+        return response()->json([
+            'reactions' => $groupedReactions,
+        ]);
     }
 }

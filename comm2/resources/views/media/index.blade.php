@@ -58,8 +58,7 @@
                             <flux:field>
                                 <flux:label>Sort by</flux:label>
                                 <flux:select name="sort_by" onchange="this.form.submit()">
-                                    <option value="recent" {{ $sortBy === 'recent' ? 'selected' : '' }}>Most recent</option>
-                                    <option value="date" {{ $sortBy === 'date' ? 'selected' : '' }}>Date</option>
+                                    <option value="recent" {{ $sortBy === 'recent' ? 'selected' : '' }}>Date</option>
                                     <option value="ratings" {{ $sortBy === 'ratings' ? 'selected' : '' }}>Ratings</option>
                                 </flux:select>
                             </flux:field>
