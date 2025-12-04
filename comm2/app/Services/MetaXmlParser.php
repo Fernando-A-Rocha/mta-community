@@ -191,13 +191,13 @@ class MetaXmlParser
             throw new InvalidArgumentException("Missing required 'type' attribute in info node");
         }
 
-        if (empty($version)) {
-            throw new InvalidArgumentException("Missing required 'version' attribute in info node");
-        }
-
-        // Validate version format (semantic versioning)
-        if (! preg_match('/^\d+\.\d+\.\d+$/', $version)) {
-            throw new InvalidArgumentException("Invalid version format '{$version}'. Must be semantic version (e.g., 1.0.0)");
+        if ($version === '') {
+            $version = '1.0.0';
+        } elseif (! preg_match('/^\d+\.\d+\.\d+$/', $version)) {
+            // Validate version format (semantic versioning) only when provided
+            throw new InvalidArgumentException(
+                "Invalid version format '{$version}'. Must be semantic version (e.g., 1.0.0)"
+            );
         }
 
         // Validate type
