@@ -84,7 +84,7 @@ class MtaServerService
                 return Cache::get(self::CACHE_KEY, []);
             }
 
-            // Filter servers: must have players > 0 and version matches
+            // Filter servers: must have players > 0, version matches, and not passworded
             $filteredServers = array_filter($allServers, function ($server) use ($targetVersion) {
                 if (! is_array($server)) {
                     return false;
@@ -92,8 +92,9 @@ class MtaServerService
 
                 $players = (int) ($server['players'] ?? 0);
                 $version = (string) ($server['version'] ?? '');
+                $password = (int) ($server['password'] ?? 0);
 
-                return $players > 0 && $version === $targetVersion;
+                return $players > 0 && $version === $targetVersion && $password === 0;
             });
 
             // Sort by player count (descending)
