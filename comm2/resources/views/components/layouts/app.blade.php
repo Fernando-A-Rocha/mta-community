@@ -98,11 +98,16 @@
             @endauth
             @guest
             <!-- Login Link -->
-            <div class="px-3 py-2 text-sm">
-                {{ __('Existing user?') }}
+            <div class="px-3 py-2 text-sm flex items-center gap-2">
                 <flux:link :href="route('login')" wire:navigate>
                     {{ __('Log in') }}
                 </flux:link>
+                <span class="text-zinc-400 dark:text-zinc-600">|</span>
+                @if (Route::has('register'))
+                    <flux:link :href="route('register')" wire:navigate>
+                        {{ __('Sign up') }}
+                    </flux:link>
+                @endif
             </div>
             @endguest
         </flux:sidebar>
