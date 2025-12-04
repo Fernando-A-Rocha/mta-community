@@ -201,7 +201,15 @@
                 @endphp
                 <template x-if="getCount('{{ $emoji }}') > 0 || getUserReaction() === '{{ $emoji }}'">
                     <div>
-                        @if (!$isOwner)
+                        @if ($isOwner)
+                            <div
+                                :title="getReactionTooltip('{{ $emoji }}')"
+                                class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
+                            >
+                                <span>{{ $emoji }}</span>
+                                <span class="text-xs font-semibold" x-text="getCount('{{ $emoji }}')"></span>
+                            </div>
+                        @elseif ($user)
                             <button
                                 @click="toggleReaction('{{ $emoji }}')"
                                 :class="getUserReaction() === '{{ $emoji }}' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800'"
