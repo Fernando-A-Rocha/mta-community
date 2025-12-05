@@ -5,9 +5,7 @@ return [
     |--------------------------------------------------------------------------
     | SSL Verification Configuration
     |--------------------------------------------------------------------------
-    |
     | Configuration for verifying SSL certificates for HTTP requests.
-    |
     */
     'verify_ssl' => env('MTA_VERIFY_SSL', false), // Set to true in production if SSL certificates are properly configured
 
@@ -15,9 +13,7 @@ return [
     |--------------------------------------------------------------------------
     | MTA Server List API Configuration
     |--------------------------------------------------------------------------
-    |
     | Configuration for fetching MTA servers from the JSON API.
-    |
     */
 
     'servers_api_url' => 'https://multitheftauto.com/api/',
@@ -29,9 +25,7 @@ return [
     |--------------------------------------------------------------------------
     | MTA News Configuration
     |--------------------------------------------------------------------------
-    |
     | Configuration for fetching and caching MTA forum news entries.
-    |
     */
 
     'news_forum_url' => 'https://multitheftauto.com/news',
@@ -42,9 +36,7 @@ return [
     |--------------------------------------------------------------------------
     | GitHub Activity Configuration
     |--------------------------------------------------------------------------
-    |
     | Configuration for fetching and caching GitHub activity (commits, issues, releases).
-    |
     */
 
     'github_token' => env('GITHUB_TOKEN'),
