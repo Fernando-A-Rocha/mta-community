@@ -54,6 +54,236 @@
             const date = new Date(dateString);
             return date.toLocaleString() + ' • ' + date.toLocaleDateString();
         },
+        formatLogContext(action, context) {
+            if (!context || typeof context !== 'object') {
+                return '<div class="text-xs text-slate-500 dark:text-slate-400">No context data</div>';
+            }
+            
+            const formatBool = (value) => value ? '{{ __('Yes') }}' : '{{ __('No') }}';
+            const formatStatus = (value) => {
+                if (typeof value === 'boolean') {
+                    return value ? '{{ __('Verified') }}' : '{{ __('Not Verified') }}';
+                }
+                return String(value).charAt(0).toUpperCase() + String(value).slice(1).replace(/_/g, ' ');
+            };
+            
+            const resourceLink = (id, name) => {
+                const url = `{{ route('resources.show', ['resource' => '__ID__']) }}`.replace('__ID__', id);
+                return `<a href="${url}" class="text-blue-600 hover:underline dark:text-blue-400">${escapeHtml(name)}</a>`;
+            };
+            
+            const userLink = (id, name) => {
+                const url = `{{ route('profile.show', ['user' => '__ID__']) }}`.replace('__ID__', id);
+                return `<a href="${url}" class="text-blue-600 hover:underline dark:text-blue-400">${escapeHtml(name)}</a>`;
+            };
+            
+            const escapeHtml = (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
+            
+            let html = '<div class="space-y-3">';
+            
+            // Resource enabled/disabled
+            if (action.startsWith('resource.enabled') || action.startsWith('resource.disabled')) {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> ${resourceLink(context.resource_id, context.resource_name)} <span class="text-slate-500 dark:text-slate-400">(ID: ${context.resource_id})</span></div>`;
+                }
+                if (context.resource_owner_id && context.resource_owner_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Owner') }}:</span> ${userLink(context.resource_owner_id, context.resource_owner_name)}</div>`;
+                }
+                html += '</div>';
+            }
+            // Resource created
+            else if (action === 'resource.created') {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> ${resourceLink(context.resource_id, context.resource_name)}</div>`;
+                }
+                if (context.long_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Long Name') }}:</span> <span>${escapeHtml(context.long_name)}</span></div>`;
+                }
+                if (context.category) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Category') }}:</span> <span>${escapeHtml(context.category.charAt(0).toUpperCase() + context.category.slice(1))}</span></div>`;
+                }
+                if (context.version) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Version') }}:</span> <span>${escapeHtml(context.version)}</span></div>`;
+                }
+                html += '<div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">';
+                if (context.tag_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Tags') }}:</span> <span>${context.tag_count}</span></div>`;
+                }
+                if (context.language_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Languages') }}:</span> <span>${context.language_count}</span></div>`;
+                }
+                if (context.image_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Images') }}:</span> <span>${context.image_count}</span></div>`;
+                }
+                const links = [];
+                if (context.has_github_url) links.push('{{ __('GitHub') }}');
+                if (context.has_forum_url) links.push('{{ __('Forum') }}');
+                html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Links') }}:</span> <span>${links.length > 0 ? links.join(' & ') : '{{ __('None') }}'}</span></div>`;
+                html += '</div></div>';
+            }
+            // Resource updated
+            else if (action === 'resource.updated') {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> ${resourceLink(context.resource_id, context.resource_name)}</div>`;
+                }
+                if (context.is_moderator_edit !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Edit Type') }}:</span> <span>${context.is_moderator_edit ? '{{ __('Moderator Edit') }}' : '{{ __('Owner Edit') }}'}</span></div>`;
+                }
+                if (context.changes && typeof context.changes === 'object' && Object.keys(context.changes).length > 0) {
+                    html += '<div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Changes') }}:</span><ul class="mt-1 space-y-1 list-disc list-inside text-slate-600 dark:text-slate-300">';
+                    for (const [field, change] of Object.entries(context.changes)) {
+                        const fieldName = field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+                        if (change && typeof change === 'object' && change.old !== undefined && change.new !== undefined) {
+                            const oldVal = typeof change.old === 'object' ? JSON.stringify(change.old) : change.old;
+                            const newVal = typeof change.new === 'object' ? JSON.stringify(change.new) : change.new;
+                            html += `<li><span class="font-medium">${escapeHtml(fieldName)}:</span> <span class="text-red-600 dark:text-red-400">${escapeHtml(String(oldVal))}</span> → <span class="text-green-600 dark:text-green-400">${escapeHtml(String(newVal))}</span></li>`;
+                        } else {
+                            html += `<li><span class="font-medium">${escapeHtml(fieldName)}:</span> ${escapeHtml(String(change))}</li>`;
+                        }
+                    }
+                    html += '</ul></div>';
+                }
+                html += '</div>';
+            }
+            // Resource version deleted
+            else if (action === 'resource.version.deleted') {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> ${resourceLink(context.resource_id, context.resource_name)}</div>`;
+                }
+                if (context.version) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Version') }}:</span> <span>${escapeHtml(context.version)}</span></div>`;
+                }
+                if (context.was_current !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Was Current Version') }}:</span> <span>${formatBool(context.was_current)}</span></div>`;
+                }
+                if (context.new_current_version) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('New Current Version') }}:</span> <span>${escapeHtml(context.new_current_version)}</span></div>`;
+                }
+                if (context.is_owner_delete !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Deleted By Owner') }}:</span> <span>${formatBool(context.is_owner_delete)}</span></div>`;
+                }
+                html += '</div>';
+            }
+            // Resource deleted
+            else if (action === 'resource.deleted') {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> <span>${escapeHtml(context.resource_name)}</span> <span class="text-slate-500 dark:text-slate-400">(ID: ${context.resource_id})</span></div>`;
+                }
+                if (context.resource_owner_id && context.resource_owner_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Owner') }}:</span> ${userLink(context.resource_owner_id, context.resource_owner_name)}</div>`;
+                }
+                if (context.category) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Category') }}:</span> <span>${escapeHtml(context.category.charAt(0).toUpperCase() + context.category.slice(1))}</span></div>`;
+                }
+                html += '<div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">';
+                if (context.version_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Versions') }}:</span> <span>${context.version_count}</span></div>`;
+                }
+                if (context.rating_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Ratings') }}:</span> <span>${context.rating_count}</span></div>`;
+                }
+                if (context.download_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Downloads') }}:</span> <span>${context.download_count}</span></div>`;
+                }
+                if (context.is_owner_delete !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Deleted By Owner') }}:</span> <span>${formatBool(context.is_owner_delete)}</span></div>`;
+                }
+                html += '</div></div>';
+            }
+            // Resource version verification updated
+            else if (action === 'resource.version.verification.updated') {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> ${resourceLink(context.resource_id, context.resource_name)}</div>`;
+                }
+                if (context.version) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Version') }}:</span> <span>${escapeHtml(context.version)}</span></div>`;
+                }
+                if (context.old_status !== undefined && context.new_status !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Verification Status') }}:</span> <span class="text-red-600 dark:text-red-400">${formatStatus(context.old_status)}</span> → <span class="text-green-600 dark:text-green-400">${formatStatus(context.new_status)}</span></div>`;
+                }
+                html += '</div>';
+            }
+            // Review created/updated/deleted
+            else if (action.startsWith('review.')) {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.resource_id && context.resource_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource') }}:</span> ${resourceLink(context.resource_id, context.resource_name)}</div>`;
+                }
+                if (context.rating !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Rating') }}:</span> <span>${context.rating}/5</span></div>`;
+                }
+                if (context.has_comment !== undefined || context.had_comment !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Has Comment') }}:</span> <span>${formatBool(context.has_comment ?? context.had_comment ?? false)}</span></div>`;
+                }
+                if (context.reviewer_id && context.reviewer_name) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Reviewer') }}:</span> ${userLink(context.reviewer_id, context.reviewer_name)}</div>`;
+                }
+                html += '</div>';
+            }
+            // Reports
+            else if (action.startsWith('report.')) {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.report_id) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Report ID') }}:</span> <span>${context.report_id}</span></div>`;
+                }
+                if (context.reportable_type) {
+                    const type = context.reportable_type === 'resource' ? '{{ __('Resource') }}' : '{{ __('User') }}';
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Report Type') }}:</span> <span>${type}</span></div>`;
+                }
+                if (context.resource_id) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Resource ID') }}:</span> <span>${context.resource_id}</span></div>`;
+                }
+                if (context.user_id) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('User ID') }}:</span> <span>${context.user_id}</span></div>`;
+                }
+                if (context.reason) {
+                    const reason = context.reason.charAt(0).toUpperCase() + context.reason.slice(1).replace(/_/g, ' ');
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Reason') }}:</span> <span>${escapeHtml(reason)}</span></div>`;
+                }
+                if (context.status) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Status') }}:</span> <span>${escapeHtml(context.status.charAt(0).toUpperCase() + context.status.slice(1))}</span></div>`;
+                }
+                if (context.deleted !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Deleted Count') }}:</span> <span>${context.deleted}</span></div>`;
+                }
+                if (context.threshold) {
+                    const date = new Date(context.threshold);
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Threshold') }}:</span> <span>${date.toLocaleString()}</span></div>`;
+                }
+                html += '</div>';
+            }
+            // Media
+            else if (action.startsWith('media.')) {
+                html += '<div class="grid gap-2 text-sm">';
+                if (context.media_id) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Media ID') }}:</span> <span>${context.media_id}</span></div>`;
+                }
+                if (context.type) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Type') }}:</span> <span>${escapeHtml(context.type.charAt(0).toUpperCase() + context.type.slice(1))}</span></div>`;
+                }
+                if (context.image_count !== undefined) {
+                    html += `<div><span class="font-semibold text-slate-700 dark:text-slate-200">{{ __('Image Count') }}:</span> <span>${context.image_count}</span></div>`;
+                }
+                html += '</div>';
+            }
+            // Fallback: JSON
+            else {
+                html += `<div class="rounded-2xl bg-slate-900/5 p-4 text-xs font-mono text-slate-800 dark:bg-slate-800/60 dark:text-slate-100"><pre class="whitespace-pre-wrap">${escapeHtml(JSON.stringify(context, null, 2))}</pre></div>`;
+            }
+            
+            html += '</div>';
+            return html;
+        },
     }"
 >
     <flux:modal.trigger name="{{ $modalName }}">
@@ -138,9 +368,7 @@
                                 <span class="block truncate" x-bind:title="log.user_agent || '{{ __('n/a') }}'" x-text="log.user_agent ? (log.user_agent.length > 80 ? log.user_agent.substring(0, 80) + '...' : log.user_agent) : '{{ __('n/a') }}'"></span>
                             </div>
                         </div>
-                        <div class="mt-4 rounded-2xl bg-slate-900/5 p-4 text-xs font-mono text-slate-800 dark:bg-slate-800/60 dark:text-slate-100">
-                            <pre class="whitespace-pre-wrap" x-text="JSON.stringify(log.context, null, 2)"></pre>
-                        </div>
+                        <div class="mt-4" x-html="formatLogContext(log.action, log.context)"></div>
                     </div>
                 </template>
             </div>

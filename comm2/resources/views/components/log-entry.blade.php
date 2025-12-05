@@ -34,8 +34,8 @@
             </span>
         </div>
     </div>
-    <div class="mt-4 rounded-2xl bg-slate-900/5 p-4 text-xs font-mono text-slate-800 dark:bg-slate-800/60 dark:text-slate-100">
-        <pre class="whitespace-pre-wrap">{{ json_encode($log->context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+    <div class="mt-4">
+        <x-log-context :action="$log->action" :context="$log->context" />
     </div>
 </div>
 
