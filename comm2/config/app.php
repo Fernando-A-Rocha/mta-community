@@ -148,4 +148,16 @@ return [
 
     'resource_modification_enabled' => env('RESOURCE_MODIFICATION_ENABLED', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | GitHub Repository URL
+    |--------------------------------------------------------------------------
+    |
+    | This value is the URL to the GitHub repository for this application.
+    | This will be displayed in the footer with a GitHub icon.
+    |
+    */
+
+    'github_url' => env('GITHUB_URL', 'https://github.com/Fernando-A-Rocha/mta-community'),
+
 ];
