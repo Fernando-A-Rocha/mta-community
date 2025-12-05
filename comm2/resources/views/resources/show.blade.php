@@ -54,9 +54,11 @@
                             <x-user-avatar :user="$resource->user" size="sm" />
                             {{ $resource->user->name }}
                         </a>
-                        <p class="mt-3 max-w-3xl text-base text-slate-200">
-                            <strong>{{ $resource->short_description }}</strong>
-                        </p>
+                        @if ($resource->short_description)
+                            <p class="mt-3 max-w-3xl text-base text-slate-200">
+                                <strong>{{ $resource->short_description }}</strong>
+                            </p>
+                        @endif
                     </div>
 
 

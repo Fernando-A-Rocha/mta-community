@@ -81,9 +81,11 @@
                     </span>
                 @endif
             </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300">
-                {{ \Illuminate\Support\Str::limit($resource->short_description, 140) }}
-            </p>
+            @if ($resource->short_description)
+                <p class="text-sm text-slate-600 dark:text-slate-300">
+                    {{ \Illuminate\Support\Str::limit($resource->short_description, 140) }}
+                </p>
+            @endif
         </div>
 
         <div class="flex items-center justify-between text-sm">

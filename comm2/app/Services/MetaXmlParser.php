@@ -183,9 +183,7 @@ class MetaXmlParser
         ]);
 
         // Validate required fields
-        if (empty($description)) {
-            throw new InvalidArgumentException("Missing required 'description' attribute in info node");
-        }
+        // Note: description is optional - it will be used as short_description if provided
 
         if (empty($type)) {
             throw new InvalidArgumentException("Missing required 'type' attribute in info node");

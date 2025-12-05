@@ -147,7 +147,7 @@ class ResourceUploadService
                 $resource = Resource::create([
                     'name' => $resourceName,
                     'long_name' => $longName,
-                    'short_description' => $metaData['description'],
+                    'short_description' => ! empty($metaData['description']) ? $metaData['description'] : '',
                     'long_description' => $longDescription,
                     'category' => $metaData['type'],
                     'user_id' => $user->id,

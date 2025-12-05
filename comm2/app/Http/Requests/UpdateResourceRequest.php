@@ -29,7 +29,7 @@ class UpdateResourceRequest extends FormRequest
     {
         return [
             'short_description' => [
-                'required',
+                'nullable',
                 'string',
                 'max:500',
                 new NoHtml,
