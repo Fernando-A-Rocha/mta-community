@@ -3,23 +3,11 @@
         <section>
             <div class="space-y-3">
                 <div>
-                    <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Members</h1>
+                    <flux:heading size="lg" class="mb-3">{{ __('Members') }} - {{ __('Top Creators') }}</flux:heading>
                     <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                        Discover the most active and talented creators in our community. Top creators are ranked by their resource downloads, ratings, media posts, and reactions.
+                    Members ranked by total downloads, average ratings of their resources, media posts, and reactions received.
                     </p>
                 </div>
-            </div>
-        </section>
-
-        <section>
-            <div class="space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Top Creators</h2>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                        Members ranked by total downloads, average ratings of their resources, media posts, and reactions received.
-                    </p>
-                </div>
-
                 <div class="space-y-4">
                     @forelse ($topCreators as $index => $creator)
                         <a

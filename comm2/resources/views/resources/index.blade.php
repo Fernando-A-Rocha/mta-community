@@ -14,7 +14,7 @@
             <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div class="space-y-3">
                     <div>
-                        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Resources</h1>
+                        <flux:heading size="lg" class="mb-3">{{ __('Resources') }}</flux:heading>
                         <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
                             Browse maps, scripts, gamemodes, and assets built by the community. Refine the catalog with search, filters, and sorting.
                         </p>

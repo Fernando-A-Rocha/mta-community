@@ -12,7 +12,7 @@
             <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div class="space-y-3">
                     <div>
-                        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Media</h1>
+                        <flux:heading size="lg" class="mb-3">{{ __('Media') }}</flux:heading>
                         <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
                             Browse gameplay screenshots, videos, and awesome moments shared by the community.
                         </p>
