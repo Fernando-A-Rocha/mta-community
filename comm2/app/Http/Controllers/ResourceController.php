@@ -166,15 +166,13 @@ class ResourceController extends Controller
         DB::transaction(function () use ($request, $resource, &$changes) {
             // Track changes for logging
             $oldValues = [
-                'short_description' => $resource->short_description,
                 'long_description' => $resource->long_description,
                 'github_url' => $resource->github_url,
                 'forum_thread_url' => $resource->forum_thread_url,
             ];
 
-            // Update basic fields
+            // Update basic fields (short_description is read-only, comes from meta.xml)
             $resource->update([
-                'short_description' => $request->input('short_description'),
                 'long_description' => $request->input('long_description'),
                 'github_url' => $request->input('github_url'),
                 'forum_thread_url' => $request->input('forum_thread_url'),

@@ -108,10 +108,10 @@
                             type="file"
                             name="images[]"
                             multiple
-                            accept="image/jpeg,image/png"
+                            accept="image/jpeg,image/png,image/webp"
                             id="images_input"
                         />
-                        <flux:description>JPG or PNG images. Max 2MB each.</flux:description>
+                        <flux:description>JPG, PNG, or WEBP images. Max 2MB each.</flux:description>
                     </flux:field>
                 </div>
 

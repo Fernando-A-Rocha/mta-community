@@ -8,20 +8,6 @@
                 @csrf
                 @method('PUT')
 
-                <!-- Short Description -->
-                <div>
-                    <flux:field>
-                        <flux:label>Short Description</flux:label>
-                        <flux:textarea
-                            name="short_description"
-                            rows="3"
-                            id="short_description"
-                            maxlength="500"
-                        >{{ old('short_description', $resource->short_description) }}</flux:textarea>
-                        <flux:description>Brief description of your resource (max 500 characters). This appears in the resource header.</flux:description>
-                    </flux:field>
-                </div>
-
                 <!-- Long Description -->
                 <div>
                     <flux:field>
@@ -115,10 +101,10 @@
                             type="file"
                             name="images[]"
                             multiple
-                            accept="image/jpeg,image/png"
+                            accept="image/jpeg,image/png,image/webp"
                             id="images_input"
                         />
-                        <flux:description>JPG or PNG images. Max 2MB each. Current: {{ $resource->images->count() }}/10</flux:description>
+                        <flux:description>JPG, PNG, or WEBP images. Max 2MB each. Current: {{ $resource->images->count() }}/10</flux:description>
                         <div id="images_info" class="mt-2 hidden">
                             <div class="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -28,12 +28,6 @@ class UpdateResourceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'short_description' => [
-                'nullable',
-                'string',
-                'max:500',
-                new NoHtml,
-            ],
             'long_description' => [
                 'nullable',
                 'string',
@@ -80,7 +74,7 @@ class UpdateResourceRequest extends FormRequest
             'images.*' => [
                 'required',
                 'image',
-                'mimes:jpg,jpeg,png',
+                'mimes:jpg,jpeg,png,webp',
                 'max:2048', // 2MB per image - See docs/UPLOAD_LIMITS.md for nginx/PHP alignment
             ],
             'remove_images' => [

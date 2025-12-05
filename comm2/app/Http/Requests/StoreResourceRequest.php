@@ -87,7 +87,7 @@ class StoreResourceRequest extends FormRequest
             $rules['images.*'] = [
                 'required',
                 'image',
-                'mimes:jpg,jpeg,png',
+                'mimes:jpg,jpeg,png,webp',
                 'max:2048', // 2MB per image - See docs/UPLOAD_LIMITS.md for nginx/PHP alignment
             ];
             $rules['github_url'] = [
