@@ -80,20 +80,20 @@ class LogController extends Controller
                     ->orWhere('context->reviewer_id', $id)
                     ->orWhere('context->resource_owner_id', $id);
             });
-            
+
             // Get entity name
             $entity = \App\Models\User::find($id);
-            $entityName = $entity ? $entity->name : __('User') . ' #' . $id;
+            $entityName = $entity ? $entity->name : __('User').' #'.$id;
         } else { // resource
             $query->where(function ($q) use ($id) {
                 $q->where('context->resource_id', $id)
                     ->orWhere('context->rating_id', $id)
                     ->orWhere('context->version_id', $id);
             });
-            
+
             // Get entity name
             $entity = \App\Models\Resource::find($id);
-            $entityName = $entity ? $entity->display_name : __('Resource') . ' #' . $id;
+            $entityName = $entity ? $entity->display_name : __('Resource').' #'.$id;
         }
 
         // Search filter
