@@ -25,11 +25,11 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Navigation')" class="grid">
                     <flux:navlist.item icon="newspaper" :href="route('home')" :current="request()->routeIs('home')" wire:navigate>{{ __('News') }}</flux:navlist.item>
-                    <flux:navlist.item icon="code-bracket" :href="route('development.index')" :current="request()->routeIs('development.*')" wire:navigate>{{ __('Development') }}</flux:navlist.item>
                     <flux:navlist.item icon="server" :href="route('servers.index')" :current="request()->routeIs('servers.*')" wire:navigate>{{ __('Servers') }}</flux:navlist.item>
                     <flux:navlist.item icon="photo" :href="route('media.index')" :current="request()->routeIs('media.*')" wire:navigate>{{ __('Media') }}</flux:navlist.item>
                     <flux:navlist.item icon="folder" :href="route('resources.index')" :current="request()->routeIs('resources.*')" wire:navigate>{{ __('Resources') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')" wire:navigate>{{ __('Members') }}</flux:navlist.item>
+                    <flux:navlist.item icon="code-bracket" :href="route('development.index')" :current="request()->routeIs('development.*')" wire:navigate>{{ __('Development') }}</flux:navlist.item>
                 </flux:navlist.group>
                 @auth
                     @if (auth()->user()->isModerator())
