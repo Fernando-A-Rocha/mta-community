@@ -52,12 +52,6 @@
                                         x-model="code"
                                     />
                                 </div>
-
-                                @error('code')
-                                    <flux:text color="red" class="mt-2">
-                                        {{ $message }}
-                                    </flux:text>
-                                @enderror
                             </div>
 
                             <div x-show="showRecoveryInput">
@@ -72,12 +66,6 @@
                                         :label="__('Recovery Code')"
                                     />
                                 </div>
-
-                                @error('recovery_code')
-                                    <flux:text color="red" class="mt-2">
-                                        {{ $message }}
-                                    </flux:text>
-                                @enderror
                             </div>
 
                             <div class="flex items-center justify-start">

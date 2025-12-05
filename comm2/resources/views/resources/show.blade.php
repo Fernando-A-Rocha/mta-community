@@ -19,17 +19,6 @@
             </a>
         </div>
 
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-100">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('report_success'))
-            <div class="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/20 dark:text-blue-100">
-                {{ session('report_success') }}
-            </div>
-        @endif
-
         <section>
             <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div class="space-y-4">
@@ -448,9 +437,6 @@
                                                 </label>
                                             @endfor
                                         </div>
-                                        @error('rating')
-                                            <flux:error>{{ $message }}</flux:error>
-                                        @enderror
                                     </flux:field>
                                 </div>
                                 <script>
@@ -515,9 +501,6 @@
                                             rows="3"
                                             placeholder="Share your experience, tips, or bugs others should know..."
                                         >{{ old('comment', $userRating?->comment) }}</flux:textarea>
-                                        @error('comment')
-                                            <flux:error>{{ $message }}</flux:error>
-                                        @enderror
                                     </flux:field>
                                 </div>
                                 <flux:button type="submit" variant="primary">
@@ -581,9 +564,6 @@
                                                 </option>
                                             @endforeach
                                         </flux:select>
-                                        @error('version_id')
-                                            <flux:error>{{ $message }}</flux:error>
-                                        @enderror
                                     </flux:field>
                                     <flux:field>
                                         <flux:label>Verification Status</flux:label>
@@ -613,9 +593,6 @@
                                                 <span class="text-sm font-medium text-slate-900 dark:text-white">Not Verified</span>
                                             </label>
                                         </div>
-                                        @error('is_verified')
-                                            <flux:error>{{ $message }}</flux:error>
-                                        @enderror
                                     </flux:field>
                                     <flux:button type="submit" variant="primary" class="w-full">
                                         Update Verification

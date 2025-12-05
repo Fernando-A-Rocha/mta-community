@@ -2,12 +2,6 @@
     @include('partials.settings-heading')
 
     <x-settings.layout :heading="__('Friends')" :subheading="__('Manage your connections and requests')">
-        @if (session('success'))
-            <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-100">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="space-y-6">
             <flux:field>
                 <flux:label>{{ __('Allow Friend Requests') }}</flux:label>
@@ -31,9 +25,6 @@
                         value="{{ old('username') }}"
                         required
                     />
-                    @error('username')
-                        <flux:error>{{ $message }}</flux:error>
-                    @enderror
                     <flux:description>{{ __('Usernames are case-sensitive.') }}</flux:description>
                 </flux:field>
                 <flux:button type="submit" variant="primary">{{ __('Send request') }}</flux:button>

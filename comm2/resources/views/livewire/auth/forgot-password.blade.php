@@ -4,9 +4,6 @@
             <div class="max-w-2xl">
                 <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
 
-                <!-- Session Status -->
-                <x-auth-session-status class="mt-4" :status="session('status')" />
-
                 <form method="POST" action="{{ route('password.email') }}" class="mt-6 flex flex-col gap-6">
                     @csrf
 

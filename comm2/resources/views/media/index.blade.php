@@ -8,12 +8,6 @@
     @endphp
 
     <div class="flex w-full flex-1 flex-col gap-8">
-        @if ($errors->has('upload') || $errors->has('reaction'))
-            <div class="rounded-2xl border border-red-200 bg-red-50/70 p-4 text-sm text-red-900 dark:border-red-500/40 dark:bg-red-900/20 dark:text-red-200">
-                {{ $errors->first('upload') ?: $errors->first('reaction') }}
-            </div>
-        @endif
-
         <section>
             <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div class="space-y-3">
@@ -85,12 +79,6 @@
                 </div>
             </form>
         </section>
-
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($media as $item)

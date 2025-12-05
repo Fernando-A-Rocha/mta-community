@@ -93,11 +93,6 @@
                             wire:model="code"
                             autocomplete="one-time-code"
                         />
-                        @error('code')
-                            <flux:text color="red">
-                                {{ $message }}
-                            </flux:text>
-                        @enderror
                     </div>
 
                     <div class="flex items-center space-x-3">
@@ -120,9 +115,6 @@
                     </div>
                 </div>
             @else
-                @error('setupData')
-                    <flux:callout variant="danger" icon="x-circle" heading="{{ $message }}"/>
-                @enderror
 
                 <div class="flex justify-center">
                     <div class="relative w-64 overflow-hidden border rounded-lg border-stone-200 dark:border-stone-700 aspect-square">

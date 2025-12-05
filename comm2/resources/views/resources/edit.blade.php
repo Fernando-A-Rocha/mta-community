@@ -8,23 +8,6 @@
                 @csrf
                 @method('PUT')
 
-                @if (session('success'))
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                        <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
-                    </div>
-                @endif
-
-                @if ($errors->any())
-                    <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                        <p class="text-sm font-semibold text-red-800 dark:text-red-200">Please fix the following errors:</p>
-                        <ul class="list-disc list-inside text-sm text-red-800 dark:text-red-200 space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
                 <!-- Short Description -->
                 <div>
                     <flux:field>
@@ -36,9 +19,6 @@
                             maxlength="500"
                         >{{ old('short_description', $resource->short_description) }}</flux:textarea>
                         <flux:description>Brief description of your resource (max 500 characters). This appears in the resource header.</flux:description>
-                        @error('short_description')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -54,9 +34,6 @@
                             maxlength="10000"
                         >{{ old('long_description', $resource->long_description) }}</flux:textarea>
                         <flux:description>Detailed description of your resource (minimum 50 characters if provided)</flux:description>
-                        @error('long_description')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -74,12 +51,6 @@
                                 />
                             @endforeach
                         </div>
-                        @error('tags')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
-                        @error('tags.*')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -98,12 +69,6 @@
                             @endforeach
                         </div>
                         <flux:description>Select the language(s) your resource supports. You can select multiple languages if your resource is multi-lingual. Languages are optional - you can leave this empty if your resource doesn't output any text.</flux:description>
-                        @error('languages')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
-                        @error('languages.*')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -164,12 +129,6 @@
                                 </span>
                             </div>
                         </div>
-                        @error('images')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
-                        @error('images.*')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -185,9 +144,6 @@
                             value="{{ old('github_url', $resource->github_url) }}"
                         />
                         <flux:description>Link to your GitHub repository where this resource's code is hosted</flux:description>
-                        @error('github_url')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -203,9 +159,6 @@
                             value="{{ old('forum_thread_url', $resource->forum_thread_url) }}"
                         />
                         <flux:description>Link to your MTA Forum thread where this resource is showcased/discussed</flux:description>
-                        @error('forum_thread_url')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 

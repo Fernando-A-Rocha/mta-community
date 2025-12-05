@@ -2,12 +2,6 @@
     @include('partials.settings-heading')
 
     <x-settings.layout :heading="__('Following')" :subheading="__('Manage resources and users you follow')">
-        @if (session('success'))
-            <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-100">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="space-y-6">
             <div class="space-y-4">
                 <h3 class="text-lg font-semibold">{{ __('Followed Resources') }}</h3>
@@ -22,7 +16,7 @@
                                         {{ $resource->display_name }}
                                     </a>
                                     <p class="text-xs text-neutral-500">
-                                        {{ __('by') }} 
+                                        {{ __('by') }}
                                         <a href="{{ route('profile.show', $resource->user) }}" class="hover:underline" wire:navigate>
                                             {{ $resource->user->name }}
                                         </a>

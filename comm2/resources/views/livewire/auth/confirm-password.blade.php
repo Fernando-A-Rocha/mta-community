@@ -7,8 +7,6 @@
                     :description="__('This is a secure area of the application. Please confirm your password before continuing.')"
                 />
 
-                <x-auth-session-status class="mt-4" :status="session('status')" />
-
                 <form method="POST" action="{{ route('password.confirm.store') }}" class="mt-6 flex flex-col gap-6">
                     @csrf
 

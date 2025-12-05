@@ -7,12 +7,6 @@
                     :description="__('Please verify your email address by clicking on the link we just emailed to you.')"
                 />
 
-                @if (session('status') == 'verification-link-sent')
-                    <div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
-                        {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-                    </div>
-                @endif
-
                 <div class="mt-6 flex flex-col gap-4">
                     <form method="POST" action="{{ route('verification.send') }}">
                         @csrf

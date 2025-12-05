@@ -110,23 +110,6 @@
 
         <flux:separator />
 
-        @if ($errors->has('friend') || $errors->has('follow'))
-            <div class="rounded-2xl border border-amber-200 bg-amber-50/70 p-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/30 dark:text-amber-100">
-                {{ $errors->first('friend') ?? $errors->first('follow') }}
-            </div>
-        @endif
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-100">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('report_success'))
-            <div class="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/20 dark:text-blue-100">
-                {{ session('report_success') }}
-            </div>
-        @endif
-
         @php
             $hasFavorites = $user->favorite_city || $user->favorite_vehicle || $user->favorite_character
                 || $user->favorite_gang || $user->favorite_weapon || $user->favorite_radio_station;

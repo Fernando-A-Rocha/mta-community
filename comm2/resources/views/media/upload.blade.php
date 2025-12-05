@@ -33,23 +33,6 @@
             <form action="{{ route('media.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="media-upload-form">
                 @csrf
 
-                @if (session('success'))
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                        <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
-                    </div>
-                @endif
-
-                @if ($errors->any())
-                    <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                        <p class="text-sm font-semibold text-red-800 dark:text-red-200">Please fix the following errors:</p>
-                        <ul class="list-disc list-inside text-sm text-red-800 dark:text-red-200 space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
                 <!-- Content Rules -->
                 <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">Content Guidelines</h3>
@@ -80,9 +63,6 @@
                             <option value="video" {{ old('type') === 'video' ? 'selected' : '' }}>YouTube Video</option>
                         </flux:select>
                         <flux:description>Choose whether to upload images or share a YouTube video</flux:description>
-                        @error('type')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -99,12 +79,6 @@
                         />
                         <flux:description>Upload up to 5 images. Each image must be max 1MB and 1920x1080 resolution. Formats: JPG, PNG, WebP</flux:description>
                         <div id="image-preview" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
-                        @error('images')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
-                        @error('images.*')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -120,9 +94,6 @@
                             id="youtube_url"
                         />
                         <flux:description>Paste a YouTube video URL</flux:description>
-                        @error('youtube_url')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 
@@ -141,9 +112,6 @@
                         <flux:description>
                             <span id="char-count">0</span>/100 characters (emojis allowed)
                         </flux:description>
-                        @error('description')
-                            <flux:error>{{ $message }}</flux:error>
-                        @enderror
                     </flux:field>
                 </div>
 

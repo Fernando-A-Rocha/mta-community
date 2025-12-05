@@ -38,9 +38,6 @@
                             @endif
                         </div>
                     </div>
-                    @error('avatar')
-                        <flux:error>{{ $message }}</flux:error>
-                    @enderror
                 </flux:field>
             </div>
 
@@ -64,9 +61,6 @@
                             </label>
                         </div>
                     @endif
-                    @error('profile_visibility')
-                        <flux:error>{{ $message }}</flux:error>
-                    @enderror
                 </flux:field>
             </div>
 
