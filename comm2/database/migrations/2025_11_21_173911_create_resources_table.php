@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Short resource name
+            $table->string('name');
             $table->string('long_name');
             $table->text('short_description');
             $table->text('long_description')->nullable();
