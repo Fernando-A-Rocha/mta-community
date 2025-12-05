@@ -30,9 +30,10 @@
             </div>
         @endif
 
-        <section class="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
+        <section>
             <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div class="space-y-4">
+                    <h1 class="text-4xl font-bold">{{ $resource->display_name }}</h1>
                     <div class="flex flex-wrap items-center gap-3">
                         <span class="rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-lg">
                             {{ ucfirst($resource->category) }}
@@ -43,13 +44,6 @@
                         @if ($resource->oop_enabled)
                             <span class="rounded-full bg-emerald-500/90 px-3 py-1 text-white text-xs font-semibold">OOP Ready</span>
                         @endif
-                        @if ($resource->languages->isNotEmpty())
-                            @if ($resource->languages->count() === 1)
-                                <span class="rounded-full bg-white/10 px-3 py-1 text-white text-xs font-semibold">{{ $resource->languages->first()->name }}</span>
-                            @else
-                                <span class="rounded-full bg-white/10 px-3 py-1 text-white text-xs font-semibold">Multi-lang</span>
-                            @endif
-                        @endif
                         @if ($resource->tags->isNotEmpty())
                             @foreach ($resource->tags->take(6) as $tag)
                                 <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">{{ $tag->name }}</span>
@@ -58,17 +52,64 @@
                                 <span class="text-xs font-medium text-white/70">+{{ $resource->tags->count() - 6 }} more</span>
                             @endif
                         @endif
+                        @if ($resource->languages->isNotEmpty())
+                            @foreach ($resource->languages as $language)
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                    {{ $language->name }}
+                                </span>
+                            @endforeach
+                        @endif
                     </div>
                     <div>
-                        <h1 class="text-4xl font-bold">{{ $resource->display_name }}</h1>
-                        <p class="mt-3 max-w-3xl text-base text-slate-200">
-                            {{ $resource->short_description }}
-                        </p>
                         <a href="{{ route('profile.show', $resource->user) }}" class="mt-3 flex items-center gap-2 text-sm font-semibold text-white hover:underline">
                             <x-user-avatar :user="$resource->user" size="sm" />
                             {{ $resource->user->name }}
                         </a>
+                        <p class="mt-3 max-w-3xl text-base text-slate-200">
+                            <strong>{{ $resource->short_description }}</strong>
+                        </p>
                     </div>
+
+
+                    @if ($canViewDetails)
+                        @if ($resource->long_description)
+                            <div class="prose mt-4 max-w-none text-slate-700 dark:prose-invert dark:text-slate-200">
+                                <div class="whitespace-pre-wrap">{!! nl2br(e($resource->long_description)) !!}</div>
+                            </div>
+                        @endif
+                        <dl class="mt-4 space-y-3 text-sm">
+                            @if ($resource->min_mta_version)
+                                <div class="flex items-center justify-between gap-4">
+                                    <dt class="text-slate-500 dark:text-slate-400">Min MTA</dt>
+                                    <dd class="font-mono text-xs text-slate-700 dark:text-slate-200">{{ $resource->min_mta_version }}</dd>
+                                </div>
+                            @endif
+                        </dl>
+                        @if ($resource->github_url || $resource->forum_thread_url)
+                            <div class="mt-4 space-y-3">
+                                @if ($resource->github_url)
+                                    <a href="{{ $resource->github_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 transition hover:border-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-white/60 dark:hover:bg-slate-800">
+                                        <svg class="h-6 w-6 text-slate-700 dark:text-slate-200" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p class="font-semibold text-slate-900 dark:text-white">GitHub Repository</p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Open source code & issues</p>
+                                        </div>
+                                    </a>
+                                @endif
+                                @if ($resource->forum_thread_url)
+                                    <a href="{{ $resource->forum_thread_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 transition hover:border-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-white/60 dark:hover:bg-slate-800">
+                                        <img src="{{ asset('mta-logo.png') }}" alt="MTA Logo" class="h-7 w-7 opacity-80 grayscale">
+                                        <div>
+                                            <p class="font-semibold text-slate-900 dark:text-white">MTA Forum Thread</p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Community discussion</p>
+                                        </div>
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
+                    @endif
                 </div>
                 <div class="w-full max-w-sm space-y-4 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
                     <dl class="grid grid-cols-2 gap-4 text-sm">
@@ -284,62 +325,51 @@
                         </script>
                     @endif
 
-                    @if ($resource->long_description)
-                        <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Description</h2>
-                            <div class="prose mt-4 max-w-none text-slate-700 dark:prose-invert dark:text-slate-200">
-                                <div class="whitespace-pre-wrap">{!! nl2br(e($resource->long_description)) !!}</div>
-                            </div>
-                        </div>
-                    @endif
-
 
                     @if ($resource->versions->isNotEmpty())
-                        <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <div class="flex items-center justify-between">
-                                <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Releases</h2>
-                                <span class="text-sm text-slate-500 dark:text-slate-400">{{ $resource->versions->count() }} {{ \Illuminate\Support\Str::plural('release', $resource->versions->count()) }}</span>
-                            </div>
-                            <div class="mt-6 space-y-4">
-                                @foreach ($resource->versions as $version)
-                                    <div class="rounded-2xl border border-slate-100/80 p-4 transition hover:border-blue-400 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:border-blue-400/70 dark:hover:bg-blue-900/20 {{ $version->is_current ? 'border-blue-400 bg-blue-50/60 dark:border-blue-400/80 dark:bg-blue-900/30' : '' }}">
-                                        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                                            <div>
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Version {{ $version->version }}</h3>
-                                                    @if ($version->is_current)
-                                                        <span class="rounded-full bg-blue-500/20 px-2 py-1 text-xs font-semibold text-blue-700 dark:text-blue-200">Latest</span>
-                                                    @endif
-                                                    @if ($version->is_verified)
-                                                        <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200 flex items-center gap-1">
-                                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                                            </svg>
-                                                            Verified
-                                                        </span>
-                                                    @else
-                                                        <span class="rounded-full bg-slate-300/20 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">Not Verified</span>
-                                                    @endif
-                                                </div>
-                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Released {{ $version->created_at->format('M d, Y') }}</p>
-                                                @if ($version->changelog)
-                                                    <div class="prose mt-3 max-w-none text-sm text-slate-600 dark:prose-invert dark:text-slate-200">
-                                                        <div class="whitespace-pre-wrap">{!! nl2br(e($version->changelog)) !!}</div>
-                                                    </div>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">Releases</h2>
+                            <span class="text-sm text-slate-500 dark:text-slate-400">{{ $resource->versions->count() }} {{ \Illuminate\Support\Str::plural('release', $resource->versions->count()) }}</span>
+                        </div>
+                        <div class="mt-6 space-y-4">
+                            @foreach ($resource->versions as $version)
+                                <div class="rounded-2xl border border-slate-100/80 p-4 transition hover:border-blue-400 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:border-blue-400/70 dark:hover:bg-blue-900/20 {{ $version->is_current ? 'border-blue-400 bg-blue-50/60 dark:border-blue-400/80 dark:bg-blue-900/30' : '' }}">
+                                    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                                        <div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Version {{ $version->version }}</h3>
+                                                @if ($version->is_current)
+                                                    <span class="rounded-full bg-blue-500/20 px-2 py-1 text-xs font-semibold text-blue-700 dark:text-blue-200">Latest</span>
+                                                @endif
+                                                @if ($version->is_verified)
+                                                    <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200 flex items-center gap-1">
+                                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        Verified
+                                                    </span>
+                                                @else
+                                                    <span class="rounded-full bg-slate-300/20 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">Not Verified</span>
                                                 @endif
                                             </div>
-                                            <a href="{{ route('resources.download.version', [$resource, $version->version]) }}">
-                                                <flux:button variant="{{ $version->is_current ? 'primary' : 'outline' }}" size="sm">
-                                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
-                                                    </svg>
-                                                    Download
-                                                </flux:button>
-                                            </a>
+                                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Released {{ $version->created_at->format('M d, Y') }}</p>
+                                            @if ($version->changelog)
+                                                <div class="prose mt-3 max-w-none text-sm text-slate-600 dark:prose-invert dark:text-slate-200">
+                                                    <div class="whitespace-pre-wrap">{!! nl2br(e($version->changelog)) !!}</div>
+                                                </div>
+                                            @endif
                                         </div>
+                                        <a href="{{ route('resources.download.version', [$resource, $version->version]) }}">
+                                            <flux:button variant="{{ $version->is_current ? 'primary' : 'outline' }}" size="sm">
+                                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
+                                                </svg>
+                                                Download
+                                            </flux:button>
+                                        </a>
                                     </div>
-                                @endforeach
-                            </div>
+                                </div>
+                            @endforeach
                         </div>
                     @endif
 
@@ -392,60 +422,6 @@
             </div>
 
             <div class="space-y-6">
-                @if (!$resource->is_disabled || (auth()->check() && auth()->user()->isModerator()))
-                    <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Additional information</h3>
-                        <dl class="mt-4 space-y-3 text-sm">
-                            @if ($resource->min_mta_version)
-                                <div class="flex items-center justify-between gap-4">
-                                    <dt class="text-slate-500 dark:text-slate-400">Min MTA</dt>
-                                    <dd class="font-mono text-xs text-slate-700 dark:text-slate-200">{{ $resource->min_mta_version }}</dd>
-                                </div>
-                            @endif
-                            @if ($resource->languages->isNotEmpty())
-                                <div class="flex items-start justify-between gap-4">
-                                    <dt class="text-slate-500 dark:text-slate-400">Languages</dt>
-                                    <dd class="flex flex-wrap gap-1.5 justify-end">
-                                        @foreach ($resource->languages as $language)
-                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                {{ $language->name }}
-                                            </span>
-                                        @endforeach
-                                    </dd>
-                                </div>
-                            @endif
-                        </dl>
-                    </div>
-
-                    @if ($resource->github_url || $resource->forum_thread_url)
-                        <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
-                            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Links</h3>
-                            <div class="mt-4 space-y-3">
-                                @if ($resource->github_url)
-                                    <a href="{{ $resource->github_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 transition hover:border-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-white/60 dark:hover:bg-slate-800">
-                                        <svg class="h-6 w-6 text-slate-700 dark:text-slate-200" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-                                        </svg>
-                                        <div>
-                                            <p class="font-semibold text-slate-900 dark:text-white">GitHub Repository</p>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400">Open source code & issues</p>
-                                        </div>
-                                    </a>
-                                @endif
-                                @if ($resource->forum_thread_url)
-                                    <a href="{{ $resource->forum_thread_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 transition hover:border-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-white/60 dark:hover:bg-slate-800">
-                                        <img src="{{ asset('mta-logo.png') }}" alt="MTA Logo" class="h-7 w-7 opacity-80 grayscale">
-                                        <div>
-                                            <p class="font-semibold text-slate-900 dark:text-white">MTA Forum Thread</p>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400">Community discussion</p>
-                                        </div>
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-                @endif
-
                 @auth
                     @if (auth()->id() !== $resource->user_id)
                         <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">

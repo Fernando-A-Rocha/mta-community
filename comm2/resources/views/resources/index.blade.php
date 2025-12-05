@@ -15,7 +15,7 @@
             </div>
         @endif
 
-        <section class="rounded-3xl border border-slate-200/60 bg-slate-50/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+        <section>
             <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div class="space-y-3">
                     <div>
@@ -31,20 +31,18 @@
                     </flux:link>
                 @endauth
             </div>
-        </section>
-
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <section class="rounded-3xl border border-slate-200/60 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/30">
-            <form method="GET" action="{{ route('resources.index') }}" class="flex flex-col gap-4">
+            <form method="GET" action="{{ route('resources.index') }}" class="flex flex-col gap-4 mt-3">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-end">
                     <div class="flex-1">
                         <flux:field>
-                            <flux:label>Search</flux:label>
+                            <flux:label>
+                                {{ __('Search') }}
+                                @if ($activeFilters->isNotEmpty())
+                                <a href="{{ route('resources.index') }}" class="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-300 ml-2">
+                                    {{ __('Clear filters') }}
+                                </a>
+                                @endif
+                            </flux:label>
                             <div class="flex gap-2">
                                 <flux:input
                                     name="search"
@@ -110,43 +108,19 @@
                     </div>
                 </div>
             </form>
-
-            @if ($activeFilters->isNotEmpty())
-                <div class="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/60">
-                    <div class="flex flex-wrap gap-2">
-                        @if (request('search'))
-                            <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
-                                Search: <strong>{{ request('search') }}</strong>
-                            </span>
-                        @endif
-                        @if (request('category'))
-                            <span class="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200">
-                                Category: <strong>{{ ucfirst(request('category')) }}</strong>
-                            </span>
-                        @endif
-                        @if ($sortBy !== 'date')
-                            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                                Sort: <strong>{{ ucfirst($sortBy) }}</strong>
-                            </span>
-                        @endif
-                        @if ($sortOrder !== 'desc')
-                            <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">
-                                Order: <strong>{{ ucfirst($sortOrder) }}</strong>
-                            </span>
-                        @endif
-                    </div>
-                    <a href="{{ route('resources.index') }}" class="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-300">
-                        Clear all
-                    </a>
-                </div>
-            @endif
         </section>
+
+        @if (session('success'))
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($resources as $resource)
                 <x-resource-card :resource="$resource" />
             @empty
-                <div class="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white/50 py-16 text-center dark:border-slate-700 dark:bg-slate-900/30">
+                <div class="col-span-full py-8">
                     <p class="text-base font-medium text-slate-600 dark:text-slate-300">No resources match your filters yet.</p>
                     <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Try adjusting your search or clearing filters to see more results.</p>
                 </div>

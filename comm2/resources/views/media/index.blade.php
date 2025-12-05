@@ -1,4 +1,12 @@
 <x-layouts.app title="Media">
+    @php
+        $activeFilters = collect([
+            'search' => request('search'),
+            'sort' => $sortBy !== 'recent' ? ucfirst($sortBy) : null,
+            'order' => $sortOrder !== 'desc' ? ucfirst($sortOrder) : null,
+        ])->filter();
+    @endphp
+
     <div class="flex w-full flex-1 flex-col gap-8">
         @if ($errors->has('upload') || $errors->has('reaction'))
             <div class="rounded-2xl border border-red-200 bg-red-50/70 p-4 text-sm text-red-900 dark:border-red-500/40 dark:bg-red-900/20 dark:text-red-200">
@@ -6,7 +14,7 @@
             </div>
         @endif
 
-        <section class="rounded-3xl border border-slate-200/60 bg-slate-50/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+        <section>
             <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div class="space-y-3">
                     <div>
@@ -22,20 +30,18 @@
                     </flux:link>
                 @endauth
             </div>
-        </section>
-
-        @if (session('success'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <section class="rounded-3xl border border-slate-200/60 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/30">
-            <form method="GET" action="{{ route('media.index') }}" class="flex flex-col gap-4">
+            <form method="GET" action="{{ route('media.index') }}" class="flex flex-col gap-4 mt-3">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-end">
                     <div class="flex-1">
                         <flux:field>
-                            <flux:label>Search</flux:label>
+                            <flux:label>
+                                {{ __('Search') }}
+                                @if ($activeFilters->isNotEmpty())
+                                <a href="{{ route('media.index') }}" class="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-300 ml-2">
+                                    {{ __('Clear filters') }}
+                                </a>
+                                @endif
+                            </flux:label>
                             <div class="flex gap-2">
                                 <flux:input
                                     name="search"
@@ -80,13 +86,19 @@
             </form>
         </section>
 
+        @if (session('success'))
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($media as $item)
                 <x-media-card :media="$item" />
             @empty
-                <div class="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white/50 py-16 text-center dark:border-slate-700 dark:bg-slate-900/30">
-                    <p class="text-base font-medium text-slate-600 dark:text-slate-300">No media found yet.</p>
-                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Be the first to share your gameplay moments!</p>
+                <div class="col-span-full py-8">
+                    <p class="text-base font-medium text-slate-600 dark:text-slate-300">No media match your filters yet.</p>
+                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Try adjusting your search or clearing filters to see more results.</p>
                 </div>
             @endforelse
         </section>

@@ -1,6 +1,6 @@
 <x-layouts.app title="Members">
     <div class="flex w-full flex-1 flex-col gap-8">
-        <section class="rounded-3xl border border-slate-200/60 bg-slate-50/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+        <section>
             <div class="space-y-3">
                 <div>
                     <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Members</h1>
@@ -11,7 +11,7 @@
             </div>
         </section>
 
-        <section class="rounded-3xl border border-slate-200/60 bg-slate-50/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+        <section>
             <div class="space-y-6">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Top Creators</h2>
@@ -95,7 +95,7 @@
                             </div>
                         </a>
                     @empty
-                        <div class="rounded-3xl border border-dashed border-slate-300 bg-white/50 py-16 text-center dark:border-slate-700 dark:bg-slate-900/30">
+                        <div class="py-8">
                             <p class="text-base font-medium text-slate-600 dark:text-slate-300">No creators found yet.</p>
                             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Be the first to upload a resource!</p>
                         </div>
