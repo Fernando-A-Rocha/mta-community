@@ -60,7 +60,65 @@ class LogController extends Controller
     }
 
     /**
-     * Get logs for a specific entity (user or resource).
+     * Get logs for a specific entity (user or resource) - Page view.
+     */
+    public function entityLogsPage(Request $request, string $type, int $id): View
+    {
+        $this->ensureModerator();
+
+        if (! in_array($type, ['user', 'resource'], true) || $id <= 0) {
+            abort(404);
+        }
+
+        $query = ActivityLog::query()->with('user')->latest();
+
+        // Filter by entity type
+        if ($type === 'user') {
+            $query->where(function ($q) use ($id) {
+                $q->where('user_id', $id)
+                    ->orWhere('context->user_id', $id)
+                    ->orWhere('context->reviewer_id', $id)
+                    ->orWhere('context->resource_owner_id', $id);
+            });
+            
+            // Get entity name
+            $entity = \App\Models\User::find($id);
+            $entityName = $entity ? $entity->name : __('User') . ' #' . $id;
+        } else { // resource
+            $query->where(function ($q) use ($id) {
+                $q->where('context->resource_id', $id)
+                    ->orWhere('context->rating_id', $id)
+                    ->orWhere('context->version_id', $id);
+            });
+            
+            // Get entity name
+            $entity = \App\Models\Resource::find($id);
+            $entityName = $entity ? $entity->display_name : __('Resource') . ' #' . $id;
+        }
+
+        // Search filter
+        $search = $request->string('search')->toString();
+        if ($search) {
+            $term = '%'.$search.'%';
+            $query->where(function ($sub) use ($term) {
+                $sub->where('action', 'like', $term)
+                    ->orWhere('context', 'like', $term);
+            });
+        }
+
+        $logs = $query->paginate(30)->withQueryString();
+
+        return view('admin.logs.entity', [
+            'logs' => $logs,
+            'type' => $type,
+            'entityId' => $id,
+            'entityName' => $entityName,
+            'search' => $search,
+        ]);
+    }
+
+    /**
+     * Get logs for a specific entity (user or resource) - JSON API (kept for backwards compatibility).
      */
     public function entityLogs(Request $request): \Illuminate\Http\JsonResponse
     {

@@ -154,6 +154,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('logs', [AdminLogController::class, 'index'])->name('logs.index');
         Route::get('logs/entity', [AdminLogController::class, 'entityLogs'])->name('logs.entity');
+        Route::get('logs/{type}/{id}', [AdminLogController::class, 'entityLogsPage'])->name('logs.entity.page');
     });
 });
 
