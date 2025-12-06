@@ -31,6 +31,8 @@ class MediaReaction extends Model
         '😂', // Laugh
         '😮', // Wow
         '🔥', // Fire
+        // Custom PNG reactions
+        'custom:mreow',
     ];
 
     public function media(): BelongsTo
@@ -49,5 +51,28 @@ class MediaReaction extends Model
     public static function isValidEmoji(string $emoji): bool
     {
         return in_array($emoji, self::VALID_EMOJIS, true);
+    }
+
+    /**
+     * Check if a reaction is a custom PNG image reaction
+     */
+    public static function isCustomReaction(string $emoji): bool
+    {
+        return str_starts_with($emoji, 'custom:');
+    }
+
+    /**
+     * Get the image filename for a custom reaction
+     * Returns null if not a custom reaction
+     */
+    public static function getCustomReactionImage(string $emoji): ?string
+    {
+        if (! self::isCustomReaction($emoji)) {
+            return null;
+        }
+
+        $reactionName = str_replace('custom:', '', $emoji);
+
+        return "images/reactions/{$reactionName}.png";
     }
 }

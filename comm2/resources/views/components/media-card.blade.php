@@ -198,6 +198,8 @@
                 @php
                     $count = $reactionCounts[$emoji] ?? 0;
                     $isUserReaction = $userReaction && $userReaction->emoji === $emoji;
+                    $isCustom = \App\Models\MediaReaction::isCustomReaction($emoji);
+                    $customImagePath = $isCustom ? \App\Models\MediaReaction::getCustomReactionImage($emoji) : null;
                 @endphp
                 <template x-if="getCount('{{ $emoji }}') > 0 || getUserReaction() === '{{ $emoji }}'">
                     <div>
@@ -206,7 +208,11 @@
                                 :title="getReactionTooltip('{{ $emoji }}')"
                                 class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
                             >
-                                <span>{{ $emoji }}</span>
+                                @if ($isCustom && $customImagePath)
+                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                @else
+                                    <span>{{ $emoji }}</span>
+                                @endif
                                 <span class="text-xs font-semibold" x-text="getCount('{{ $emoji }}')"></span>
                             </div>
                         @elseif ($user)
@@ -216,7 +222,11 @@
                                 :title="getReactionTooltip('{{ $emoji }}')"
                                 class="reaction-button flex items-center gap-1 rounded-full border px-2 py-1 text-sm transition"
                             >
-                                <span>{{ $emoji }}</span>
+                                @if ($isCustom && $customImagePath)
+                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                @else
+                                    <span>{{ $emoji }}</span>
+                                @endif
                                 <span class="text-xs font-semibold" x-text="getCount('{{ $emoji }}')"></span>
                             </button>
                         @else
@@ -224,7 +234,11 @@
                                 :title="getReactionTooltip('{{ $emoji }}')"
                                 class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
                             >
-                                <span>{{ $emoji }}</span>
+                                @if ($isCustom && $customImagePath)
+                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                @else
+                                    <span>{{ $emoji }}</span>
+                                @endif
                                 <span class="text-xs font-semibold" x-text="getCount('{{ $emoji }}')"></span>
                             </div>
                         @endif
@@ -253,13 +267,21 @@
                         <!-- Inline Emoji Picker -->
                         <div x-show="pickerOpen" @click.away="pickerOpen = false" class="emoji-picker flex items-center gap-1 flex-wrap">
                             @foreach (\App\Models\MediaReaction::VALID_EMOJIS as $emoji)
+                                @php
+                                    $isCustom = \App\Models\MediaReaction::isCustomReaction($emoji);
+                                    $customImagePath = $isCustom ? \App\Models\MediaReaction::getCustomReactionImage($emoji) : null;
+                                @endphp
                                 <button
                                     x-show="getUserReaction() !== '{{ $emoji }}'"
                                     @click="addReaction('{{ $emoji }}')"
                                     class="emoji-option flex items-center justify-center rounded-full border border-slate-200 bg-white p-1 text-base transition hover:border-blue-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
                                     title="React with {{ $emoji }}"
                                 >
-                                    {{ $emoji }}
+                                    @if ($isCustom && $customImagePath)
+                                        <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                    @else
+                                        {{ $emoji }}
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -536,6 +558,20 @@
 
         const validEmojis = @json(\App\Models\MediaReaction::VALID_EMOJIS);
 
+        // Helper function to check if emoji is custom
+        function isCustomReaction(emoji) {
+            return emoji.startsWith('custom:');
+        }
+
+        // Helper function to get custom reaction image path
+        function getCustomReactionImage(emoji) {
+            if (!isCustomReaction(emoji)) {
+                return null;
+            }
+            const reactionName = emoji.replace('custom:', '');
+            return `/images/reactions/${reactionName}.png`;
+        }
+
         // Sort emojis by count (highest first)
         const sortedEmojis = validEmojis
             .filter(emoji => reactions[emoji] && reactions[emoji].length > 0)
@@ -553,10 +589,17 @@
                 const visibleUsers = users.slice(0, maxVisible);
                 const hiddenUsers = hasMore ? users.slice(maxVisible) : [];
 
+                // Determine if this is a custom reaction and get image path
+                const isCustom = isCustomReaction(emoji);
+                const imagePath = isCustom ? getCustomReactionImage(emoji) : null;
+                const emojiDisplay = isCustom && imagePath
+                    ? `<img src="${imagePath}" alt="${emoji}" class="h-6 w-6 object-contain" />`
+                    : `<span class="text-xl">${emoji}</span>`;
+
                 html += `
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">${users.length}</span>
-                        <span class="text-xl">${emoji}</span>
+                        ${emojiDisplay}
                         <span class="text-sm text-slate-600 dark:text-slate-400">
                             <span id="reaction-users-visible-${mediaId}-${emoji}">
                                 ${visibleUsers.map(user => formatUserName(user)).join(', ')}
