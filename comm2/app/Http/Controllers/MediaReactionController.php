@@ -142,10 +142,10 @@ class MediaReactionController extends Controller
             // If user has a different emoji reaction, update it
             if ($existingReaction) {
                 $existingReaction->update(['emoji' => $validated['emoji']]);
-                $reaction = $existingReaction;
+                $userReaction = $existingReaction;
             } else {
                 // Create new reaction
-                $reaction = MediaReaction::create([
+                $userReaction = MediaReaction::create([
                     'media_id' => $media->id,
                     'user_id' => $user->id,
                     'emoji' => $validated['emoji'],
@@ -169,11 +169,11 @@ class MediaReactionController extends Controller
                 return response()->json([
                     'message' => 'Reaction added successfully.',
                     'removed' => false,
-                    'reaction' => $reaction,
+                    'reaction' => $userReaction,
                     'remaining_reactions' => $this->getRemainingReactions(),
                     'reaction_counts' => $media->reaction_counts,
                     'user_reaction' => [
-                        'emoji' => $reaction->emoji,
+                        'emoji' => $userReaction->emoji,
                     ],
                     'reaction_users' => $reactionUsersByEmoji,
                 ]);
