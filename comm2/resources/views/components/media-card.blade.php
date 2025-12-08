@@ -209,7 +209,7 @@
                                 class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
                             >
                                 @if ($isCustom && $customImagePath)
-                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 rounded-full object-cover" />
                                 @else
                                     <span>{{ $emoji }}</span>
                                 @endif
@@ -223,7 +223,7 @@
                                 class="reaction-button flex items-center gap-1 rounded-full border px-2 py-1 text-sm transition"
                             >
                                 @if ($isCustom && $customImagePath)
-                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 rounded-full object-cover" />
                                 @else
                                     <span>{{ $emoji }}</span>
                                 @endif
@@ -235,7 +235,7 @@
                                 class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
                             >
                                 @if ($isCustom && $customImagePath)
-                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                    <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 rounded-full object-cover" />
                                 @else
                                     <span>{{ $emoji }}</span>
                                 @endif
@@ -278,7 +278,7 @@
                                     title="React with {{ $emoji }}"
                                 >
                                     @if ($isCustom && $customImagePath)
-                                        <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 object-contain" />
+                                        <img src="{{ asset($customImagePath) }}" alt="{{ $emoji }}" class="h-5 w-5 rounded-full object-cover border border-slate-200 bg-white p-[2px] dark:border-slate-700" />
                                     @else
                                         {{ $emoji }}
                                     @endif
@@ -593,7 +593,7 @@
                 const isCustom = isCustomReaction(emoji);
                 const imagePath = isCustom ? getCustomReactionImage(emoji) : null;
                 const emojiDisplay = isCustom && imagePath
-                    ? `<img src="${imagePath}" alt="${emoji}" class="h-6 w-6 object-contain" />`
+                    ? `<img src="${imagePath}" alt="${emoji}" class="h-6 w-6 rounded-full object-cover" />`
                     : `<span class="text-xl">${emoji}</span>`;
 
                 html += `
