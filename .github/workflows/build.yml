@@ -22,7 +22,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./comm2
+        working-directory: ./
 
     env:
       DB_CONNECTION: mysql

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# mtacomm2 Deployment Script
+# MTA Community Deployment Script
 # This script handles git pull → rsync → Laravel optimization workflow
 # with persistent storage preservation using symlinks
 # Usage: ./deploy.sh [environment]
@@ -17,7 +17,6 @@ NC='\033[0m' # No Color
 ENVIRONMENT=${1:-production}
 HOME_DIR="/home/$(whoami)"
 PROJECT_DIR="$HOME_DIR/mta/mtacomm2"
-PROJECT_LARAVEL_DIR="$PROJECT_DIR/comm2"
 WEB_ROOT="/var/www/mtacomm2.frocha.net"
 MAINTENANCE_FLAG="/var/www/utility/maintenance.flag"
 LARAVEL_DIR="$WEB_ROOT/platform"
@@ -28,7 +27,7 @@ log() {
     echo -e "$1"
 }
 
-log "${GREEN}🚀 Starting mtacomm2 deployment...${NC}"
+log "${GREEN}🚀 Starting MTA Community deployment...${NC}"
 log "${BLUE}Environment: $ENVIRONMENT${NC}"
 log "${BLUE}Project directory: $PROJECT_DIR${NC}"
 log "${BLUE}Web root: $WEB_ROOT${NC}"
@@ -124,7 +123,7 @@ sudo rsync -av --delete \
     --exclude='phpunit.xml' \
     --exclude='.editorconfig' \
     --exclude='.styleci.yml' \
-    "$PROJECT_LARAVEL_DIR/" "$LARAVEL_DIR/"
+    "$PROJECT_DIR/" "$LARAVEL_DIR/"
 
 if [ $? -ne 0 ]; then
     log "${RED}❌ Rsync failed${NC}"
@@ -144,12 +143,12 @@ log "${GREEN}✅ Files synced successfully${NC}"
 
 # Copy environment file from home directory
 log "${GREEN}📋 Copying .env file...${NC}"
-if [ -f "$PROJECT_LARAVEL_DIR/.env" ]; then
-    sudo cp "$PROJECT_LARAVEL_DIR/.env" "$LARAVEL_DIR/.env"
+if [ -f "$PROJECT_DIR/.env" ]; then
+    sudo cp "$PROJECT_DIR/.env" "$LARAVEL_DIR/.env"
     sudo chown www-data:www-data "$LARAVEL_DIR/.env"
     log "${GREEN}✅ .env file copied successfully${NC}"
 else
-    log "${YELLOW}⚠️  No .env file found in $PROJECT_LARAVEL_DIR/.env${NC}"
+    log "${YELLOW}⚠️  No .env file found in $PROJECT_DIR/.env${NC}"
 fi
 
 # Set proper permissions
@@ -233,11 +232,11 @@ fi
 
 # Final status
 log "${GREEN}🎉 Deployment completed successfully!${NC}"
-log "${GREEN}🌐 The mtacomm2 is available at: https://mtacomm2.frocha.net${NC}"
+log "${GREEN}🌐 The MTA Community is available at: https://mtacomm2.frocha.net${NC}"
 log "${BLUE}📊 Deployment Summary:${NC}"
-log "   - Files synced from: $PROJECT_LARAVEL_DIR/"
+log "   - Files synced from: $PROJECT_DIR/"
 log "   - Laravel directory deployed to: $LARAVEL_DIR"
 log "   - Persistent storage: $PERSISTENT_STORAGE"
 log "   - HTTP Status: $HTTP_STATUS"
 
-log "${GREEN}✅ mtacomm2 deployment completed!${NC}"
+log "${GREEN}✅ MTA Community deployment completed!${NC}"

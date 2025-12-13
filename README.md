@@ -1,6 +1,6 @@
 # mta-community
 
-**MTA Community** (comm2) is a community platform for Multi Theft Auto (MTA) that enables developers to upload, manage, and distribute MTA resources (scripts, gamemodes, maps, etc.). The platform includes user authentication, resource management with versioning, ratings, downloads tracking, and integrations with MTA servers, forum news, and GitHub.
+**MTA Community** is a community platform for Multi Theft Auto (MTA) that enables developers to upload, manage, and distribute MTA resources (scripts, gamemodes, maps, etc.). The platform includes user authentication, resource management with versioning, ratings, downloads tracking, and integrations with MTA servers, forum news, and GitHub.
 
 ## Contributing
 
@@ -51,7 +51,6 @@ All of this should be easy to set up with your package manager.
 
 - Ensure PHP, Composer and NPM are available
 - Create a MySQL database (e.g. "comm2")
-- `cd comm2`
 - `composer install`
 - Copy .env.example to .env and configure correctly
 - Generate a Laravel secret key: `php artisan key:generate`
@@ -61,7 +60,6 @@ All of this should be easy to set up with your package manager.
 
 ### Development
 
-- `cd comm2`
 - Start local dev server: `composer run dev`
 - Run the linter: `composer run lint:fix`
 - Run tests and ensure they are passing: `composer run test`
