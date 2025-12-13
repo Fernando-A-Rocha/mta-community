@@ -186,9 +186,6 @@ class ResourceController extends Controller
                 }
             }
 
-            // Log request - DEBUG
-            Log::info('Request:', $request->all());
-
             // Update tags
             $oldTagIds = $resource->tags()->pluck('tags.id')->toArray();
             if ($request->has('tags')) {
@@ -229,14 +226,18 @@ class ResourceController extends Controller
                     ->get();
 
                 $imagesRemoved = $imagesToRemove->count();
+                $removedDisplayImage = $imagesToRemove->contains(
+                    static fn (ResourceImage $image): bool => $image->is_display_image
+                );
 
                 foreach ($imagesToRemove as $image) {
                     Storage::disk('public')->delete($image->path);
                     $image->delete();
                 }
 
-                // If we removed the display image, set the first remaining image as display
-                if ($resource->displayImage === null && $resource->images()->count() > 0) {
+                // If display image was removed (or none exists), assign the first remaining image
+                $hasDisplayImage = $resource->displayImage()->exists();
+                if ($resource->images()->exists() && (! $hasDisplayImage || $removedDisplayImage)) {
                     $firstImage = $resource->images()->orderBy('order')->first();
                     if ($firstImage) {
                         $firstImage->update(['is_display_image' => true]);
