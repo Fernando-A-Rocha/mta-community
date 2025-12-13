@@ -1,4 +1,4 @@
-# mta-community
+# mtacommunity2
 
 **MTA Community** is a community platform for Multi Theft Auto (MTA) that enables developers to upload, manage, and distribute MTA resources (scripts, gamemodes, maps, etc.). The platform includes user authentication, resource management with versioning, ratings, downloads tracking, and integrations with MTA servers, forum news, and GitHub.
 
