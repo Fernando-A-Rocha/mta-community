@@ -12,7 +12,7 @@
         : 0;
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), config('app.rtl_locales', [])) ? 'rtl' : 'ltr' }}" class="dark {{ in_array(app()->getLocale(), config('app.rtl_locales', [])) ? 'rtl' : '' }}">
     <head>
         @include('partials.head')
     </head>
@@ -53,6 +53,11 @@
             </flux:navlist>
 
             <flux:spacer />
+
+            <!-- Language Selector (Desktop) -->
+            <div class="hidden lg:block px-3 py-2">
+                <x-language-selector />
+            </div>
 
             @auth
             <!-- Desktop User Menu -->
@@ -118,6 +123,9 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <!-- Language Selector (Mobile) -->
+            <x-language-selector />
 
             @auth
             <flux:dropdown position="top" align="end">

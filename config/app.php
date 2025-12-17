@@ -74,6 +74,66 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    | These are the locales that the application supports. The locale switcher
+    | will only allow users to select from these locales.
+    */
+
+    'supported_locales' => [
+        'en',
+        'es',
+        'pt_BR',
+        'ru',
+        'hu',
+        'ro',
+        'pl',
+        'ar',
+        'sr',
+        'de',
+        'pt_PT',
+        'fa',
+        'tr',
+        'zh_TW',
+        'id',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | RTL Locales
+    |--------------------------------------------------------------------------
+    | These locales use right-to-left text direction.
+    */
+
+    'rtl_locales' => ['ar', 'fa'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Locale Labels
+    |--------------------------------------------------------------------------
+    | Human-readable labels for each locale, displayed in the language switcher.
+    */
+
+    'locale_labels' => [
+        'en' => 'English',
+        'es' => 'Español',
+        'pt_BR' => 'Português (Brasil)',
+        'ru' => 'Русский',
+        'hu' => 'Magyar',
+        'ro' => 'Română',
+        'pl' => 'Polski',
+        'ar' => 'العربية',
+        'sr' => 'Српски',
+        'de' => 'Deutsch',
+        'pt_PT' => 'Português (Portugal)',
+        'fa' => 'فارسی',
+        'tr' => 'Türkçe',
+        'zh_TW' => '中文(繁體)',
+        'id' => 'Bahasa Indonesia',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     | This key is utilized by Laravel's encryption services and should be set

@@ -6,6 +6,7 @@ use App\Http\Controllers\DevelopmentController;
 use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegacyResourceVersionController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MediaReactionController;
 use App\Http\Controllers\MemberController;
@@ -28,6 +29,8 @@ use Laravel\Fortify\Features;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('home/news', [HomeController::class, 'news'])->name('home.news');
+
+Route::post('locale', [LocaleController::class, 'update'])->name('locale.update');
 
 Route::get('legacy/mta/resources', LegacyResourceVersionController::class)
     ->name('legacy.mta.resources');
