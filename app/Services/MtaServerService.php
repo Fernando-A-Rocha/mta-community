@@ -107,8 +107,10 @@ class MtaServerService
 
             // Ensure proper types and preserve UTF-8 encoding
             return array_map(function ($server) {
+                $serverName = (string) ($server['name'] ?? '');
+                $serverName = mb_convert_encoding($serverName, 'ISO-8859-1', 'UTF-8');
                 return [
-                    'name' => (string) $server['name'] ?? '',
+                    'name' => $serverName,
                     'ip' => (string) ($server['ip'] ?? ''),
                     'port' => (int) ($server['port'] ?? 0),
                     'players' => (int) ($server['players'] ?? 0),
