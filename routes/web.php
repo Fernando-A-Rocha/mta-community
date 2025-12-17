@@ -37,6 +37,7 @@ Route::get('legacy/mta/resources', LegacyResourceVersionController::class)
 
 Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
 Route::get('servers/list', [ServerController::class, 'servers'])->name('servers.list');
+Route::get('servers/history', [ServerController::class, 'history'])->name('servers.history');
 
 Route::get('development', [DevelopmentController::class, 'index'])->name('development.index');
 Route::get('development/activity', [DevelopmentController::class, 'activity'])->name('development.activity');

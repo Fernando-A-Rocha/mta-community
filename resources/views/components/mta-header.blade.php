@@ -22,7 +22,21 @@
                     .then(function(r) {
                         var info = r.split(",");
                         if (info[0] && info[1]) {
-                            onlinePlayersEl.innerHTML = new Intl.NumberFormat("en-US").format(info[0]) + " players online on " + new Intl.NumberFormat("en-US").format(info[1]) + " public servers";
+                            var players = Number.parseInt(info[0], 10);
+                            var servers = Number.parseInt(info[1], 10);
+
+                            if (Number.isFinite(players) && Number.isFinite(servers)) {
+                                var payload = {
+                                    players: players,
+                                    servers: servers,
+                                    fetchedAt: Date.now(),
+                                };
+
+                                onlinePlayersEl.innerHTML = new Intl.NumberFormat("en-US").format(players) + " players online on " + new Intl.NumberFormat("en-US").format(servers) + " public servers";
+
+                                window.__mtaOnlineStats = payload;
+                                window.dispatchEvent(new CustomEvent("mta:online-stats", { detail: payload }));
+                            }
                         }
                     });
             }

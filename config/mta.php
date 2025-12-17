@@ -20,6 +20,14 @@ return [
 
     'current_stable_version' => '1.6',
 
+    /*
+    |--------------------------------------------------------------------------
+    | MTA Stats Cache
+    |--------------------------------------------------------------------------
+    | Configuration for caching MTA server related stats.
+    */
+    'stats_api_url' => env('MTA_STATS_API_URL', 'http://localhost:3069'),
+    'stats_cache_duration' => 60 * 10, // seconds (10 minutes)
     'servers_cache_duration' => 60 * 10, // seconds (10 minutes)
     /*
     |--------------------------------------------------------------------------

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\MtaServerService;
+use App\Services\MtaStatsService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,7 +14,8 @@ use Illuminate\View\View;
 class ServerController extends Controller
 {
     public function __construct(
-        private readonly MtaServerService $mtaServerService
+        private readonly MtaServerService $mtaServerService,
+        private readonly MtaStatsService $mtaStatsService,
     ) {}
 
     /**
@@ -29,7 +32,6 @@ class ServerController extends Controller
     public function servers(Request $request): JsonResponse
     {
         $allServers = $this->mtaServerService->getServers();
-        $statistics = $this->mtaServerService->getStatistics();
 
         // Create a map of server positions in the original list (using IP:Port as unique identifier)
         $serverPositions = [];
@@ -90,7 +92,6 @@ class ServerController extends Controller
 
         return response()->json([
             'servers' => $formattedServers,
-            'statistics' => $statistics,
             'pagination' => [
                 'current_page' => $page,
                 'last_page' => (int) ceil($total / $perPage),
@@ -98,6 +99,69 @@ class ServerController extends Controller
                 'total' => $total,
             ],
             'fetch_timestamp' => $fetchTimestamp,
+        ]);
+    }
+
+    /**
+     * Get historical player/server counts.
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $perPageDays = 30;
+        $page = max(1, $request->integer('page', 1));
+        $daysToFetch = min($perPageDays * $page, 365);
+
+        $history = $this->mtaStatsService->getHistory($daysToFetch);
+
+        $now = CarbonImmutable::now();
+        $windowStart = $now->subDays($perPageDays * $page);
+        $windowEnd = $now->subDays($perPageDays * ($page - 1));
+
+        $windowData = [];
+        foreach ($history as $row) {
+            try {
+                $timestamp = CarbonImmutable::parse($row['created_at']);
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($timestamp->betweenIncluded($windowStart, $windowEnd)) {
+                $windowData[] = [
+                    'players' => (int) ($row['players'] ?? 0),
+                    'servers' => (int) ($row['servers'] ?? 0),
+                    'created_at' => $timestamp->toIso8601String(),
+                ];
+            }
+        }
+
+        usort($windowData, static fn (array $a, array $b) => strcmp($a['created_at'], $b['created_at']));
+
+        $hasNext = false;
+        foreach ($history as $row) {
+            try {
+                $timestamp = CarbonImmutable::parse($row['created_at']);
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($timestamp->lt($windowStart)) {
+                $hasNext = true;
+                break;
+            }
+        }
+
+        return response()->json([
+            'data' => $windowData,
+            'meta' => [
+                'page' => $page,
+                'per_page_days' => $perPageDays,
+                'has_prev' => $page > 1,
+                'has_next' => $hasNext,
+                'range' => [
+                    'from' => $windowStart->toIso8601String(),
+                    'to' => $windowEnd->toIso8601String(),
+                ],
+            ],
         ]);
     }
 }

@@ -109,6 +109,7 @@ class MtaServerService
             return array_map(function ($server) {
                 $serverName = (string) ($server['name'] ?? '');
                 $serverName = mb_convert_encoding($serverName, 'ISO-8859-1', 'UTF-8');
+
                 return [
                     'name' => $serverName,
                     'ip' => (string) ($server['ip'] ?? ''),
@@ -129,24 +130,6 @@ class MtaServerService
             // Return cached data if available, otherwise empty array
             return Cache::get(self::CACHE_KEY, []);
         }
-    }
-
-    /**
-     * Get statistics about the cached servers.
-     *
-     * @return array{total_players: int, total_servers: int}
-     */
-    public function getStatistics(): array
-    {
-        $servers = $this->getServers();
-
-        $totalPlayers = array_sum(array_column($servers, 'players'));
-        $totalServers = count($servers);
-
-        return [
-            'total_players' => $totalPlayers,
-            'total_servers' => $totalServers,
-        ];
     }
 
     /**

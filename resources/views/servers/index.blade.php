@@ -2,20 +2,24 @@
     <div class="flex w-full flex-1 flex-col gap-6" x-data="{
         servers: [],
         statistics: { total_players: 0, total_servers: 0 },
+        history: [],
+        historyMeta: { page: 1, per_page_days: 30, has_prev: false, has_next: false, range: null },
         loading: false,
+        historyLoading: false,
+        historyError: null,
         currentPage: 1,
         lastPage: 1,
         total: 0,
         fetchTimestamp: null,
         searchQuery: '',
+        activeChart: 'players',
+        charts: { players: null, servers: null },
         async loadServers(page = 1, search = '') {
             this.loading = true;
             this.currentPage = page;
             this.searchQuery = search;
             try {
-                const params = new URLSearchParams({
-                    page: page,
-                });
+                const params = new URLSearchParams({ page });
                 if (search) {
                     params.append('search', search);
                 }
@@ -28,15 +32,186 @@
                 });
                 const data = await response.json();
                 this.servers = data.servers;
-                this.statistics = data.statistics;
                 this.lastPage = data.pagination.last_page;
                 this.total = data.pagination.total;
-                this.fetchTimestamp = data.fetch_timestamp;
             } catch (error) {
                 console.error('Failed to load servers:', error);
                 this.servers = [];
             } finally {
                 this.loading = false;
+            }
+        },
+        handleHeaderStats(event) {
+            const { players, servers, fetchedAt } = event.detail || {};
+            if (!Number.isFinite(players) || !Number.isFinite(servers)) {
+                return;
+            }
+
+            this.statistics = {
+                total_players: players,
+                total_servers: servers,
+            };
+            this.fetchTimestamp = fetchedAt ? Math.floor(fetchedAt / 1000) : Math.floor(Date.now() / 1000);
+        },
+        async ensureChartJs() {
+            if (window.Chart) {
+                return;
+            }
+
+            await new Promise((resolve, reject) => {
+                const existing = document.querySelector('script[data-chartjs]');
+                if (existing) {
+                    existing.addEventListener('load', resolve, { once: true });
+                    existing.addEventListener('error', reject, { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.async = true;
+                script.dataset.chartjs = 'true';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        },
+        destroyChart(key) {
+            if (this.charts[key]) {
+                this.charts[key].destroy();
+                this.charts[key] = null;
+            }
+        },
+        renderChartInstance(key, { labels, data, label, color, tooltipLabels = null }) {
+            const canvas = this.$refs[`${key}ChartCanvas`];
+            if (!canvas || !window.Chart) {
+                return;
+            }
+
+            const context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+
+            const existing = this.charts[key];
+            if (existing) {
+                existing.data.labels = labels;
+                existing.data.datasets[0].data = data;
+                existing.data.datasets[0].tooltipLabels = tooltipLabels;
+                existing.update('none');
+
+                return;
+            }
+
+            this.charts[key] = new Chart(context, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label,
+                        data,
+                        borderColor: color,
+                        backgroundColor: color + '33',
+                        tension: 0.25,
+                        fill: true,
+                        tooltipLabels,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: { maxTicksLimit: 8 },
+                        },
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label(context) {
+                                    const fullLabel = context.dataset.tooltipLabels?.[context.dataIndex] ?? context.label ?? '';
+                                    const pointLabel = fullLabel ? `${fullLabel} — ` : '';
+                                    return `${pointLabel}${label}: ${context.formattedValue}`;
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        },
+        renderHistoryCharts(ignoreLoadingGuard = false) {
+            if ((this.historyLoading && !ignoreLoadingGuard) || !this.history?.length) {
+                this.destroyChart('players');
+                this.destroyChart('servers');
+                return;
+            }
+
+            const labels = this.history.map((item) => {
+                const date = new Date(item.created_at);
+                return date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                });
+            });
+
+            const tooltipLabels = this.history.map((item) => {
+                const date = new Date(item.created_at);
+                return date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                });
+            });
+
+            const playersData = this.history.map((item) => item.players);
+            const serversData = this.history.map((item) => item.servers);
+
+            this.renderChartInstance('players', {
+                labels,
+                data: playersData,
+                label: '{{ __('Players') }}',
+                color: '#2563eb',
+                tooltipLabels,
+            });
+
+            this.renderChartInstance('servers', {
+                labels,
+                data: serversData,
+                label: '{{ __('Servers') }}',
+                color: '#16a34a',
+                tooltipLabels,
+            });
+        },
+        async loadHistory(page = 1) {
+            this.historyLoading = true;
+            this.historyError = null;
+            try {
+                const params = new URLSearchParams({ page });
+                const response = await fetch(`{{ route('servers.history') }}?${params}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                const payload = await response.json();
+                this.history = payload?.data ?? [];
+                this.historyMeta = payload?.meta ?? this.historyMeta;
+
+                await this.ensureChartJs();
+                this.renderHistoryCharts(true);
+            } catch (error) {
+                console.error('Failed to load history:', error);
+                this.history = [];
+                this.historyError = '{{ __('Unable to load history right now.') }}';
+            } finally {
+                this.historyLoading = false;
             }
         },
         async searchServers() {
@@ -56,8 +231,83 @@
         },
         init() {
             this.loadServers();
+            window.addEventListener('mta:online-stats', this.handleHeaderStats.bind(this));
+            if (window.__mtaOnlineStats) {
+                this.handleHeaderStats({ detail: window.__mtaOnlineStats });
+            }
+
+            this.loadHistory();
         }
     }">
+        <section>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <flux:heading size="lg" class="mb-1">{{ __('Player & Server History') }}</flux:heading>
+                    <flux:text class="text-neutral-600 dark:text-neutral-400">
+                        {{ __('Showing the last 30 days by default. Use the buttons to browse older history.') }}
+                    </flux:text>
+                </div>
+                <div class="flex items-center gap-2">
+                    <flux:button
+                        variant="ghost"
+                        size="sm"
+                        x-show="historyMeta?.has_prev"
+                        x-on:click="loadHistory(Math.max(1, (historyMeta.page || 1) - 1))"
+                        x-bind:disabled="historyLoading || !(historyMeta?.has_prev)"
+                    >
+                        {{ __('Newer 30 days') }}
+                    </flux:button>
+                    <flux:button
+                        variant="ghost"
+                        size="sm"
+                        x-show="historyMeta?.has_next"
+                        x-on:click="loadHistory((historyMeta.page || 1) + 1)"
+                        x-bind:disabled="historyLoading || !(historyMeta?.has_next)"
+                    >
+                        {{ __('Older 30 days') }}
+                    </flux:button>
+                </div>
+            </div>
+
+            <div class="mt-4 flex items-center gap-2">
+                <flux:button
+                    size="sm"
+                    variant="ghost"
+                    x-bind:class="activeChart === 'players' ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600' : ''"
+                    x-on:click="activeChart = 'players';"
+                >
+                    {{ __('Players') }}
+                </flux:button>
+                <flux:button
+                    size="sm"
+                    variant="ghost"
+                    x-bind:class="activeChart === 'servers' ? 'bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600' : ''"
+                    x-on:click="activeChart = 'servers';"
+                >
+                    {{ __('Servers') }}
+                </flux:button>
+            </div>
+
+            <div x-show="historyLoading" class="py-10 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 dark:border-white"></div>
+                <p class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">{{ __('Loading history...') }}</p>
+            </div>
+
+            <template x-if="!historyLoading && history.length === 0">
+                <div class="py-8 text-center">
+                    <flux:text class="text-neutral-600 dark:text-neutral-400">
+                        {{ __('No history data available for this period.') }}
+                    </flux:text>
+                    <p x-show="historyError" class="mt-2 text-sm text-red-600 dark:text-red-400" x-text="historyError"></p>
+                </div>
+            </template>
+
+            <div x-show="!historyLoading && history.length > 0" class="relative mt-6 h-72">
+                <canvas x-ref="playersChartCanvas" x-show="activeChart === 'players'" x-cloak></canvas>
+                <canvas x-ref="serversChartCanvas" x-show="activeChart === 'servers'" x-cloak></canvas>
+            </div>
+        </section>
+
         <section>
             <div class="mb-4">
                 <flux:heading size="lg" class="mb-2">{{ __('Active MTA Servers') }}</flux:heading>
@@ -152,7 +402,7 @@
                                 </div>
                             </div>
                             <!-- Mobile View (visible on mobile only) -->
-                            <div 
+                            <div
                                 class="md:hidden py-3 px-4 hover:bg-neutral-50 dark:hover:bg-zinc-800 cursor-pointer"
                                 x-data="{ open: false }"
                                 @click="open = true"
@@ -176,14 +426,14 @@
                                     </svg>
                                 </div>
                                 <!-- Mobile Modal -->
-                                <div 
+                                <div
                                     x-show="open"
                                     x-cloak
                                     class="fixed inset-0 z-50"
                                     @keydown.escape.window="open = false"
                                 >
                                     <!-- Backdrop -->
-                                    <div 
+                                    <div
                                         class="fixed inset-0 bg-black/50 backdrop-blur-sm"
                                         x-transition:enter="ease-out duration-300"
                                         x-transition:enter-start="opacity-0"
@@ -196,7 +446,7 @@
                                     <!-- Modal Content -->
                                     <div class="fixed inset-0 overflow-y-auto">
                                         <div class="flex min-h-full items-center justify-center p-4">
-                                            <div 
+                                            <div
                                                 class="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white dark:bg-zinc-800 shadow-xl transition-all"
                                                 x-transition:enter="ease-out duration-300"
                                                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -211,7 +461,7 @@
                                                     <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                                                         {{ __('Server Details') }}
                                                     </h3>
-                                                    <button 
+                                                    <button
                                                         @click="open = false"
                                                         class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                                     >
@@ -270,7 +520,7 @@
                                                 </div>
                                                 <!-- Modal Footer -->
                                                 <div class="border-t border-neutral-200 dark:border-neutral-700 px-6 py-4 flex justify-end">
-                                                    <flux:button 
+                                                    <flux:button
                                                         variant="primary"
                                                         @click="open = false"
                                                     >
@@ -314,4 +564,5 @@
         </section>
     </div>
 </x-layouts.app>
+
 
