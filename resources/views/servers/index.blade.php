@@ -81,7 +81,7 @@
                 this.charts[key] = null;
             }
         },
-        renderChartInstance(key, { labels, data, label, color, tooltipLabels = null }) {
+        renderChartInstance(key, { labels, data, label, color, tooltipLabels = null, pointColors = null, pointHoverColors = null, pointRadii = null, pointHoverRadii = null, highlightedIndices = [] }) {
             const canvas = this.$refs[`${key}ChartCanvas`];
             if (!canvas || !window.Chart) {
                 return;
@@ -97,6 +97,13 @@
                 existing.data.labels = labels;
                 existing.data.datasets[0].data = data;
                 existing.data.datasets[0].tooltipLabels = tooltipLabels;
+                existing.data.datasets[0].pointBackgroundColor = pointColors ?? color;
+                existing.data.datasets[0].pointBorderColor = pointColors ?? color;
+                existing.data.datasets[0].pointHoverBackgroundColor = pointHoverColors ?? color;
+                existing.data.datasets[0].pointHoverBorderColor = pointHoverColors ?? color;
+                existing.data.datasets[0].pointRadius = pointRadii ?? 3;
+                existing.data.datasets[0].pointHoverRadius = pointHoverRadii ?? 5;
+                existing.data.datasets[0].highlightedIndices = highlightedIndices;
                 existing.update('none');
 
                 return;
@@ -114,6 +121,13 @@
                         tension: 0.25,
                         fill: true,
                         tooltipLabels,
+                        pointBackgroundColor: pointColors ?? color,
+                        pointBorderColor: pointColors ?? color,
+                        pointHoverBackgroundColor: pointHoverColors ?? color,
+                        pointHoverBorderColor: pointHoverColors ?? color,
+                        pointRadius: pointRadii ?? 3,
+                        pointHoverRadius: pointHoverRadii ?? 5,
+                        highlightedIndices,
                     }],
                 },
                 options: {
@@ -131,16 +145,40 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
+                                title() {
+                                    return [];
+                                },
                                 label(context) {
                                     const fullLabel = context.dataset.tooltipLabels?.[context.dataIndex] ?? context.label ?? '';
                                     const pointLabel = fullLabel ? `${fullLabel} — ` : '';
-                                    return `${pointLabel}${label}: ${context.formattedValue}`;
+                                    const isHighest = Array.isArray(context.dataset.highlightedIndices) && context.dataset.highlightedIndices.includes(context.dataIndex);
+                                    const highestSuffix = isHighest ? ' — Highest' : '';
+                                    return `${pointLabel}${label}: ${context.formattedValue}${highestSuffix}`;
                                 },
                             },
                         },
                     },
                 },
             });
+        },
+        buildPointStyles(values, baseColor, highlightColor) {
+            const maxValue = Math.max(...values);
+            const highlightedIndices = [];
+
+            const pointColors = values.map((value, index) => {
+                if (value === maxValue) {
+                    highlightedIndices.push(index);
+                    return highlightColor;
+                }
+
+                return baseColor;
+            });
+
+            const pointHoverColors = pointColors;
+            const pointRadii = values.map((value) => (value === maxValue ? 5 : 3));
+            const pointHoverRadii = values.map((value) => (value === maxValue ? 7 : 5));
+
+            return { pointColors, pointHoverColors, pointRadii, pointHoverRadii, highlightedIndices };
         },
         renderHistoryCharts(ignoreLoadingGuard = false) {
             if ((this.historyLoading && !ignoreLoadingGuard) || !this.history?.length) {
@@ -171,12 +209,16 @@
             const playersData = this.history.map((item) => item.players);
             const serversData = this.history.map((item) => item.servers);
 
+            const playersPointStyles = this.buildPointStyles(playersData, '#2563eb', '#f59e0b');
+            const serversPointStyles = this.buildPointStyles(serversData, '#16a34a', '#f59e0b');
+
             this.renderChartInstance('players', {
                 labels,
                 data: playersData,
                 label: '{{ __('Players') }}',
                 color: '#2563eb',
                 tooltipLabels,
+                ...playersPointStyles,
             });
 
             this.renderChartInstance('servers', {
@@ -185,6 +227,7 @@
                 label: '{{ __('Servers') }}',
                 color: '#16a34a',
                 tooltipLabels,
+                ...serversPointStyles,
             });
         },
         async loadHistory(page = 1) {
