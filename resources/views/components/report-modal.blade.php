@@ -59,7 +59,7 @@
             </div>
         @else
             @if ($existingReport)
-                <div class="rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-xs text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/30 dark:text-blue-100">
+                <div class="rounded-2xl border border-orange-200 bg-orange-50/80 p-4 text-xs text-orange-900 dark:border-orange-500/40 dark:bg-orange-900/30 dark:text-orange-100">
                     <p class="font-semibold">
                         @if ($type === 'user')
                             {{ __('Previous report status: :status', ['status' => $existingReport->status->label()]) }}

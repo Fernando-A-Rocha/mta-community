@@ -59,7 +59,7 @@
         @foreach ($alerts as $index => $alert)
             <div
                 id="alert-{{ $index }}"
-                class="alert-item rounded-2xl border p-4 text-sm shadow-lg relative overflow-hidden @if($alert['type'] === 'success') border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900 dark:text-emerald-100 @elseif($alert['type'] === 'info') border-blue-200 bg-blue-100 text-blue-900 dark:border-blue-500/40 dark:bg-blue-900 dark:text-blue-100 @elseif($alert['type'] === 'error') border-red-200 bg-red-100 text-red-900 dark:border-red-500/40 dark:bg-red-900 dark:text-red-100 @else border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-500/40 dark:bg-amber-900 dark:text-amber-100 @endif"
+                class="alert-item rounded-2xl border p-4 text-sm shadow-lg relative overflow-hidden @if($alert['type'] === 'success') border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900 dark:text-emerald-100 @elseif($alert['type'] === 'info') border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-500/40 dark:bg-amber-900 dark:text-amber-100 @elseif($alert['type'] === 'error') border-red-200 bg-red-100 text-red-900 dark:border-red-500/40 dark:bg-red-900 dark:text-red-100 @else border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-500/40 dark:bg-amber-900 dark:text-amber-100 @endif"
                 style="pointer-events: auto; opacity: 0; transform: translateX(100%); transition: opacity 0.3s ease-out, transform 0.3s ease-out;"
                 data-progress="100"
             >

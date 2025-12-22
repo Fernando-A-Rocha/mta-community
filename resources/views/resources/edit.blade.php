@@ -82,7 +82,7 @@
                                                 <span class="text-sm text-red-600 dark:text-red-400">Remove</span>
                                             </label>
                                             @if ($image->is_display_image)
-                                                <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">Display Image</div>
+                                                <div class="text-xs text-orange-600 dark:text-orange-400 mt-1">Display Image</div>
                                             @endif
                                         </div>
                                     </div>
@@ -106,11 +106,11 @@
                         />
                         <flux:description>JPG, PNG, or WEBP images. Max 2MB each. Current: {{ $resource->images->count() }}/10</flux:description>
                         <div id="images_info" class="mt-2 hidden">
-                            <div class="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex items-center gap-2 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                                <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
-                                <span class="text-sm text-blue-800 dark:text-blue-200">
+                                <span class="text-sm text-orange-800 dark:text-orange-200">
                                     <span id="images_count"></span> image(s) selected
                                 </span>
                             </div>
@@ -172,12 +172,12 @@
                             @php
                                 $isFirstVersion = $firstVersion->id === $version->id;
                             @endphp
-                            <div class="flex items-center justify-between p-3 border rounded {{ $version->is_current ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700' }}">
+                            <div class="flex items-center justify-between p-3 border rounded {{ $version->is_current ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'border-gray-200 dark:border-gray-700' }}">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2">
                                         <span class="font-medium">Version {{ $version->version }}</span>
                                         @if ($version->is_current)
-                                            <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
+                                            <span class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded text-xs font-medium">
                                                 Latest
                                             </span>
                                         @endif

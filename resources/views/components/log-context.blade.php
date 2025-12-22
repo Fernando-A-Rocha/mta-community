@@ -19,12 +19,12 @@
     
     // Helper function to create resource link
     $resourceLink = function($resourceId, $resourceName) {
-        return '<a href="' . route('resources.show', $resourceId) . '" class="text-blue-600 hover:underline dark:text-blue-400">' . e($resourceName) . '</a>';
+        return '<a href="' . route('resources.show', $resourceId) . '" class="text-orange-500 hover:underline dark:text-orange-300">' . e($resourceName) . '</a>';
     };
     
     // Helper function to create user link
     $userLink = function($userId, $userName) {
-        return '<a href="' . route('profile.show', $userId) . '" class="text-blue-600 hover:underline dark:text-blue-400">' . e($userName) . '</a>';
+        return '<a href="' . route('profile.show', $userId) . '" class="text-orange-500 hover:underline dark:text-orange-300">' . e($userName) . '</a>';
     };
 @endphp
 

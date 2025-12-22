@@ -209,14 +209,14 @@
             const playersData = this.history.map((item) => item.players);
             const serversData = this.history.map((item) => item.servers);
 
-            const playersPointStyles = this.buildPointStyles(playersData, '#2563eb', '#f59e0b');
+            const playersPointStyles = this.buildPointStyles(playersData, '#ea580c', '#f97316');
             const serversPointStyles = this.buildPointStyles(serversData, '#16a34a', '#f59e0b');
 
             this.renderChartInstance('players', {
                 labels,
                 data: playersData,
                 label: '{{ __('Players') }}',
-                color: '#2563eb',
+                color: '#f97316',
                 tooltipLabels,
                 ...playersPointStyles,
             });
@@ -316,7 +316,7 @@
                 <flux:button
                     size="sm"
                     variant="ghost"
-                    x-bind:class="activeChart === 'players' ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600' : ''"
+                    x-bind:class="activeChart === 'players' ? 'bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-700' : ''"
                     x-on:click="activeChart = 'players';"
                 >
                     {{ __('Players') }}
@@ -441,7 +441,7 @@
                                 </div>
                                 <!-- IP:Port Column -->
                                 <div class="flex items-center text-sm whitespace-nowrap">
-                                    <a :href="'mtasa://' + server.ip + ':' + server.port" class="text-blue-600 hover:underline dark:text-blue-400" x-text="server.ip + ':' + server.port"></a>
+                                    <a :href="'mtasa://' + server.ip + ':' + server.port" class="text-orange-500 hover:underline dark:text-orange-300" x-text="server.ip + ':' + server.port"></a>
                                 </div>
                             </div>
                             <!-- Mobile View (visible on mobile only) -->
@@ -549,7 +549,7 @@
                                                             {{ __('Address') }}
                                                         </div>
                                                         <div class="text-base">
-                                                            <a :href="'mtasa://' + server.ip + ':' + server.port" class="text-blue-600 hover:underline dark:text-blue-400 break-all" x-text="server.ip + ':' + server.port"></a>
+                                                            <a :href="'mtasa://' + server.ip + ':' + server.port" class="text-orange-500 hover:underline dark:text-orange-300 break-all" x-text="server.ip + ':' + server.port"></a>
                                                         </div>
                                                     </div>
                                                     <div>

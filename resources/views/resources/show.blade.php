@@ -24,7 +24,7 @@
                 <div class="space-y-4">
                     <h1 class="text-4xl font-bold">{{ $resource->display_name }}</h1>
                     <div class="flex flex-wrap items-center gap-3">
-                        <span class="rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-lg">
+                        <span class="rounded-full bg-gradient-to-r from-orange-500 to-orange-700 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-lg">
                             {{ ucfirst($resource->category) }}
                         </span>
                         @if ($resource->is_disabled)
@@ -324,13 +324,13 @@
                         </div>
                         <div class="mt-6 space-y-4">
                             @foreach ($resource->versions as $version)
-                                <div class="rounded-2xl border border-slate-100/80 p-4 transition hover:border-blue-400 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:border-blue-400/70 dark:hover:bg-blue-900/20 {{ $version->is_current ? 'border-blue-400 bg-blue-50/60 dark:border-blue-400/80 dark:bg-blue-900/30' : '' }}">
+                                <div class="rounded-2xl border border-slate-100/80 p-4 transition hover:border-orange-400 hover:bg-orange-50/50 dark:border-slate-800 dark:hover:border-orange-400/70 dark:hover:bg-orange-900/20 {{ $version->is_current ? 'border-orange-400 bg-orange-50/60 dark:border-orange-400/80 dark:bg-orange-900/30' : '' }}">
                                     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                         <div>
                                             <div class="flex flex-wrap items-center gap-2">
                                                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Version {{ $version->version }}</h3>
                                                 @if ($version->is_current)
-                                                    <span class="rounded-full bg-blue-500/20 px-2 py-1 text-xs font-semibold text-blue-700 dark:text-blue-200">Latest</span>
+                                                    <span class="rounded-full bg-orange-500/20 px-2 py-1 text-xs font-semibold text-orange-700 dark:text-orange-200">Latest</span>
                                                 @endif
                                                 @if ($version->is_verified)
                                                     <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200 flex items-center gap-1">

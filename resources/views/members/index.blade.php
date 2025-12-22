@@ -13,7 +13,7 @@
                         <a
                             href="{{ route('profile.show', $creator['user']) }}"
                             wire:navigate
-                            class="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60"
+                            class="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60"
                         >
                             <x-user-avatar :user="$creator['user']" size="md" class="!h-12 !w-12 !rounded-full" />
 
@@ -73,10 +73,10 @@
                                 </div>
 
                                 <div class="flex shrink-0 items-center gap-2">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
                                         #{{ $index + 1 }}
                                     </div>
-                                    <svg class="h-5 w-5 text-slate-400 transition group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-5 w-5 text-slate-400 transition group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                 </div>

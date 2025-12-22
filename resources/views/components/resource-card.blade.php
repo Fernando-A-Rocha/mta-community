@@ -15,7 +15,7 @@
 <a
     href="{{ route('resources.show', $resource) }}"
     wire:navigate
-    class="group relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-slate-900/60 {{ $isVerified ? 'border-emerald-400/80 shadow-emerald-200/50 dark:border-emerald-500/60 dark:shadow-emerald-900/30' : 'border-slate-200/80 hover:border-blue-400 dark:border-slate-800' }}"
+    class="group relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-slate-900/60 {{ $isVerified ? 'border-emerald-400/80 shadow-emerald-200/50 dark:border-emerald-500/60 dark:shadow-emerald-900/30' : 'border-slate-200/80 hover:border-orange-400 dark:border-slate-800' }}"
 >
     <div class="relative aspect-[3/2] max-h-[150px] overflow-hidden">
         @if ($resource->displayImage)
@@ -55,7 +55,7 @@
         </div>
         @if ($resource->currentVersion)
             <div class="absolute bottom-3 left-3 flex items-center gap-2">
-                <div class="rounded-full bg-blue-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
+                <div class="rounded-full bg-orange-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
                     v{{ $resource->currentVersion->version }}
                 </div>
                 @if ($isVerified)

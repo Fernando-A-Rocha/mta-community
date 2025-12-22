@@ -4,7 +4,7 @@
             <flux:heading size="lg" class="mb-4">{{ __('Development Activity') }}</flux:heading>
             <flux:text class="text-neutral-600 dark:text-neutral-400 mb-6">
                 {{ __('Current stable MTA version') }}: <strong>{{ config('mta.current_stable_version') }}</strong>
-                <a href="https://multitheftauto.com/download" target="_blank" rel="noopener noreferrer" class="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">
+                <a href="https://multitheftauto.com/download" target="_blank" rel="noopener noreferrer" class="ml-2 text-orange-500 hover:text-orange-700 dark:text-orange-300 dark:hover:text-orange-200 underline">
                     {{ __('Download') }}
                 </a>
             </flux:text>
@@ -105,7 +105,7 @@
                 getBadgeColor(type) {
                     const colors = {
                         'commit': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-                        'issue': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+                        'issue': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
                         'pull_request': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
                         'release': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
                     };

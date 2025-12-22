@@ -28,8 +28,8 @@
                 @csrf
 
                 <!-- English Only Notice -->
-                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <p class="text-sm text-blue-800 dark:text-blue-200">
+                <div class="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <p class="text-sm text-orange-800 dark:text-orange-200">
                         <strong>Note:</strong> All text fields including title, descriptions, and changelog must be written in English only (ASCII characters).
                     </p>
                 </div>

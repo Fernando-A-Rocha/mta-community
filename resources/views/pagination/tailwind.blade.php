@@ -8,13 +8,13 @@
                     {!! __('pagination.previous') !!}
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="inline-flex items-center px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 leading-5 rounded-md hover:text-neutral-900 focus:outline-none focus:ring ring-neutral-300 focus:border-blue-300 active:bg-neutral-50 active:text-neutral-800 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:text-neutral-200 dark:focus:border-blue-700 dark:active:bg-neutral-700 dark:active:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 dark:hover:text-neutral-100">
+                <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="inline-flex items-center px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 leading-5 rounded-md hover:text-neutral-900 focus:outline-none focus:ring ring-neutral-300 focus:border-orange-400 active:bg-neutral-50 active:text-neutral-800 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:text-neutral-200 dark:focus:border-orange-700 dark:active:bg-neutral-700 dark:active:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 dark:hover:text-neutral-100">
                     {!! __('pagination.previous') !!}
                 </a>
             @endif
 
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="inline-flex items-center px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 leading-5 rounded-md hover:text-neutral-900 focus:outline-none focus:ring ring-neutral-300 focus:border-blue-300 active:bg-neutral-50 active:text-neutral-800 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:text-neutral-200 dark:focus:border-blue-700 dark:active:bg-neutral-700 dark:active:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 dark:hover:text-neutral-100">
+                <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="inline-flex items-center px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 leading-5 rounded-md hover:text-neutral-900 focus:outline-none focus:ring ring-neutral-300 focus:border-orange-400 active:bg-neutral-50 active:text-neutral-800 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:text-neutral-200 dark:focus:border-orange-700 dark:active:bg-neutral-700 dark:active:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 dark:hover:text-neutral-100">
                     {!! __('pagination.next') !!}
                 </a>
             @else
@@ -56,7 +56,7 @@
                             </span>
                         </span>
                     @else
-                        <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="inline-flex items-center px-2 py-2 text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-l-md leading-5 hover:text-neutral-600 focus:outline-none focus:ring ring-neutral-300 focus:border-blue-300 active:bg-neutral-50 active:text-neutral-600 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:active:bg-neutral-700 dark:focus:border-blue-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-100" aria-label="{{ __('pagination.previous') }}">
+                        <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="inline-flex items-center px-2 py-2 text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-l-md leading-5 hover:text-neutral-600 focus:outline-none focus:ring ring-neutral-300 focus:border-orange-400 active:bg-neutral-50 active:text-neutral-600 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:active:bg-neutral-700 dark:focus:border-orange-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-100" aria-label="{{ __('pagination.previous') }}">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
@@ -80,7 +80,7 @@
                                         <span class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-neutral-900 bg-neutral-200 border border-neutral-300 cursor-default leading-5 dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-100">{{ $page }}</span>
                                     </span>
                                 @else
-                                    <a href="{{ $url }}" class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-neutral-700 bg-white border border-neutral-300 leading-5 hover:text-neutral-900 focus:outline-none focus:ring ring-neutral-300 focus:border-blue-300 active:bg-neutral-50 active:text-neutral-700 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:text-neutral-100 dark:active:bg-neutral-700 dark:focus:border-blue-800 hover:bg-neutral-50 dark:hover:bg-neutral-700" aria-label="{{ __('Go to page :page', ['page' => $page]) }}">
+                                    <a href="{{ $url }}" class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-neutral-700 bg-white border border-neutral-300 leading-5 hover:text-neutral-900 focus:outline-none focus:ring ring-neutral-300 focus:border-orange-400 active:bg-neutral-50 active:text-neutral-700 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:text-neutral-100 dark:active:bg-neutral-700 dark:focus:border-orange-800 hover:bg-neutral-50 dark:hover:bg-neutral-700" aria-label="{{ __('Go to page :page', ['page' => $page]) }}">
                                         {{ $page }}
                                     </a>
                                 @endif
@@ -90,7 +90,7 @@
 
                     {{-- Next Page Link --}}
                     @if ($paginator->hasMorePages())
-                        <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="inline-flex items-center px-2 py-2 -ml-px text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-r-md leading-5 hover:text-neutral-600 focus:outline-none focus:ring ring-neutral-300 focus:border-blue-300 active:bg-neutral-50 active:text-neutral-600 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:active:bg-neutral-700 dark:focus:border-blue-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-100" aria-label="{{ __('pagination.next') }}">
+                        <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="inline-flex items-center px-2 py-2 -ml-px text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-r-md leading-5 hover:text-neutral-600 focus:outline-none focus:ring ring-neutral-300 focus:border-orange-400 active:bg-neutral-50 active:text-neutral-600 transition ease-in-out duration-150 dark:bg-zinc-800 dark:border-neutral-600 dark:active:bg-neutral-700 dark:focus:border-orange-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-100" aria-label="{{ __('pagination.next') }}">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>

@@ -31,7 +31,7 @@
                             <flux:label>
                                 {{ __('Search') }}
                                 @if ($activeFilters->isNotEmpty())
-                                <a href="{{ route('media.index') }}" class="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-300 ml-2">
+                                <a href="{{ route('media.index') }}" class="text-xs font-semibold text-orange-500 hover:underline dark:text-orange-300 ml-2">
                                     {{ __('Clear filters') }}
                                 </a>
                                 @endif

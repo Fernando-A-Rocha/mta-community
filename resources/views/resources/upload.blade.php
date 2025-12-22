@@ -32,10 +32,10 @@
         @else
             <div class="grid md:grid-cols-2 gap-6 max-w-4xl">
                 <!-- Upload New Resource -->
-                <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-8 hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+                <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-8 hover:border-orange-500 dark:hover:border-orange-400 transition-colors">
                     <div class="flex flex-col items-center text-center gap-4">
-                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                         </div>
@@ -50,7 +50,7 @@
                 </div>
 
                 <!-- Upload New Version -->
-                <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-8 hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+                <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-8 hover:border-orange-500 dark:hover:border-orange-400 transition-colors">
                     <div class="flex flex-col items-center text-center gap-4">
                         <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                             <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

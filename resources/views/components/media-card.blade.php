@@ -112,7 +112,7 @@
                 <a
                     href="{{ route('profile.show', $media->user) }}"
                     wire:navigate
-                    class="text-sm font-medium text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                    class="text-sm font-medium text-slate-900 hover:text-orange-500 dark:text-white dark:hover:text-orange-300"
                 >
                     {{ $media->user->name }}
                 </a>
@@ -218,7 +218,7 @@
                         @elseif ($user)
                             <button
                                 @click="toggleReaction('{{ $emoji }}')"
-                                :class="getUserReaction() === '{{ $emoji }}' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800'"
+                                :class="getUserReaction() === '{{ $emoji }}' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30' : 'border-slate-200 bg-white hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800'"
                                 :title="getReactionTooltip('{{ $emoji }}')"
                                 class="reaction-button flex items-center gap-1 rounded-full border px-2 py-1 text-sm transition"
                             >
@@ -251,7 +251,7 @@
                     <div class="flex items-center gap-1">
                         <button
                             @click="togglePicker()"
-                            class="reaction-toggle-button flex items-center justify-center rounded-full border border-slate-200 bg-white p-1.5 text-sm transition hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800 shrink-0"
+                            class="reaction-toggle-button flex items-center justify-center rounded-full border border-slate-200 bg-white p-1.5 text-sm transition hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800 shrink-0"
                             title="Add reaction"
                         >
                             <!-- Plus Icon (default) -->
@@ -274,7 +274,7 @@
                                 <button
                                     x-show="getUserReaction() !== '{{ $emoji }}'"
                                     @click="addReaction('{{ $emoji }}')"
-                                    class="emoji-option flex items-center justify-center rounded-full border border-slate-200 bg-white p-1 text-base transition hover:border-blue-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+                                    class="emoji-option flex items-center justify-center rounded-full border border-slate-200 bg-white p-1 text-base transition hover:border-orange-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
                                     title="React with {{ $emoji }}"
                                 >
                                     @if ($isCustom && $customImagePath)
@@ -317,9 +317,9 @@
 
         <!-- Modal Content -->
         <div id="reactions-content-{{ $media->id }}" class="p-6">
-            <div class="flex items-center justify-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                </div>
         </div>
     </div>
 </div>
@@ -610,7 +610,7 @@
                                 </span>
                                 <button
                                     onclick="toggleReactionUsers(${mediaId}, '${emoji}')"
-                                    class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-1"
+                                    class="text-sm text-orange-500 hover:text-orange-600 dark:text-orange-300 dark:hover:text-orange-200 ml-1"
                                 >
                                     <span id="reaction-toggle-text-${mediaId}-${emoji}">and ${hiddenUsers.length} more...</span>
                                 </button>

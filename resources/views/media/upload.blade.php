@@ -34,9 +34,9 @@
                 @csrf
 
                 <!-- Content Rules -->
-                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">Content Guidelines</h3>
-                    <ul class="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+                <div class="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <h3 class="text-sm font-semibold text-orange-800 dark:text-orange-200 mb-2">Content Guidelines</h3>
+                    <ul class="text-sm text-orange-800 dark:text-orange-200 space-y-1 list-disc list-inside">
                         <li>Gameplay of MTA is encouraged</li>
                         <li>Funny moments and awesome showcases are welcome</li>
                         <li>Keep content appropriate and respectful</li>

@@ -22,7 +22,7 @@
         </div>
 
         @if (session('report_admin_notice'))
-            <div class="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/20 dark:text-blue-100">
+            <div class="rounded-2xl border border-orange-200 bg-orange-50/70 p-4 text-sm text-orange-900 dark:border-orange-500/40 dark:bg-orange-900/20 dark:text-orange-100">
                 {{ session('report_admin_notice') }}
             </div>
         @endif
