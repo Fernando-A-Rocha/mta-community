@@ -1,64 +1,50 @@
 @php
     $alerts = [];
+    $seenAlerts = [];
 
-    // Collect session messages
-    if (session('success')) {
-        $alerts[] = [
-            'message' => session('success'),
-            'type' => 'success',
-        ];
+    $addAlert = function (string $message, string $type) use (&$alerts, &$seenAlerts): void {
+        $normalizedMessage = trim($message);
+
+        if ($normalizedMessage === '') {
+            return;
+        }
+
+        $key = $type . '|' . $normalizedMessage;
+
+        if (! isset($seenAlerts[$key])) {
+            $alerts[] = [
+                'message' => $normalizedMessage,
+                'type' => $type,
+            ];
+
+            $seenAlerts[$key] = true;
+        }
+    };
+
+    $flashTypes = [
+        'success' => 'success',
+        'status' => 'success',
+        'report_success' => 'info',
+        'report_admin_notice' => 'info',
+        'error' => 'error',
+        'warning' => 'warning',
+        'info' => 'info',
+        'message' => 'info',
+    ];
+
+    foreach ($flashTypes as $key => $type) {
+        $value = session($key);
+
+        if ($value !== null) {
+            foreach (is_array($value) ? $value : [$value] as $message) {
+                $addAlert((string) $message, $type);
+            }
+        }
     }
 
-    if (session('report_success')) {
-        $alerts[] = [
-            'message' => session('report_success'),
-            'type' => 'info',
-        ];
-    }
-
-    if (session('report_admin_notice')) {
-        $alerts[] = [
-            'message' => session('report_admin_notice'),
-            'type' => 'info',
-        ];
-    }
-
-    if (session('status')) {
-        $alerts[] = [
-            'message' => session('status'),
-            'type' => 'success',
-        ];
-    }
-
-    // Collect validation errors (only general errors, not field-specific ones)
-    // Field-specific errors are handled by Flux components and shown under inputs
     if ($errors->any()) {
-        $fieldErrors = $errors->getMessages();
-        $allErrors = $errors->all();
-
-        // Get all field names that have errors
-        $fieldNames = array_keys($fieldErrors);
-
-        // Only show errors that are NOT field-specific
-        // Check each error message to see if it's associated with a field
-        foreach ($allErrors as $errorMessage) {
-            $isFieldError = false;
-
-            // Check if this error message belongs to any field
-            foreach ($fieldNames as $fieldName) {
-                if (in_array($errorMessage, $fieldErrors[$fieldName])) {
-                    $isFieldError = true;
-                    break;
-                }
-            }
-
-            // Only add to alerts if it's NOT a field-specific error
-            if (!$isFieldError) {
-                $alerts[] = [
-                    'message' => $errorMessage,
-                    'type' => 'error',
-                ];
-            }
+        foreach ($errors->all() as $errorMessage) {
+            $addAlert($errorMessage, 'error');
         }
     }
 @endphp
@@ -73,7 +59,7 @@
         @foreach ($alerts as $index => $alert)
             <div
                 id="alert-{{ $index }}"
-                class="alert-item rounded-2xl border p-4 text-sm shadow-lg relative overflow-hidden @if($alert['type'] === 'success') border-emerald-200 bg-emerald-50/70 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-100 @elseif($alert['type'] === 'info') border-blue-200 bg-blue-50/70 text-blue-900 dark:border-blue-500/40 dark:bg-blue-900/20 dark:text-blue-100 @elseif($alert['type'] === 'error') border-red-200 bg-red-50/70 text-red-900 dark:border-red-500/40 dark:bg-red-900/20 dark:text-red-100 @else border-amber-200 bg-amber-50/70 text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/30 dark:text-amber-100 @endif"
+                class="alert-item rounded-2xl border p-4 text-sm shadow-lg relative overflow-hidden @if($alert['type'] === 'success') border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900 dark:text-emerald-100 @elseif($alert['type'] === 'info') border-blue-200 bg-blue-100 text-blue-900 dark:border-blue-500/40 dark:bg-blue-900 dark:text-blue-100 @elseif($alert['type'] === 'error') border-red-200 bg-red-100 text-red-900 dark:border-red-500/40 dark:bg-red-900 dark:text-red-100 @else border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-500/40 dark:bg-amber-900 dark:text-amber-100 @endif"
                 style="pointer-events: auto; opacity: 0; transform: translateX(100%); transition: opacity 0.3s ease-out, transform 0.3s ease-out;"
                 data-progress="100"
             >
