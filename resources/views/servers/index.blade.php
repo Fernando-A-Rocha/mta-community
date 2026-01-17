@@ -3,7 +3,7 @@
         servers: [],
         statistics: { total_players: 0, total_servers: 0 },
         history: [],
-        historyMeta: { page: 1, per_page_days: 30, has_prev: false, has_next: false, range: null },
+        historyMeta: { page: 1, per_page_days: 14, has_prev: false, has_next: false, range: null },
         loading: false,
         historyLoading: false,
         historyError: null,
@@ -81,7 +81,7 @@
                 this.charts[key] = null;
             }
         },
-        renderChartInstance(key, { labels, data, label, color, tooltipLabels = null, pointColors = null, pointHoverColors = null, pointRadii = null, pointHoverRadii = null, highlightedIndices = [] }) {
+        renderChartInstance(key, { labels, data, label, color, tooltipLabels = null, pointColors = null, pointHoverColors = null, pointRadii = null, pointHoverRadii = null, pointHitRadii = null, highlightedIndices = [] }) {
             const canvas = this.$refs[`${key}ChartCanvas`];
             if (!canvas || !window.Chart) {
                 return;
@@ -101,8 +101,9 @@
                 existing.data.datasets[0].pointBorderColor = pointColors ?? color;
                 existing.data.datasets[0].pointHoverBackgroundColor = pointHoverColors ?? color;
                 existing.data.datasets[0].pointHoverBorderColor = pointHoverColors ?? color;
-                existing.data.datasets[0].pointRadius = pointRadii ?? 3;
-                existing.data.datasets[0].pointHoverRadius = pointHoverRadii ?? 5;
+                existing.data.datasets[0].pointRadius = pointRadii ?? 0;
+                existing.data.datasets[0].pointHoverRadius = pointHoverRadii ?? 0;
+                existing.data.datasets[0].pointHitRadius = pointHitRadii ?? 8;
                 existing.data.datasets[0].highlightedIndices = highlightedIndices;
                 existing.update('none');
 
@@ -125,8 +126,9 @@
                         pointBorderColor: pointColors ?? color,
                         pointHoverBackgroundColor: pointHoverColors ?? color,
                         pointHoverBorderColor: pointHoverColors ?? color,
-                        pointRadius: pointRadii ?? 3,
-                        pointHoverRadius: pointHoverRadii ?? 5,
+                        pointRadius: pointRadii ?? 0,
+                        pointHoverRadius: pointHoverRadii ?? 0,
+                        pointHitRadius: pointHitRadii ?? 8,
                         highlightedIndices,
                     }],
                 },
@@ -175,10 +177,11 @@
             });
 
             const pointHoverColors = pointColors;
-            const pointRadii = values.map((value) => (value === maxValue ? 5 : 3));
-            const pointHoverRadii = values.map((value) => (value === maxValue ? 7 : 5));
+            const pointRadii = values.map(() => 0);
+            const pointHoverRadii = values.map(() => 0);
+            const pointHitRadii = values.map(() => 8);
 
-            return { pointColors, pointHoverColors, pointRadii, pointHoverRadii, highlightedIndices };
+            return { pointColors, pointHoverColors, pointRadii, pointHoverRadii, pointHitRadii, highlightedIndices };
         },
         renderHistoryCharts(ignoreLoadingGuard = false) {
             if ((this.historyLoading && !ignoreLoadingGuard) || !this.history?.length) {
@@ -287,7 +290,7 @@
                 <div>
                     <flux:heading size="lg" class="mb-1">{{ __('Player & Server History') }}</flux:heading>
                     <flux:text class="text-neutral-600 dark:text-neutral-400">
-                        {{ __('Showing the last 30 days by default. Use the buttons to browse older history.') }}
+                        {{ __('Showing the last 14 days by default. Use the buttons to browse older history.') }}
                     </flux:text>
                 </div>
                 <div class="flex items-center gap-2">
@@ -298,7 +301,7 @@
                         x-on:click="loadHistory(Math.max(1, (historyMeta.page || 1) - 1))"
                         x-bind:disabled="historyLoading || !(historyMeta?.has_prev)"
                     >
-                        {{ __('Newer 30 days') }}
+                        {{ __('Newer 14 days') }}
                     </flux:button>
                     <flux:button
                         variant="ghost"
@@ -307,7 +310,7 @@
                         x-on:click="loadHistory((historyMeta.page || 1) + 1)"
                         x-bind:disabled="historyLoading || !(historyMeta?.has_next)"
                     >
-                        {{ __('Older 30 days') }}
+                        {{ __('Older 14 days') }}
                     </flux:button>
                 </div>
             </div>

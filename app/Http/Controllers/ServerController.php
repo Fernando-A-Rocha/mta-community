@@ -107,7 +107,7 @@ class ServerController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $perPageDays = 30;
+        $perPageDays = 14;
         $page = max(1, $request->integer('page', 1));
         $daysToFetch = min($perPageDays * $page, 365);
 
